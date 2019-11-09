@@ -1,195 +1,215 @@
 <!-- TOC -->
 
-- [一. 前端](#%e4%b8%80-%e5%89%8d%e7%ab%af)
+- [一. 前端](#一-前端)
   - [1.1 Css/Scss](#11-cssscss)
-    - [1.1.1 层叠性](#111-%e5%b1%82%e5%8f%a0%e6%80%a7)
-    - [1.1.2 继承性](#112-%e7%bb%a7%e6%89%bf%e6%80%a7)
-    - [1.1.3 优先级](#113-%e4%bc%98%e5%85%88%e7%ba%a7)
-    - [1.1.4 backgroud设置背景图片样式顺序决定是否生效](#114-backgroud%e8%ae%be%e7%bd%ae%e8%83%8c%e6%99%af%e5%9b%be%e7%89%87%e6%a0%b7%e5%bc%8f%e9%a1%ba%e5%ba%8f%e5%86%b3%e5%ae%9a%e6%98%af%e5%90%a6%e7%94%9f%e6%95%88)
-    - [1.1.5 Vue在元素中要使用当前vue对象的属性作为图片路径显示在 background-image: url() css上解决办法:](#115-vue%e5%9c%a8%e5%85%83%e7%b4%a0%e4%b8%ad%e8%a6%81%e4%bd%bf%e7%94%a8%e5%bd%93%e5%89%8dvue%e5%af%b9%e8%b1%a1%e7%9a%84%e5%b1%9e%e6%80%a7%e4%bd%9c%e4%b8%ba%e5%9b%be%e7%89%87%e8%b7%af%e5%be%84%e6%98%be%e7%a4%ba%e5%9c%a8-background-image-url-css%e4%b8%8a%e8%a7%a3%e5%86%b3%e5%8a%9e%e6%b3%95)
-    - [1.1.6 div里面的内容如何垂直居中](#116-div%e9%87%8c%e9%9d%a2%e7%9a%84%e5%86%85%e5%ae%b9%e5%a6%82%e4%bd%95%e5%9e%82%e7%9b%b4%e5%b1%85%e4%b8%ad)
+    - [1.1.1 层叠性](#111-层叠性)
+    - [1.1.2 继承性](#112-继承性)
+    - [1.1.3 优先级](#113-优先级)
+    - [1.1.4 backgroud设置背景图片样式顺序决定是否生效](#114-backgroud设置背景图片样式顺序决定是否生效)
+    - [1.1.5 Vue在元素中要使用当前vue对象的属性作为图片路径显示在 background-image: url() css上解决办法:](#115-vue在元素中要使用当前vue对象的属性作为图片路径显示在-background-image-url-css上解决办法)
+    - [1.1.6 div里面的内容如何垂直居中](#116-div里面的内容如何垂直居中)
     - [1.1.7 RGBA](#117-rgba)
-    - [1.1.8 块级元素](#118-%e5%9d%97%e7%ba%a7%e5%85%83%e7%b4%a0)
-    - [1.1.9 行级元素](#119-%e8%a1%8c%e7%ba%a7%e5%85%83%e7%b4%a0)
-    - [1.1.10 行内块元素](#1110-%e8%a1%8c%e5%86%85%e5%9d%97%e5%85%83%e7%b4%a0)
-    - [1.1.11 行高](#1111-%e8%a1%8c%e9%ab%98)
-    - [1.1.12 浮动](#1112-%e6%b5%ae%e5%8a%a8)
+    - [1.1.8 块级元素](#118-块级元素)
+    - [1.1.9 行级元素](#119-行级元素)
+    - [1.1.10 行内块元素](#1110-行内块元素)
+    - [1.1.11 行高](#1111-行高)
+    - [1.1.12 浮动](#1112-浮动)
   - [1.2 Java Script](#12-java-script)
     - [1.2.1 Object.assign](#121-objectassign)
-    - [1.2.2 前端js获取滚动条距离顶部的位置](#122-%e5%89%8d%e7%ab%afjs%e8%8e%b7%e5%8f%96%e6%bb%9a%e5%8a%a8%e6%9d%a1%e8%b7%9d%e7%a6%bb%e9%a1%b6%e9%83%a8%e7%9a%84%e4%bd%8d%e7%bd%ae)
-    - [1.2.3 splice删除指定数组下标](#123-splice%e5%88%a0%e9%99%a4%e6%8c%87%e5%ae%9a%e6%95%b0%e7%bb%84%e4%b8%8b%e6%a0%87)
+    - [1.2.2 前端js获取滚动条距离顶部的位置](#122-前端js获取滚动条距离顶部的位置)
+    - [1.2.3 splice删除指定数组下标](#123-splice删除指定数组下标)
     - [1.2.4 Object.keys(), Object.values()](#124-objectkeys-objectvalues)
-    - [1.2.5 addEventListener注册事件注意点](#125-addeventlistener%e6%b3%a8%e5%86%8c%e4%ba%8b%e4%bb%b6%e6%b3%a8%e6%84%8f%e7%82%b9)
+    - [1.2.5 addEventListener注册事件注意点](#125-addeventlistener注册事件注意点)
   - [1.3 Vue.js/Nuxt.js](#13-vuejsnuxtjs)
-    - [1.3.1 vue.js生命周期](#131-vuejs%e7%94%9f%e5%91%bd%e5%91%a8%e6%9c%9f)
-    - [1.3.2 nuxt.js 生命周期](#132-nuxtjs-%e7%94%9f%e5%91%bd%e5%91%a8%e6%9c%9f)
-    - [1.3.3 computed(计算属性)](#133-computed%e8%ae%a1%e7%ae%97%e5%b1%9e%e6%80%a7)
-    - [1.3.4 v-show和v-if](#134-v-show%e5%92%8cv-if)
+    - [1.3.1 vue.js生命周期](#131-vuejs生命周期)
+    - [1.3.2 nuxt.js 生命周期](#132-nuxtjs-生命周期)
+    - [1.3.3 computed(计算属性)](#133-computed计算属性)
+    - [1.3.4 v-show和v-if](#134-v-show和v-if)
     - [1.3.5 v-for](#135-v-for)
-    - [1.3.6 this.$set/Vue.set 响应式属性](#136-thissetvueset-%e5%93%8d%e5%ba%94%e5%bc%8f%e5%b1%9e%e6%80%a7)
-    - [1.3.7 自定义指令](#137-%e8%87%aa%e5%ae%9a%e4%b9%89%e6%8c%87%e4%bb%a4)
-    - [1.3.8 vue-router base属性](#138-vue-router-base%e5%b1%9e%e6%80%a7)
-    - [1.3.9 Nuxt v-for嵌套v-if的坑](#139-nuxt-v-for%e5%b5%8c%e5%a5%97v-if%e7%9a%84%e5%9d%91)
-    - [1.3.10 .native添加原生事件](#1310-native%e6%b7%bb%e5%8a%a0%e5%8e%9f%e7%94%9f%e4%ba%8b%e4%bb%b6)
-    - [1.3.11 nuxt.js重定向](#1311-nuxtjs%e9%87%8d%e5%ae%9a%e5%90%91)
-    - [1.3.12 vue深度监听属性](#1312-vue%e6%b7%b1%e5%ba%a6%e7%9b%91%e5%90%ac%e5%b1%9e%e6%80%a7)
-    - [1.3.13 vue脚手架3.0版本之前的路由配置](#1313-vue%e8%84%9a%e6%89%8b%e6%9e%b630%e7%89%88%e6%9c%ac%e4%b9%8b%e5%89%8d%e7%9a%84%e8%b7%af%e7%94%b1%e9%85%8d%e7%bd%ae)
-    - [1.3.14 前端生成excel表格](#1314-%e5%89%8d%e7%ab%af%e7%94%9f%e6%88%90excel%e8%a1%a8%e6%a0%bc)
-    - [1.3.15 限制输入字符的语句在linux中会失效](#1315-%e9%99%90%e5%88%b6%e8%be%93%e5%85%a5%e5%ad%97%e7%ac%a6%e7%9a%84%e8%af%ad%e5%8f%a5%e5%9c%a8linux%e4%b8%ad%e4%bc%9a%e5%a4%b1%e6%95%88)
-    - [1.3.15 vue.js嵌套路由 子路由path的定义](#1315-vuejs%e5%b5%8c%e5%a5%97%e8%b7%af%e7%94%b1-%e5%ad%90%e8%b7%af%e7%94%b1path%e7%9a%84%e5%ae%9a%e4%b9%89)
-    - [1.3.16 Nuxt.js 官网提供的自定义loading组件. 并将该组件定义在nuxt.config.js的loading 选项中](#1316-nuxtjs-%e5%ae%98%e7%bd%91%e6%8f%90%e4%be%9b%e7%9a%84%e8%87%aa%e5%ae%9a%e4%b9%89loading%e7%bb%84%e4%bb%b6-%e5%b9%b6%e5%b0%86%e8%af%a5%e7%bb%84%e4%bb%b6%e5%ae%9a%e4%b9%89%e5%9c%a8nuxtconfigjs%e7%9a%84loading-%e9%80%89%e9%a1%b9%e4%b8%ad)
-    - [1.3.17 vue.js父子组件加载顺序](#1317-vuejs%e7%88%b6%e5%ad%90%e7%bb%84%e4%bb%b6%e5%8a%a0%e8%bd%bd%e9%a1%ba%e5%ba%8f)
-    - [1.3.18 vue.js .sync修饰符](#1318-vuejs-sync%e4%bf%ae%e9%a5%b0%e7%ac%a6)
+    - [1.3.6 this.$set/Vue.set 响应式属性](#136-thissetvueset-响应式属性)
+    - [1.3.7 自定义指令](#137-自定义指令)
+    - [1.3.8 vue-router base属性](#138-vue-router-base属性)
+    - [1.3.9 Nuxt v-for嵌套v-if的坑](#139-nuxt-v-for嵌套v-if的坑)
+    - [1.3.10 .native添加原生事件](#1310-native添加原生事件)
+    - [1.3.11 nuxt.js重定向](#1311-nuxtjs重定向)
+    - [1.3.12 vue深度监听属性](#1312-vue深度监听属性)
+    - [1.3.13 vue脚手架3.0版本之前的路由配置](#1313-vue脚手架30版本之前的路由配置)
+    - [1.3.14 前端生成excel表格](#1314-前端生成excel表格)
+    - [1.3.15 限制输入字符的语句在linux中会失效](#1315-限制输入字符的语句在linux中会失效)
+    - [1.3.15 vue.js嵌套路由 子路由path的定义](#1315-vuejs嵌套路由-子路由path的定义)
+    - [1.3.16 Nuxt.js 官网提供的自定义loading组件. 并将该组件定义在nuxt.config.js的loading 选项中](#1316-nuxtjs-官网提供的自定义loading组件-并将该组件定义在nuxtconfigjs的loading-选项中)
+    - [1.3.17 vue.js父子组件加载顺序](#1317-vuejs父子组件加载顺序)
+    - [1.3.18 vue.js .sync修饰符](#1318-vuejs-sync修饰符)
   - [1.4 ElementUI](#14-elementui)
   - [1.5 npm](#15-npm)
     - [1.5.1 package.lock.json](#151-packagelockjson)
-    - [1.5.2 package.json文件中的依赖](#152-packagejson%e6%96%87%e4%bb%b6%e4%b8%ad%e7%9a%84%e4%be%9d%e8%b5%96)
-    - [1.5.3 npm install指定版本依赖并保存至package.json](#153-npm-install%e6%8c%87%e5%ae%9a%e7%89%88%e6%9c%ac%e4%be%9d%e8%b5%96%e5%b9%b6%e4%bf%9d%e5%ad%98%e8%87%b3packagejson)
-    - [1.5.4 npm发布自己编写的vue.js组件库](#154-npm%e5%8f%91%e5%b8%83%e8%87%aa%e5%b7%b1%e7%bc%96%e5%86%99%e7%9a%84vuejs%e7%bb%84%e4%bb%b6%e5%ba%93)
-    - [1.5.5 npm+git搭建私有npm仓库](#155-npmgit%e6%90%ad%e5%bb%ba%e7%a7%81%e6%9c%89npm%e4%bb%93%e5%ba%93)
+    - [1.5.2 package.json文件中的依赖](#152-packagejson文件中的依赖)
+    - [1.5.3 npm install指定版本依赖并保存至package.json](#153-npm-install指定版本依赖并保存至packagejson)
+    - [1.5.4 npm发布自己编写的vue.js组件库](#154-npm发布自己编写的vuejs组件库)
+    - [1.5.5 npm+git搭建私有npm仓库](#155-npmgit搭建私有npm仓库)
   - [1.6 Html](#16-html)
-    - [1.6.1 手动设置ie浏览器以最新版本渲染页面](#161-%e6%89%8b%e5%8a%a8%e8%ae%be%e7%bd%aeie%e6%b5%8f%e8%a7%88%e5%99%a8%e4%bb%a5%e6%9c%80%e6%96%b0%e7%89%88%e6%9c%ac%e6%b8%b2%e6%9f%93%e9%a1%b5%e9%9d%a2)
-    - [1.6.2 指定浏览器对html文件的编码格式](#162-%e6%8c%87%e5%ae%9a%e6%b5%8f%e8%a7%88%e5%99%a8%e5%af%b9html%e6%96%87%e4%bb%b6%e7%9a%84%e7%bc%96%e7%a0%81%e6%a0%bc%e5%bc%8f)
-  - [1.7 ES6语法](#17-es6%e8%af%ad%e6%b3%95)
-    - [1.7.1 export 和 export default的区别](#171-export-%e5%92%8c-export-default%e7%9a%84%e5%8c%ba%e5%88%ab)
-- [二. 后端](#%e4%ba%8c-%e5%90%8e%e7%ab%af)
+    - [1.6.1 手动设置ie浏览器以最新版本渲染页面](#161-手动设置ie浏览器以最新版本渲染页面)
+    - [1.6.2 指定浏览器对html文件的编码格式](#162-指定浏览器对html文件的编码格式)
+  - [1.7 ES6语法](#17-es6语法)
+    - [1.7.1 export 和 export default的区别](#171-export-和-export-default的区别)
+  - [1.8 跨域](#18-跨域)
+    - [1.8.1 出现跨域的原因](#181-出现跨域的原因)
+    - [1.8.2 预检操作](#182-预检操作)
+  - [1.9 some方法](#19-some方法)
+- [二. 后端](#二-后端)
   - [2.1 Java basic](#21-java-basic)
-    - [2.1.1 Double引发的Null Pointer Exception](#211-double%e5%bc%95%e5%8f%91%e7%9a%84null-pointer-exception)
-    - [2.1.2 强转类型前提](#212-%e5%bc%ba%e8%bd%ac%e7%b1%bb%e5%9e%8b%e5%89%8d%e6%8f%90)
-    - [2.1.3 基础数据类型相等的判断](#213-%e5%9f%ba%e7%a1%80%e6%95%b0%e6%8d%ae%e7%b1%bb%e5%9e%8b%e7%9b%b8%e7%ad%89%e7%9a%84%e5%88%a4%e6%96%ad)
-    - [2.1.4 Split方法](#214-split%e6%96%b9%e6%b3%95)
-    - [2.1.5 异常中try, finally, catch中return的顺序](#215-%e5%bc%82%e5%b8%b8%e4%b8%adtry-finally-catch%e4%b8%adreturn%e7%9a%84%e9%a1%ba%e5%ba%8f)
-    - [2.1.6 Servlet中没有暴露出无参构造器(手动编写了带参构造器)](#216-servlet%e4%b8%ad%e6%b2%a1%e6%9c%89%e6%9a%b4%e9%9c%b2%e5%87%ba%e6%97%a0%e5%8f%82%e6%9e%84%e9%80%a0%e5%99%a8%e6%89%8b%e5%8a%a8%e7%bc%96%e5%86%99%e4%ba%86%e5%b8%a6%e5%8f%82%e6%9e%84%e9%80%a0%e5%99%a8)
-    - [2.1.7 根据oss url获取远程图片, 并转成base64](#217-%e6%a0%b9%e6%8d%aeoss-url%e8%8e%b7%e5%8f%96%e8%bf%9c%e7%a8%8b%e5%9b%be%e7%89%87-%e5%b9%b6%e8%bd%ac%e6%88%90base64)
-    - [2.1.8 动态代理抛出实际真实异常](#218-%e5%8a%a8%e6%80%81%e4%bb%a3%e7%90%86%e6%8a%9b%e5%87%ba%e5%ae%9e%e9%99%85%e7%9c%9f%e5%ae%9e%e5%bc%82%e5%b8%b8)
-    - [2.1.9 多线程基础](#219-%e5%a4%9a%e7%ba%bf%e7%a8%8b%e5%9f%ba%e7%a1%80)
-      - [2.1.9.1 volatile关键字与System.out.print的欢喜冤家](#2191-volatile%e5%85%b3%e9%94%ae%e5%ad%97%e4%b8%8esystemoutprint%e7%9a%84%e6%ac%a2%e5%96%9c%e5%86%a4%e5%ae%b6)
-      - [2.1.9.2 JDK线程状态及转换图](#2192-jdk%e7%ba%bf%e7%a8%8b%e7%8a%b6%e6%80%81%e5%8f%8a%e8%bd%ac%e6%8d%a2%e5%9b%be)
-    - [2.1.10 抽象类和接口的区别](#2110-%e6%8a%bd%e8%b1%a1%e7%b1%bb%e5%92%8c%e6%8e%a5%e5%8f%a3%e7%9a%84%e5%8c%ba%e5%88%ab)
-    - [2.1.11 Overload和Override的区别](#2111-overload%e5%92%8coverride%e7%9a%84%e5%8c%ba%e5%88%ab)
+    - [2.1.1 Double引发的Null Pointer Exception](#211-double引发的null-pointer-exception)
+    - [2.1.2 强转类型前提](#212-强转类型前提)
+    - [2.1.3 基础数据类型相等的判断](#213-基础数据类型相等的判断)
+    - [2.1.4 Split方法](#214-split方法)
+    - [2.1.5 异常中try, finally, catch中return的顺序](#215-异常中try-finally-catch中return的顺序)
+    - [2.1.6 Servlet中没有暴露出无参构造器(手动编写了带参构造器)](#216-servlet中没有暴露出无参构造器手动编写了带参构造器)
+    - [2.1.7 根据oss url获取远程图片, 并转成base64](#217-根据oss-url获取远程图片-并转成base64)
+    - [2.1.8 动态代理抛出实际真实异常](#218-动态代理抛出实际真实异常)
+    - [2.1.9 多线程基础](#219-多线程基础)
+      - [2.1.9.1 volatile关键字与System.out.print的欢喜冤家](#2191-volatile关键字与systemoutprint的欢喜冤家)
+      - [2.1.9.2 JDK线程状态及转换图](#2192-jdk线程状态及转换图)
+    - [2.1.10 抽象类和接口的区别](#2110-抽象类和接口的区别)
+    - [2.1.11 Overload和Override的区别](#2111-overload和override的区别)
     - [2.1.12 ArrayList，LinkedList，Vector](#2112-arraylistlinkedlistvector)
     - [2.1.13 HashMap, HashTable, ConcurrentHashMap](#2113-hashmap-hashtable-concurrenthashmap)
-    - [2.1.14 创建Class对象的几种方法](#2114-%e5%88%9b%e5%bb%baclass%e5%af%b9%e8%b1%a1%e7%9a%84%e5%87%a0%e7%a7%8d%e6%96%b9%e6%b3%95)
-    - [2.1.15 ArrayList.asList()的坑](#2115-arraylistaslist%e7%9a%84%e5%9d%91)
-    - [2.1.16 不要在 foreach 循环里进行元素的 remove/add 操作](#2116-%e4%b8%8d%e8%a6%81%e5%9c%a8-foreach-%e5%be%aa%e7%8e%af%e9%87%8c%e8%bf%9b%e8%a1%8c%e5%85%83%e7%b4%a0%e7%9a%84-removeadd-%e6%93%8d%e4%bd%9c)
-    - [2.1.17 JVM 类加载器](#2117-jvm-%e7%b1%bb%e5%8a%a0%e8%bd%bd%e5%99%a8)
+    - [2.1.14 创建Class对象的几种方法](#2114-创建class对象的几种方法)
+    - [2.1.15 ArrayList.asList()的坑](#2115-arraylistaslist的坑)
+    - [2.1.16 不要在 foreach 循环里进行元素的 remove/add 操作](#2116-不要在-foreach-循环里进行元素的-removeadd-操作)
+    - [2.1.17 JVM 类加载器](#2117-jvm-类加载器)
+    - [2.1.18 Map put进去的默认类型](#2118-map-put进去的默认类型)
+    - [2.1.19 AtomicInteger CAS操作流程](#2119-atomicinteger-cas操作流程)
   - [2.2 Spring Cloud](#22-spring-cloud)
-    - [2.2.1 服务注册中心Eureka](#221-%e6%9c%8d%e5%8a%a1%e6%b3%a8%e5%86%8c%e4%b8%ad%e5%bf%83eureka)
+    - [2.2.1 服务注册中心Eureka](#221-服务注册中心eureka)
     - [2.2.2 ApiGateWay(Zuul)](#222-apigatewayzuul)
     - [2.2.3 FeignClient](#223-feignclient)
     - [2.2.4 Swagger](#224-swagger)
     - [2.2.5 ServerConfig](#225-serverconfig)
-    - [2.2.6 SpringCloud常用组件及作用](#226-springcloud%e5%b8%b8%e7%94%a8%e7%bb%84%e4%bb%b6%e5%8f%8a%e4%bd%9c%e7%94%a8)
-  - [2.3 Spring Boot](#23-spring-boot)
-    - [2.3.1 @RequestParam 类型映射](#231-requestparam-%e7%b1%bb%e5%9e%8b%e6%98%a0%e5%b0%84)
-    - [2.3.2 @RequestMapping 方法映射关系](#232-requestmapping-%e6%96%b9%e6%b3%95%e6%98%a0%e5%b0%84%e5%85%b3%e7%b3%bb)
-    - [2.3.3 @RequestBody注解接收Post请求ContentType为application/x-www-form-urlencoded格式的数据](#233-requestbody%e6%b3%a8%e8%a7%a3%e6%8e%a5%e6%94%b6post%e8%af%b7%e6%b1%82contenttype%e4%b8%baapplicationx-www-form-urlencoded%e6%a0%bc%e5%bc%8f%e7%9a%84%e6%95%b0%e6%8d%ae)
-    - [2.3.4 @RequestMapping支持多种请求方法](#234-requestmapping%e6%94%af%e6%8c%81%e5%a4%9a%e7%a7%8d%e8%af%b7%e6%b1%82%e6%96%b9%e6%b3%95)
-    - [2.3.5 @RequestMapping指定request和response的contentType](#235-requestmapping%e6%8c%87%e5%ae%9arequest%e5%92%8cresponse%e7%9a%84contenttype)
-    - [2.3.6 SpringBoot使用对象来接收query参数](#236-springboot%e4%bd%bf%e7%94%a8%e5%af%b9%e8%b1%a1%e6%9d%a5%e6%8e%a5%e6%94%b6query%e5%8f%82%e6%95%b0)
-    - [2.3.7 Spring mvc 全局异常处理注解@ExceptionHandler](#237-spring-mvc-%e5%85%a8%e5%b1%80%e5%bc%82%e5%b8%b8%e5%a4%84%e7%90%86%e6%b3%a8%e8%a7%a3exceptionhandler)
-    - [2.3.8 Spring获取ioc容器上下文的两种方式](#238-spring%e8%8e%b7%e5%8f%96ioc%e5%ae%b9%e5%99%a8%e4%b8%8a%e4%b8%8b%e6%96%87%e7%9a%84%e4%b8%a4%e7%a7%8d%e6%96%b9%e5%bc%8f)
-    - [2.3.9 Spring核心](#239-spring%e6%a0%b8%e5%bf%83)
-    - [2.3.10 Spring bean生命周期](#2310-spring-bean%e7%94%9f%e5%91%bd%e5%91%a8%e6%9c%9f)
-    - [2.3.11 SpringBoot是job注解和异步调用注解生效前提](#2311-springboot%e6%98%afjob%e6%b3%a8%e8%a7%a3%e5%92%8c%e5%bc%82%e6%ad%a5%e8%b0%83%e7%94%a8%e6%b3%a8%e8%a7%a3%e7%94%9f%e6%95%88%e5%89%8d%e6%8f%90)
-    - [2.3.12 Springboot yml文件配置的坑](#2312-springboot-yml%e6%96%87%e4%bb%b6%e9%85%8d%e7%bd%ae%e7%9a%84%e5%9d%91)
-    - [2.3.13 @Autowired和@Resource的区别](#2313-autowired%e5%92%8cresource%e7%9a%84%e5%8c%ba%e5%88%ab)
-    - [2.3.14 SpringBoot默认包扫描路径](#2314-springboot%e9%bb%98%e8%ae%a4%e5%8c%85%e6%89%ab%e6%8f%8f%e8%b7%af%e5%be%84)
+    - [2.2.6 SpringCloud常用组件及作用](#226-springcloud常用组件及作用)
+  - [2.3 Spring](#23-spring)
+    - [2.3.1 @RequestParam 类型映射](#231-requestparam-类型映射)
+    - [2.3.2 @RequestMapping 方法映射关系](#232-requestmapping-方法映射关系)
+    - [2.3.3 @RequestBody注解接收Post请求ContentType为application/x-www-form-urlencoded格式的数据](#233-requestbody注解接收post请求contenttype为applicationx-www-form-urlencoded格式的数据)
+    - [2.3.4 @RequestMapping支持多种请求方法](#234-requestmapping支持多种请求方法)
+    - [2.3.5 @RequestMapping指定request和response的contentType](#235-requestmapping指定request和response的contenttype)
+    - [2.3.6 SpringBoot使用对象来接收query参数](#236-springboot使用对象来接收query参数)
+    - [2.3.7 Spring mvc 全局异常处理注解@ExceptionHandler](#237-spring-mvc-全局异常处理注解exceptionhandler)
+    - [2.3.8 Spring获取ioc容器上下文的两种方式](#238-spring获取ioc容器上下文的两种方式)
+    - [2.3.9 Spring核心](#239-spring核心)
+    - [2.3.10 Spring bean作用域](#2310-spring-bean作用域)
+    - [2.3.11 SpringBoot是job注解和异步调用注解生效前提](#2311-springboot是job注解和异步调用注解生效前提)
+    - [2.3.12 Springboot yml文件配置的坑](#2312-springboot-yml文件配置的坑)
+    - [2.3.13 @Autowired和@Resource的区别](#2313-autowired和resource的区别)
+    - [2.3.14 SpringBoot默认包扫描路径](#2314-springboot默认包扫描路径)
+    - [2.3.15 springboot后台允许跨域及实现自定义请求头](#2315-springboot后台允许跨域及实现自定义请求头)
+    - [2.3.16 spring 描述bean的信息](#2316-spring-描述bean的信息)
+    - [2.3.17 spring自动装配](#2317-spring自动装配)
+    - [2.3.18 spring事件驱动模型的坑](#2318-spring事件驱动模型的坑)
+    - [2.3.19 Springboot parent jar包包含的功能](#2319-springboot-parent-jar包包含的功能)
+    - [2.3.20 spring-boot-starter-actuator](#2320-spring-boot-starter-actuator)
+    - [2.3.21 @SpringBootApplication注解](#2321-springbootapplication注解)
+    - [2.3.22 使用SPI功能集成spring自定义事件功能](#2322-使用spi功能集成spring自定义事件功能)
+    - [2.3.23 启动springboot后执行某个特定的方法](#2323-启动springboot后执行某个特定的方法)
+    - [2.3.24 springboot引用其它yml或者properties配置文件](#2324-springboot引用其它yml或者properties配置文件)
   - [2.4 Mybatis](#24-mybatis)
-    - [2.4.1 parameterType为int/long时, 参数为0的处理](#241-parametertype%e4%b8%baintlong%e6%97%b6-%e5%8f%82%e6%95%b0%e4%b8%ba0%e7%9a%84%e5%a4%84%e7%90%86)
-    - [2.4.2 $和#区别](#242-%e5%92%8c%e5%8c%ba%e5%88%ab)
-    - [2.4.3 ORM映射文件 type和map后缀的区别](#243-orm%e6%98%a0%e5%b0%84%e6%96%87%e4%bb%b6-type%e5%92%8cmap%e5%90%8e%e7%bc%80%e7%9a%84%e5%8c%ba%e5%88%ab)
-    - [2.4.4 Mybatis resultMap中type=map, 使用枚举的typeHandler前提](#244-mybatis-resultmap%e4%b8%adtypemap-%e4%bd%bf%e7%94%a8%e6%9e%9a%e4%b8%be%e7%9a%84typehandler%e5%89%8d%e6%8f%90)
-    - [2.4.5 使用springboot 通过继承SqlSessionDaoSupport类集成mybatis](#245-%e4%bd%bf%e7%94%a8springboot-%e9%80%9a%e8%bf%87%e7%bb%a7%e6%89%bfsqlsessiondaosupport%e7%b1%bb%e9%9b%86%e6%88%90mybatis)
+    - [2.4.1 parameterType为int/long时, 参数为0的处理](#241-parametertype为intlong时-参数为0的处理)
+    - [2.4.2 $和#区别](#242-和区别)
+    - [2.4.3 ORM映射文件 type和map后缀的区别](#243-orm映射文件-type和map后缀的区别)
+    - [2.4.4 Mybatis resultMap中type=map, 使用枚举的typeHandler前提](#244-mybatis-resultmap中typemap-使用枚举的typehandler前提)
+    - [2.4.5 使用springboot 通过继承SqlSessionDaoSupport类集成mybatis](#245-使用springboot-通过继承sqlsessiondaosupport类集成mybatis)
+    - [2.4.6 typehandler](#246-typehandler)
+    - [2.4.7 mybatis继承oracle的坑](#247-mybatis继承oracle的坑)
   - [2.5 MySql](#25-mysql)
     - [2.5.1 export database/table command](#251-export-databasetable-command)
     - [2.5.2 import database/table command](#252-import-databasetable-command)
-    - [2.5.3 mysql压缩版本()启动步骤](#253-mysql%e5%8e%8b%e7%bc%a9%e7%89%88%e6%9c%ac%e5%90%af%e5%8a%a8%e6%ad%a5%e9%aa%a4)
-    - [2.5.5 存储过程](#255-%e5%ad%98%e5%82%a8%e8%bf%87%e7%a8%8b)
-    - [2.5.6 DML和DDL概念](#256-dml%e5%92%8cddl%e6%a6%82%e5%bf%b5)
-    - [2.5.7 mysql连接数不够](#257-mysql%e8%bf%9e%e6%8e%a5%e6%95%b0%e4%b8%8d%e5%a4%9f)
+    - [2.5.3 mysql压缩版本()启动步骤](#253-mysql压缩版本启动步骤)
+    - [2.5.5 存储过程](#255-存储过程)
+    - [2.5.6 DML和DDL概念](#256-dml和ddl概念)
+    - [2.5.7 mysql连接数不够](#257-mysql连接数不够)
     - [2.5.8 flyway](#258-flyway)
-    - [2.5.9 mysql sql优化](#259-mysql-sql%e4%bc%98%e5%8c%96)
+    - [2.5.9 mysql sql优化](#259-mysql-sql优化)
   - [2.6 Elasticsearch](#26-elasticsearch)
-    - [2.6.1 linux构建es的坑](#261-linux%e6%9e%84%e5%bb%baes%e7%9a%84%e5%9d%91)
+    - [2.6.1 linux构建es的坑](#261-linux构建es的坑)
   - [2.7 Redis](#27-redis)
-    - [2.7.1 手动暂时性的设置密码](#271-%e6%89%8b%e5%8a%a8%e6%9a%82%e6%97%b6%e6%80%a7%e7%9a%84%e8%ae%be%e7%bd%ae%e5%af%86%e7%a0%81)
-    - [2.7.2 redis配置远程支持连接](#272-redis%e9%85%8d%e7%bd%ae%e8%bf%9c%e7%a8%8b%e6%94%af%e6%8c%81%e8%bf%9e%e6%8e%a5)
+    - [2.7.1 手动暂时性的设置密码](#271-手动暂时性的设置密码)
+    - [2.7.2 redis配置远程支持连接](#272-redis配置远程支持连接)
   - [2.8 Maven](#28-maven)
-    - [2.8.1 install maven仓库找不到的jar包](#281-install-maven%e4%bb%93%e5%ba%93%e6%89%be%e4%b8%8d%e5%88%b0%e7%9a%84jar%e5%8c%85)
-    - [2.8.2 maven profiles集成springboot build多环境](#282-maven-profiles%e9%9b%86%e6%88%90springboot-build%e5%a4%9a%e7%8e%af%e5%a2%83)
-    - [2.8.3 maven pom文件scope解析](#283-maven-pom%e6%96%87%e4%bb%b6scope%e8%a7%a3%e6%9e%90)
-    - [2.8.4 maven项目打包类型](#284-maven%e9%a1%b9%e7%9b%ae%e6%89%93%e5%8c%85%e7%b1%bb%e5%9e%8b)
-    - [2.8.5 maven代码混淆插件导致spring 创建的bean找不到类型](#285-maven%e4%bb%a3%e7%a0%81%e6%b7%b7%e6%b7%86%e6%8f%92%e4%bb%b6%e5%af%bc%e8%87%b4spring-%e5%88%9b%e5%bb%ba%e7%9a%84bean%e6%89%be%e4%b8%8d%e5%88%b0%e7%b1%bb%e5%9e%8b)
+    - [2.8.1 install maven仓库找不到的jar包](#281-install-maven仓库找不到的jar包)
+    - [2.8.2 maven profiles集成springboot build多环境](#282-maven-profiles集成springboot-build多环境)
+    - [2.8.3 maven pom文件scope解析](#283-maven-pom文件scope解析)
+    - [2.8.4 maven项目打包类型](#284-maven项目打包类型)
+    - [2.8.5 maven代码混淆插件导致spring 创建的bean找不到类型](#285-maven代码混淆插件导致spring-创建的bean找不到类型)
   - [2.9 Git](#29-git)
-    - [2.9.1 回退版本](#291-%e5%9b%9e%e9%80%80%e7%89%88%e6%9c%ac)
-    - [2.9.2 查看分支树](#292-%e6%9f%a5%e7%9c%8b%e5%88%86%e6%94%af%e6%a0%91)
-    - [2.9.3 只查看commitId和comments的背景](#293-%e5%8f%aa%e6%9f%a5%e7%9c%8bcommitid%e5%92%8ccomments%e7%9a%84%e8%83%8c%e6%99%af)
-    - [2.9.4 cherry-pick和merge的区别](#294-cherry-pick%e5%92%8cmerge%e7%9a%84%e5%8c%ba%e5%88%ab)
-    - [2.9.5 合并commit](#295-%e5%90%88%e5%b9%b6commit)
-    - [2.9.6 git reset HEAD~ 带来的坑](#296-git-reset-head-%e5%b8%a6%e6%9d%a5%e7%9a%84%e5%9d%91)
-    - [2.9.7 Github中提交的记录在Contribution中看不到](#297-github%e4%b8%ad%e6%8f%90%e4%ba%a4%e7%9a%84%e8%ae%b0%e5%bd%95%e5%9c%a8contribution%e4%b8%ad%e7%9c%8b%e4%b8%8d%e5%88%b0)
-  - [2.10 设计模式与应用](#210-%e8%ae%be%e8%ae%a1%e6%a8%a1%e5%bc%8f%e4%b8%8e%e5%ba%94%e7%94%a8)
-    - [2.10.1 简单工厂 + java多态性完成订单流水操作](#2101-%e7%ae%80%e5%8d%95%e5%b7%a5%e5%8e%82--java%e5%a4%9a%e6%80%81%e6%80%a7%e5%ae%8c%e6%88%90%e8%ae%a2%e5%8d%95%e6%b5%81%e6%b0%b4%e6%93%8d%e4%bd%9c)
-    - [2.10.2 适配器模式 + 动态代理集成第三方类库, 完成日志记录操作](#2102-%e9%80%82%e9%85%8d%e5%99%a8%e6%a8%a1%e5%bc%8f--%e5%8a%a8%e6%80%81%e4%bb%a3%e7%90%86%e9%9b%86%e6%88%90%e7%ac%ac%e4%b8%89%e6%96%b9%e7%b1%bb%e5%ba%93-%e5%ae%8c%e6%88%90%e6%97%a5%e5%bf%97%e8%ae%b0%e5%bd%95%e6%93%8d%e4%bd%9c)
-    - [2.10.3 模板方法](#2103-%e6%a8%a1%e6%9d%bf%e6%96%b9%e6%b3%95)
-    - [2.10.4 观察者模式](#2104-%e8%a7%82%e5%af%9f%e8%80%85%e6%a8%a1%e5%bc%8f)
-- [三. DevOps](#%e4%b8%89-devops)
+    - [2.9.1 回退版本](#291-回退版本)
+    - [2.9.2 查看分支树](#292-查看分支树)
+    - [2.9.3 只查看commitId和comments的背景](#293-只查看commitid和comments的背景)
+    - [2.9.4 cherry-pick和merge的区别](#294-cherry-pick和merge的区别)
+    - [2.9.5 合并commit](#295-合并commit)
+    - [2.9.6 git reset HEAD~ 带来的坑](#296-git-reset-head-带来的坑)
+    - [2.9.7 Github中提交的记录在Contribution中看不到](#297-github中提交的记录在contribution中看不到)
+    - [2.9.8 gialab保护分支, merge代码时指定某种角色才能merge](#298-gialab保护分支-merge代码时指定某种角色才能merge)
+  - [2.10 设计模式与应用](#210-设计模式与应用)
+    - [2.10.1 简单工厂 + java多态性完成订单流水操作](#2101-简单工厂--java多态性完成订单流水操作)
+    - [2.10.2 适配器模式 + 动态代理集成第三方类库, 完成日志记录操作](#2102-适配器模式--动态代理集成第三方类库-完成日志记录操作)
+    - [2.10.3 模板方法](#2103-模板方法)
+    - [2.10.4 观察者模式](#2104-观察者模式)
+- [三. DevOps](#三-devops)
   - [3.1 Docker](#31-docker)
-    - [3.1.1 搭建远程本地仓库](#311-%e6%90%ad%e5%bb%ba%e8%bf%9c%e7%a8%8b%e6%9c%ac%e5%9c%b0%e4%bb%93%e5%ba%93)
-    - [3.1.2 push镜像到本地仓库](#312-push%e9%95%9c%e5%83%8f%e5%88%b0%e6%9c%ac%e5%9c%b0%e4%bb%93%e5%ba%93)
-    - [3.1.3 使用ssh远程执行命令运行容器](#313-%e4%bd%bf%e7%94%a8ssh%e8%bf%9c%e7%a8%8b%e6%89%a7%e8%a1%8c%e5%91%bd%e4%bb%a4%e8%bf%90%e8%a1%8c%e5%ae%b9%e5%99%a8)
-    - [3.1.4 挂载宿主机目录](#314-%e6%8c%82%e8%bd%bd%e5%ae%bf%e4%b8%bb%e6%9c%ba%e7%9b%ae%e5%bd%95)
-    - [3.1.5 ADD命令的坑](#315-add%e5%91%bd%e4%bb%a4%e7%9a%84%e5%9d%91)
-    - [3.1.6 Dockerfile常见命令解析](#316-dockerfile%e5%b8%b8%e8%a7%81%e5%91%bd%e4%bb%a4%e8%a7%a3%e6%9e%90)
-    - [3.1.7 指定docker 容器的时间参照物](#317-%e6%8c%87%e5%ae%9adocker-%e5%ae%b9%e5%99%a8%e7%9a%84%e6%97%b6%e9%97%b4%e5%8f%82%e7%85%a7%e7%89%a9)
+    - [3.1.1 搭建远程本地仓库](#311-搭建远程本地仓库)
+    - [3.1.2 push镜像到本地仓库](#312-push镜像到本地仓库)
+    - [3.1.3 使用ssh远程执行命令运行容器](#313-使用ssh远程执行命令运行容器)
+    - [3.1.4 挂载宿主机目录](#314-挂载宿主机目录)
+    - [3.1.5 ADD命令的坑](#315-add命令的坑)
+    - [3.1.6 Dockerfile常见命令解析](#316-dockerfile常见命令解析)
+    - [3.1.7 指定docker 容器的时间参照物](#317-指定docker-容器的时间参照物)
   - [3.2 Jenkins](#32-jenkins)
-    - [3.2.1 自动化部署maven项目](#321-%e8%87%aa%e5%8a%a8%e5%8c%96%e9%83%a8%e7%bd%b2maven%e9%a1%b9%e7%9b%ae)
-    - [3.2.2 多job部署, job间传值](#322-%e5%a4%9ajob%e9%83%a8%e7%bd%b2-job%e9%97%b4%e4%bc%a0%e5%80%bc)
-    - [3.2.3 linux不同用户运行jenkins.war](#323-linux%e4%b8%8d%e5%90%8c%e7%94%a8%e6%88%b7%e8%bf%90%e8%a1%8cjenkinswar)
-    - [3.2.4 Jenkins支持maven多模块项目(每个模块都是一个git仓库)多环境同时部署思想](#324-jenkins%e6%94%af%e6%8c%81maven%e5%a4%9a%e6%a8%a1%e5%9d%97%e9%a1%b9%e7%9b%ae%e6%af%8f%e4%b8%aa%e6%a8%a1%e5%9d%97%e9%83%bd%e6%98%af%e4%b8%80%e4%b8%aagit%e4%bb%93%e5%ba%93%e5%a4%9a%e7%8e%af%e5%a2%83%e5%90%8c%e6%97%b6%e9%83%a8%e7%bd%b2%e6%80%9d%e6%83%b3)
-    - [3.2.5 jenkins multijob build多模块(每个模块都是一个git仓库)](#325-jenkins-multijob-build%e5%a4%9a%e6%a8%a1%e5%9d%97%e6%af%8f%e4%b8%aa%e6%a8%a1%e5%9d%97%e9%83%bd%e6%98%af%e4%b8%80%e4%b8%aagit%e4%bb%93%e5%ba%93)
-    - [3.2.6 jenkins Multijob 参数传递规则:](#326-jenkins-multijob-%e5%8f%82%e6%95%b0%e4%bc%a0%e9%80%92%e8%a7%84%e5%88%99)
-    - [3.2.7 jenkins使用nohup后台运行jar包](#327-jenkins%e4%bd%bf%e7%94%a8nohup%e5%90%8e%e5%8f%b0%e8%bf%90%e8%a1%8cjar%e5%8c%85)
-    - [3.2.8 jenkins运行mvn命令找不到](#328-jenkins%e8%bf%90%e8%a1%8cmvn%e5%91%bd%e4%bb%a4%e6%89%be%e4%b8%8d%e5%88%b0)
-  - [3.3 Shell脚本](#33-shell%e8%84%9a%e6%9c%ac)
-    - [3.3.1 自定义shell脚本, 完成maven多项目自动拉取远程仓库代码操作](#331-%e8%87%aa%e5%ae%9a%e4%b9%89shell%e8%84%9a%e6%9c%ac-%e5%ae%8c%e6%88%90maven%e5%a4%9a%e9%a1%b9%e7%9b%ae%e8%87%aa%e5%8a%a8%e6%8b%89%e5%8f%96%e8%bf%9c%e7%a8%8b%e4%bb%93%e5%ba%93%e4%bb%a3%e7%a0%81%e6%93%8d%e4%bd%9c)
-    - [3.3.2 ENV=${ENV:-"local"} 代码含义](#332-envenv-%22local%22-%e4%bb%a3%e7%a0%81%e5%90%ab%e4%b9%89)
-    - [3.3.3 ssh执行远程命令awk命令无法执行的问题](#333-ssh%e6%89%a7%e8%a1%8c%e8%bf%9c%e7%a8%8b%e5%91%bd%e4%bb%a4awk%e5%91%bd%e4%bb%a4%e6%97%a0%e6%b3%95%e6%89%a7%e8%a1%8c%e7%9a%84%e9%97%ae%e9%a2%98)
-    - [3.3.4 Sed命令根据key修改文件内容](#334-sed%e5%91%bd%e4%bb%a4%e6%a0%b9%e6%8d%aekey%e4%bf%ae%e6%94%b9%e6%96%87%e4%bb%b6%e5%86%85%e5%ae%b9)
-    - [3.3.4 Sed和Rename命令修改文件名](#334-sed%e5%92%8crename%e5%91%bd%e4%bb%a4%e4%bf%ae%e6%94%b9%e6%96%87%e4%bb%b6%e5%90%8d)
+    - [3.2.1 自动化部署maven项目](#321-自动化部署maven项目)
+    - [3.2.2 多job部署, job间传值](#322-多job部署-job间传值)
+    - [3.2.3 linux不同用户运行jenkins.war](#323-linux不同用户运行jenkinswar)
+    - [3.2.4 Jenkins支持maven多模块项目(每个模块都是一个git仓库)多环境同时部署思想](#324-jenkins支持maven多模块项目每个模块都是一个git仓库多环境同时部署思想)
+    - [3.2.5 jenkins multijob build多模块(每个模块都是一个git仓库)](#325-jenkins-multijob-build多模块每个模块都是一个git仓库)
+    - [3.2.6 jenkins Multijob 参数传递规则:](#326-jenkins-multijob-参数传递规则)
+    - [3.2.7 jenkins使用nohup后台运行jar包](#327-jenkins使用nohup后台运行jar包)
+    - [3.2.8 jenkins运行mvn命令找不到](#328-jenkins运行mvn命令找不到)
+  - [3.3 Shell脚本](#33-shell脚本)
+    - [3.3.1 自定义shell脚本, 完成maven多项目自动拉取远程仓库代码操作](#331-自定义shell脚本-完成maven多项目自动拉取远程仓库代码操作)
+    - [3.3.2 ENV=${ENV:-"local"} 代码含义](#332-envenv-local-代码含义)
+    - [3.3.3 ssh执行远程命令awk命令无法执行的问题](#333-ssh执行远程命令awk命令无法执行的问题)
+    - [3.3.4 Sed命令根据key修改文件内容](#334-sed命令根据key修改文件内容)
+    - [3.3.4 Sed和Rename命令修改文件名](#334-sed和rename命令修改文件名)
   - [3.4 Nginx](#34-nginx)
-    - [3.4.1 配置反向代理](#341-%e9%85%8d%e7%bd%ae%e5%8f%8d%e5%90%91%e4%bb%a3%e7%90%86)
-    - [3.4.2 配置多个vue.js单页面项目](#342-%e9%85%8d%e7%bd%ae%e5%a4%9a%e4%b8%aavuejs%e5%8d%95%e9%a1%b5%e9%9d%a2%e9%a1%b9%e7%9b%ae)
-    - [3.4.3 docker化basic auth(可配)](#343-docker%e5%8c%96basic-auth%e5%8f%af%e9%85%8d)
-    - [3.4.4 配置Https证书, 支持https访问.](#344-%e9%85%8d%e7%bd%aehttps%e8%af%81%e4%b9%a6-%e6%94%af%e6%8c%81https%e8%ae%bf%e9%97%ae)
-- [四. Linux](#%e5%9b%9b-linux)
-  - [4.1 常用命令(常忘)](#41-%e5%b8%b8%e7%94%a8%e5%91%bd%e4%bb%a4%e5%b8%b8%e5%bf%98)
-    - [4.1.1 给文件添加可执行权限](#411-%e7%bb%99%e6%96%87%e4%bb%b6%e6%b7%bb%e5%8a%a0%e5%8f%af%e6%89%a7%e8%a1%8c%e6%9d%83%e9%99%90)
-    - [4.1.2 删除当前文件夹内所有内容](#412-%e5%88%a0%e9%99%a4%e5%bd%93%e5%89%8d%e6%96%87%e4%bb%b6%e5%a4%b9%e5%86%85%e6%89%80%e6%9c%89%e5%86%85%e5%ae%b9)
-    - [4.1.3 压缩当前文件夹为zip包](#413-%e5%8e%8b%e7%bc%a9%e5%bd%93%e5%89%8d%e6%96%87%e4%bb%b6%e5%a4%b9%e4%b8%bazip%e5%8c%85)
-    - [4.1.4 解压缩zip压缩包到当前目录](#414-%e8%a7%a3%e5%8e%8b%e7%bc%a9zip%e5%8e%8b%e7%bc%a9%e5%8c%85%e5%88%b0%e5%bd%93%e5%89%8d%e7%9b%ae%e5%bd%95)
-    - [4.1.5 查看某个文件的大小](#415-%e6%9f%a5%e7%9c%8b%e6%9f%90%e4%b8%aa%e6%96%87%e4%bb%b6%e7%9a%84%e5%a4%a7%e5%b0%8f)
-    - [4.1.6 列出文件夹下面第一级每个文件的大小(包括文件夹和文件)](#416-%e5%88%97%e5%87%ba%e6%96%87%e4%bb%b6%e5%a4%b9%e4%b8%8b%e9%9d%a2%e7%ac%ac%e4%b8%80%e7%ba%a7%e6%af%8f%e4%b8%aa%e6%96%87%e4%bb%b6%e7%9a%84%e5%a4%a7%e5%b0%8f%e5%8c%85%e6%8b%ac%e6%96%87%e4%bb%b6%e5%a4%b9%e5%92%8c%e6%96%87%e4%bb%b6)
-    - [4.1.7 查找文件命令](#417-%e6%9f%a5%e6%89%be%e6%96%87%e4%bb%b6%e5%91%bd%e4%bb%a4)
-    - [4.1.8 查找某个端口被占用](#418-%e6%9f%a5%e6%89%be%e6%9f%90%e4%b8%aa%e7%ab%af%e5%8f%a3%e8%a2%ab%e5%8d%a0%e7%94%a8)
-    - [4.1.9 查看linux各进程内存使用情况](#419-%e6%9f%a5%e7%9c%8blinux%e5%90%84%e8%bf%9b%e7%a8%8b%e5%86%85%e5%ad%98%e4%bd%bf%e7%94%a8%e6%83%85%e5%86%b5)
-    - [4.1.10 Linux 启动项目后台保留策略](#4110-linux-%e5%90%af%e5%8a%a8%e9%a1%b9%e7%9b%ae%e5%90%8e%e5%8f%b0%e4%bf%9d%e7%95%99%e7%ad%96%e7%95%a5)
-    - [4.1.11 cp -r 命令的坑](#4111-cp--r-%e5%91%bd%e4%bb%a4%e7%9a%84%e5%9d%91)
-    - [4.1.12 清除所有log文件(内存不够时)](#4112-%e6%b8%85%e9%99%a4%e6%89%80%e6%9c%89log%e6%96%87%e4%bb%b6%e5%86%85%e5%ad%98%e4%b8%8d%e5%a4%9f%e6%97%b6)
-    - [4.1.13 压缩成tar.gz压缩包](#4113-%e5%8e%8b%e7%bc%a9%e6%88%90targz%e5%8e%8b%e7%bc%a9%e5%8c%85)
-    - [4.1.14 解压缩tar.gz包](#4114-%e8%a7%a3%e5%8e%8b%e7%bc%a9targz%e5%8c%85)
-    - [4.1.15 Linux文件权限查看及无权限解决方案](#4115-linux%e6%96%87%e4%bb%b6%e6%9d%83%e9%99%90%e6%9f%a5%e7%9c%8b%e5%8f%8a%e6%97%a0%e6%9d%83%e9%99%90%e8%a7%a3%e5%86%b3%e6%96%b9%e6%a1%88)
-- [五. Http](#%e4%ba%94-http)
+    - [3.4.1 配置反向代理](#341-配置反向代理)
+    - [3.4.2 配置多个vue.js单页面项目](#342-配置多个vuejs单页面项目)
+    - [3.4.3 docker化basic auth(可配)](#343-docker化basic-auth可配)
+    - [3.4.4 配置Https证书, 支持https访问.](#344-配置https证书-支持https访问)
+    - [3.4.5 利用nginx正向代理](#345-利用nginx正向代理)
+- [四. Linux](#四-linux)
+  - [4.1 常用命令(常忘)](#41-常用命令常忘)
+    - [4.1.1 给文件添加可执行权限](#411-给文件添加可执行权限)
+    - [4.1.2 删除当前文件夹内所有内容](#412-删除当前文件夹内所有内容)
+    - [4.1.3 压缩当前文件夹为zip包](#413-压缩当前文件夹为zip包)
+    - [4.1.4 解压缩zip压缩包到当前目录](#414-解压缩zip压缩包到当前目录)
+    - [4.1.5 查看某个文件的大小](#415-查看某个文件的大小)
+    - [4.1.6 列出文件夹下面第一级每个文件的大小(包括文件夹和文件)](#416-列出文件夹下面第一级每个文件的大小包括文件夹和文件)
+    - [4.1.7 查找文件命令](#417-查找文件命令)
+    - [4.1.8 查找某个端口被占用](#418-查找某个端口被占用)
+    - [4.1.9 查看linux各进程内存使用情况](#419-查看linux各进程内存使用情况)
+    - [4.1.10 Linux 启动项目后台保留策略](#4110-linux-启动项目后台保留策略)
+    - [4.1.11 cp -r 命令的坑](#4111-cp--r-命令的坑)
+    - [4.1.12 清除所有log文件(内存不够时)](#4112-清除所有log文件内存不够时)
+    - [4.1.13 压缩成tar.gz压缩包](#4113-压缩成targz压缩包)
+    - [4.1.14 解压缩tar.gz包](#4114-解压缩targz包)
+    - [4.1.15 Linux文件权限查看及无权限解决方案](#4115-linux文件权限查看及无权限解决方案)
+- [五. Http](#五-http)
   - [5.1 ContentType](#51-contenttype)
-- [六. IDEA](#%e5%85%ad-idea)
-  - [6.1 快捷键](#61-%e5%bf%ab%e6%8d%b7%e9%94%ae)
-    - [6.1.1 查看接口或接口中的方法实现类](#611-%e6%9f%a5%e7%9c%8b%e6%8e%a5%e5%8f%a3%e6%88%96%e6%8e%a5%e5%8f%a3%e4%b8%ad%e7%9a%84%e6%96%b9%e6%b3%95%e5%ae%9e%e7%8e%b0%e7%b1%bb)
-- [七. 阿里云oss](#%e4%b8%83-%e9%98%bf%e9%87%8c%e4%ba%91oss)
-  - [7.1 上传图片](#71-%e4%b8%8a%e4%bc%a0%e5%9b%be%e7%89%87)
-    - [7.1.1 私密上传base64格式图片](#711-%e7%a7%81%e5%af%86%e4%b8%8a%e4%bc%a0base64%e6%a0%bc%e5%bc%8f%e5%9b%be%e7%89%87)
-  - [7.2 下载图片](#72-%e4%b8%8b%e8%bd%bd%e5%9b%be%e7%89%87)
-    - [7.2.1 前端访问私密图片](#721-%e5%89%8d%e7%ab%af%e8%ae%bf%e9%97%ae%e7%a7%81%e5%af%86%e5%9b%be%e7%89%87)
+- [六. IDEA](#六-idea)
+  - [6.1 快捷键](#61-快捷键)
+    - [6.1.1 查看接口或接口中的方法实现类](#611-查看接口或接口中的方法实现类)
+- [七. 阿里云oss](#七-阿里云oss)
+  - [7.1 上传图片](#71-上传图片)
+    - [7.1.1 私密上传base64格式图片](#711-私密上传base64格式图片)
+  - [7.2 下载图片](#72-下载图片)
+    - [7.2.1 前端访问私密图片](#721-前端访问私密图片)
 
 <!-- /TOC -->
 
@@ -694,35 +714,63 @@ npm install --save file-saver@2.0.0
 
 ### 1.7 ES6语法
 #### 1.7.1 export 和 export default的区别
-1. 首先, ES6中存在多模块的概念, 相当于java中的pacakge, 在使用它的时候需要import,  
-   但是它不同与java的package的是, 它需要手动export出去, 即将包暴露出去
-2. export default 只能暴露出一个接口.
-   eg: xxx.js文件
-   export default class xxx {
-     static a = 'attribute'
-     static f = () => {console.log('f')}
-   } 
-   xxx中包含许多属性和方法, 且需要static修饰.
-   
-   使用时:
-     import xxx from 'xxx文件的路径'
-     获取a属性: xxx.a
-     调用f方法: xxx.f()
-3. export 通常是可以暴露多个接口, 但是在import时, 需要加上 {} 来import指定的接口
-   eg: xxx.js文件:
-   const a = 'attribute'
-   const f = () => {console.log('f')}
-   export {
-     a,
-     f
-   }
+  1. 首先, ES6中存在多模块的概念, 相当于java中的pacakge, 在使用它的时候需要import,  
+     但是它不同与java的package的是, 它需要手动export出去, 即将包暴露出去
+  2. export default 只能暴露出一个接口.
+     eg: xxx.js文件
+     export default class xxx {
+       static a = 'attribute'
+       static f = () => {console.log('f')}
+     } 
+     xxx中包含许多属性和方法, 且需要static修饰.
+     
+     使用时:
+       import xxx from 'xxx文件的路径'
+       获取a属性: xxx.a
+       调用f方法: xxx.f()
+  3. export 通常是可以暴露多个接口, 但是在import时, 需要加上 {} 来import指定的接口
+     eg: xxx.js文件:
+     const a = 'attribute'
+     const f = () => {console.log('f')}
+     export {
+       a,
+       f
+     }
 
-   使用时:
-     获取a属性: import { a } from 'xxx文件路径'
-     获取f方法: import { f } from 'xxx文件路径'
-     同时获取a属性和f方法: import { a, f } from 'xxx文件路径'
+     使用时:
+       获取a属性: import { a } from 'xxx文件路径'
+       获取f方法: import { f } from 'xxx文件路径'
+       同时获取a属性和f方法: import { a, f } from 'xxx文件路径'
+
+  4. module.exports = {} 和export default {} 时等价的
 
 ***
+
+### 1.8 跨域
+#### 1.8.1 出现跨域的原因
+  * 违背同源策略(协议、域名、端口都要相同)时, 就会出现跨域
+     ```text
+       eg: vue.js项目使用localhost:8080作为默认url, 而springboot项目若使用localhost:8081作为服务, 那么这就是两个不同应用程序, 当8080项目在网页中要请求springboot项目8081的一些数据时, 若8081后台没有做跨域处理, 那就会出现跨域. 在这个过程中, 是因为浏览器发现我要请求的资源并不是当前的应用程序。在请求资源时, 浏览器还会根据简单请求和非简单请求进行'预检'操作.
+     ```
+#### 1.8.2 预检操作
+  * 浏览器将跨域请求分为两类, 简单请求和非简单请求
+    1. 简单请求: 
+      ```txt
+        包括HEAD, GET, POST方法请求, 且HTTP请求头信息不会超过以下几种字段: Accept, Accept-Language, Content-Language, Last-Event-Id, Content-Type(只限于3个值: application/x-www-form-urlencoded, multipart/form-data, test/plain)
+      ```
+    2. 非简单请求:
+      ```txt
+        包括PUT, DELETE方法的请求以及Content-Type为application/json。
+        针对于非简单请求, 浏览器会'预检'(preflight)请求, 主要目的为确认服务器是否允许本地请求(包括源、请求方法、请求头信息等等), 只有预检通过时, 浏览器才会真正的发送XMLHttpRequest, 否则报错(跟跨域相关, 但具体时预检请求没有得到正确的返回状态)。
+      ```
+
+### 1.9 some方法
+  * some方法的主要用途时some内的表达式返回true则为true, 意为存在的意思, 注意如下几种情况的写法, 主要是看箭头函数右侧的返回值
+    ```js
+      [{a: 1, b: 2}, {a: 2, b: 1}].some(_ => _.a === 2)   =======  true
+      [{a: 1, b: 2}, {a: 2, b: 1}].some(_ => { _.a === 2 })  ======= false
+      [{a: 1, b: 2}, {a: 2, b: 1}].some(_ => { return _.a === 2 })  ======= true
+    ```
 
 ## 二. 后端
 ### 2.1 Java basic
@@ -905,31 +953,37 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
 ```
 
 #### 2.1.17 JVM 类加载器
-* 背景:
-    ```
-      我们都知道java是跨平台的，但所谓的跨平台是指编译后的class字节码文件通过jvm能运行在不同的平台上，而jvm在   
-      对应平台jdk的安装过程中就已经安装完成。那么运行一个普通的java程序(eg: 控制台输出Hello World)jvm在底层   
-      做了哪些事呢？
-    ```
-* javac命令:  
-    ```
-      javac命令的主要作用就是将.java后缀名文件编译成.class字节码文件, 在大多数IDE中, 这一步骤在run程序的时候   
-      都帮我们完成了。
-    ```
-* java命令:  
-    ```
-      java命令就是将javac命令编译后的.class字节码文件运行起来。在此时, JVM将起着非常重要的作用。   
-      首先, 一个普通无继承的类拥有四个类加载器:   
-        1. 自身的classLoader:  
-        2. AppClassLoader:  
-            主要加载应用程序的类, 如自己编写的类、第三方jar包的类库。eg: maven中引入中的所有第三方jar包
-        3. ExtClassLoader:  
-            能拿到它的引用，一般加载jdk安装目录下的jre/lib/ext文件下的所有jar包。
-        4. null(根类加载器):  
-            在程序中拿不到它的引用，但是它实际存在，由c++编写, 根加载器一般加载比较重要的类. 比如jdk安装目录下的jre/lib/rt.jar类库(里面存放着jdk类库的字节码文件, 这就是我们能使用jdk api的原因)
-    ```
-* 具体java应用程序class加载时间调用顺序如下图所示:
-![JDK_Classloader](https://github.com/AvengerEug/treadpit/blob/master/jvm_classloader.jpg)
+  * 背景:
+      ```
+        我们都知道java是跨平台的，但所谓的跨平台是指编译后的class字节码文件通过jvm能运行在不同的平台上，而jvm在   
+        对应平台jdk的安装过程中就已经安装完成。那么运行一个普通的java程序(eg: 控制台输出Hello World)jvm在底层   
+        做了哪些事呢？
+      ```
+  * javac命令:  
+      ```
+        javac命令的主要作用就是将.java后缀名文件编译成.class字节码文件, 在大多数IDE中, 这一步骤在run程序的时候   
+        都帮我们完成了。
+      ```
+  * java命令:  
+      ```
+        java命令就是将javac命令编译后的.class字节码文件运行起来。在此时, JVM将起着非常重要的作用。   
+        首先, 一个普通无继承的类拥有四个类加载器:   
+          1. 自身的classLoader:  
+          2. AppClassLoader:  
+              主要加载应用程序的类, 如自己编写的类、第三方jar包的类库。eg: maven中引入中的所有第三方jar包
+          3. ExtClassLoader:  
+              能拿到它的引用，一般加载jdk安装目录下的jre/lib/ext文件下的所有jar包。
+          4. null(根类加载器):  
+              在程序中拿不到它的引用，但是它实际存在，由c++编写, 根加载器一般加载比较重要的类. 比如jdk安装目录下的jre/lib/rt.jar类库(里面存放着jdk类库的字节码文件, 这就是我们能使用jdk api的原因)
+      ```
+  * 具体java应用程序class加载时间调用顺序如下图所示:
+  ![JDK_Classloader](https://github.com/AvengerEug/treadpit/blob/master/jvm_classloader.jpg)
+
+#### 2.1.18 Map put进去的默认类型
+  * Map<String, Object>格式的map, 若put进去的类型时int类型, 那么get出来时虽然时object类型, 但是此时如果long类型来接收的话, 会抛出转型异常, 因为get出来的是int类型, int类型不能直接强转成long类型
+
+#### 2.1.19 AtomicInteger CAS操作流程
+  * 实例对象(eg: atomicInteger), atomicInteger.incrementAndGet() -> atomicInteger内部的UnSafe类的compareAndSwapInt方法 -> 虚拟机中的unsafe.cpp文件(c语言编写的compareAndSwapInt方法) -> 汇编语言实现原子性 -> cpu调用指令(因为整个操作变成了一个指令, 所以具备原子性了)
 
 ### 2.2 Spring Cloud
 #### 2.2.1 服务注册中心Eureka
@@ -1036,7 +1090,7 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
 * Ribbon: 负载均衡, 该组件存储在ApiGateWay中, 采用轮询算法, 依次请求服务的每一个实例
 * Feigh: 服务间内部调用, 底层采用动态代理, 根据feignClient接口中mvc的一些注解, 组装http请求
 * Hystrix: 熔断器, 防止因某个微服务崩溃而导致整个微服务雪崩。具体内部使用采用的是每个服务走自己的线程池
-### 2.3 Spring Boot
+### 2.3 Spring
 #### 2.3.1 @RequestParam 类型映射
 |  后台定义类型 |  前台传数据格式 |
 | -------| ------ |
@@ -1121,12 +1175,12 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
     4. Pointcut(切点): 切点定义了“何处”需要执行code, 即表达式定义。 切点会匹配通知所要织入的一个或者多个连接点
 * Annotation
 
-#### 2.3.10 Spring bean生命周期
-* singleton: 单例模式, 默认。只存在一个实例
-* propytype: 原型。每次注入属性时都是new一个新对象
-* request: 针对每次http请求, 都会new一个新对象, 适用于WebApplicationContext环境
-* session: 每次会话都会new一个新对象, 同一次会话共用一个实例
-* global-session: 所有会话共用一个实例
+#### 2.3.10 Spring bean作用域
+  * singleton: 单例模式, 默认。只存在一个实例
+  * propytype: 原型。每次注入属性时都是new一个新对象
+  * request: 针对每次http请求, 都会new一个新对象, 适用于WebApplicationContext环境
+  * session: 每次会话都会new一个新对象, 同一次会话共用一个实例
+  * global-session: 所有会话共用一个实例
 
 #### 2.3.11 SpringBoot是job注解和异步调用注解生效前提
 * 异步注解:  @Async
@@ -1165,52 +1219,234 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
     ```
   
 
+
+
+#### 2.3.15 springboot后台允许跨域及实现自定义请求头
+  1. 集成WebMvcConfigurerAdapter类, 重写addCorsMappings方法, 添加针对请求mapping设置允许的请求方法、源等其它关于跨域的设置.如下:
+     ```java
+      @Override
+      public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**").allowedMethods("PUT", "GET", "POST", "DELETE").allowedOrigins("*");
+
+      }
+     ```
+  2. 引入spring security类库. 写一个过滤器继承WebSecurityConfigurerAdapter并重写configure方法, 配置允许自定义请求头的部分信息，以及将继承OncePerRequestFilter的过滤器添加到UsernamePasswordAuthenticationFilter过滤器前面. 如下
+      ```java
+        public class CorsConfigration extends WebSecurityConfigurerAdapter {
+
+            @Override
+            protected void configure(HttpSecurity http) throws Exception {
+                http.csrf()
+                        .disable()
+                        .cors()
+                        .and()
+                        .authorizeRequests()
+                        .antMatchers(
+                                "/**"
+                        )
+                        .permitAll()
+                        .anyRequest().authenticated();
+
+                http.headers().cacheControl().disable();
+
+                // add jwt filter
+                http.addFilterBefore(new JwtAuthFilter(), UsernamePasswordAuthenticationFilter.class);
+            }
+        }
+      ```
+
+      ```java
+          public class JwtAuthFilter extends OncePerRequestFilter {
+
+              @Override
+              public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
+
+                  Boolean isFilter = !request.getRequestURI().equals("/user/login");
+
+                  if (isFilter) {
+
+                      if (getJwtToken(request) == null) {
+                          response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "无token");
+                          return;
+                      }
+
+                      String authToken = request.getHeader("jwt-token");
+                      logger.info(authToken);
+                  }
+
+                  chain.doFilter(request, response);
+              }
+
+              @Override
+              public void destroy() {
+                  // Nothing to do
+              }
+
+              private String getJwtToken(HttpServletRequest request) {
+                  return request.getHeader(ContextUtil.JWT_TOKEN);
+              }
+
+          }
+      ```
+     
+
+#### 2.3.16 spring 描述bean的信息
+  1. class: 类的全路径
+  2. name: bean的名称
+  3. scope: 作用域
+  4. constructor-arg: 注入依赖关系
+  5. properties: 注入依赖关系的
+  6. lazy-initialization mode: 是否懒加载
+  7. initialization方法: 在bean的所有属性注入之后调用的钩子函数
+  8. destrction方法: 包含bean的容器被销毁时的钩子函数
+
+#### 2.3.17 spring自动装配
+  1. byName: 
+       * 优点：解决了byType多个类型注入抛异常的问题
+       * 缺点: 代码有点看不懂, eg: xml配置了UserDao类型的两个bean, id分别叫userDao和userDao1。其中userService依赖了UserDao的类型(不使用@Autowired注解), 它的名字叫testDao, 并存在如下方法:
+         ```java
+             public void setUserDao(UserDao userDao) {
+               this.testDao = userDao;
+             }
+         ```
+        , 那么它会将id为userDao(bean中name没配置的话, id=name)的bean注入到testDao中, 若存在如下方法:
+
+         ```java
+            public void setUserDao1(UserDao userDao) {
+              this.testDao = usreDao;
+            }
+         ```
+         , 那么它会将userDao1这个bean注入到testDao中去
+
+         总而言之就是, byType是根据bean name的首字母变成大写, 并添加set的方法名来注入的。
+  2. byType: 
+       * 缺点： 当同一个类型有多个bean的时候, 注入时会抛出异常, 因为spring不知道注入哪一个
+  3. 全局设置(xml配置): 
+     ```xml
+      在spring的beans标签中添加属性default-autowire="byType"
+      <default-autowire="byType">
+      可取值: byType, byName, default, no  其中default的功能等同于no, 则为不开启自动装配功能
+     ```
+  4. 作用于单个bean:
+     ```xml
+      <bean id="xxx" class="com.xx.xxx.xxxx" autowire="byName"/>
+     ```
+
+#### 2.3.18 spring事件驱动模型的坑
+  * spring事件驱动模型三个关键类: ApplicationEvent, ApplicationListener, ApplicationContext
+  * 步骤
+      1. 事件本身继承ApplicationEvent类, 事件本身, 可以自定义逻辑属性, 在监听器中会用到该类
+      2. 添加事件处理监听器, 实现ApplicationListener<E extends ApplicationEvent>接口 => 需要将该类添加到spring容器中, 否则监听不到事件
+      3. 使用springContext上下文发布事件, ApplicationContext.publishEvent(事件实例);
+
+#### 2.3.19 Springboot parent jar包包含的功能
+  1. 默认的jdk1.8编译环境
+  2. UTF-8编译环境
+  3. 自身依赖了一些jar包, 比如log4f等等
+  4. 可以支持resource目录下的文件使用pom文件中定义的一些属性
+
+#### 2.3.20 spring-boot-starter-actuator
+  * 常用于生产环境, 可用于项目的监管和check
+
+#### 2.3.21 @SpringBootApplication注解
+  * 包含了@EnableAutoConfiguration和@ComponentScan注解, 可以使用这两个注解代替@SpringBootApplication注解启动一个springboot程序
+
+#### 2.3.22 使用SPI功能集成spring自定义事件功能
+  * 背景: jdk默认支持SPI功能, 原则是在classpath中添加META-INF/services文件夹, 并在里面添加以接口命名的文件, 内容为接口的实现类, 这样执行java程序的时候使用ServiceLoader类就能获取到实例并执行对应的方法了
+  * 集成spring SPI步骤
+    1. 在classpath路径下添加如下文件 META-INF/spring.factories
+    2. 在spring.factories类中存储值: org.springframework.context.ApplicationListener=自定义监听器的全路径(若有多个, 使用逗号隔开)
+    3. 监听器类要实现org.springframework.contextApplicationListener接口, 并重写里面的方法
+  * 所有实现了org.springframework.contextApplicationListener接口的监听器会在如下几个场景中被触发:
+    1. 在启动springboot时, 由ApplicationStartingEvent类来进行第一次触发
+    2. 当已知要在上下文中使用的环境但在创建上下文之前, 由ApplicationEnvironmentPreparedEvent触发
+    3. 在刷新开始之前但在加载bean定义之后由ApplicationPreparedEvent触发
+    4. 在刷新上下文之后但在调用任何程序和命令行运行程序之前由ApplicationStartedEvent触发
+    5. 在调用任何应用程序和命令行程序之后, 由ApplicationReadyEvent触发
+    6. 如果启动时发生异常, 由ApplicationFailedEvent触发
+
+#### 2.3.23 启动springboot后执行某个特定的方法
+  1. 两个实现方式: 实现CommandLineRunner或ApplicationRunner接口可实现
+  2. 若两种方法都实现了, 并且像按照某些顺序执行, 则可以继续实现org.springframework.core.Ordered接口或者使用org.framework.core.annotation.Order胡杰来达到要求
+
+#### 2.3.24 springboot引用其它yml或者properties配置文件
+  * 使用spring.profiles.include来配置. eg: spring.profiles.include=common 则会加载applicatioin-common.yml或application-common.properties文件
+
 ### 2.4 Mybatis
 #### 2.4.1 parameterType为int/long时, 参数为0的处理
-* 若传入的参数为0, mybatis会将它当成```空字符串```处理, 所以会查出name为空字符串的数据
-  ```xml
-  <select id="countApplicant" parameterType="int" resultType="long">
-      <![CDATA[
-          SELECT COUNT(1)
-          FROM applicant
-          WHERE name = #{parameter}
-      ]]>
-  </select>
-  ```
+  * 若传入的参数为0, mybatis会将它当成```空字符串```处理, 所以会查出name为空字符串的数据
+    ```xml
+    <select id="countApplicant" parameterType="int" resultType="long">
+        <![CDATA[
+            SELECT COUNT(1)
+            FROM applicant
+            WHERE name = #{parameter}
+        ]]>
+    </select>
+    ```
 
 #### 2.4.2 $和#区别
-* $会存在sql注入的风险, #不会。 因为$是将数据和sql语句一起编译的 而#是先编译sql语句再将数据绑定上去, 即跟原生jdbc的问号占位符一样(?, ?, ?....)
-* 所以通常在模糊模糊查找时会添加bind标签将需要模糊查找的key预先编译好, 再直接用#将bind定义的变量keywordWrapper进行筛选即可,。
-  ```XML
-    <bind name="keywordWrapper" value="keyword + '%'"/>
+  * $会存在sql注入的风险, #不会。 因为$是将数据和sql语句一起编译的 而#是先编译sql语句再将数据绑定上去, 即跟原生jdbc的问号占位符一样(?, ?, ?....)
+  * 所以通常在模糊模糊查找时会添加bind标签将需要模糊查找的key预先编译好, 再直接用#将bind定义的变量keywordWrapper进行筛选即可,。
+    ```XML
+      <bind name="keywordWrapper" value="keyword + '%'"/>
 
-    <![CDATA[
-      SELECT * FROM user WHERE name LIKE #{keywordWrapper}
-    ]]>
-  ```
+      <![CDATA[
+        SELECT * FROM user WHERE name LIKE #{keywordWrapper}
+      ]]>
+    ```
 
 #### 2.4.3 ORM映射文件 type和map后缀的区别
-1. parameterType和parameterMap
-  * parameterType指的是传递进去的参数类型, 基本数据类型以及pojo类型(map或类对象)
-  * parameterMap 一般很少用, 懒得研究
-2. resultMap和resultType
-  * resultType 返回基本数据类型
-  * resultMap 返回对象类型, 同时该对象需要在xml文件中配置model与db字段的映射关系
+  1. parameterType和parameterMap
+    * parameterType指的是传递进去的参数类型, 基本数据类型以及pojo类型(map或类对象)
+    * parameterMap 一般很少用, 懒得研究
+  2. resultMap和resultType
+    * resultType 返回基本数据类型
+    * resultMap 返回对象类型, 同时该对象需要在xml文件中配置model与db字段的映射关系
 
 #### 2.4.4 Mybatis resultMap中type=map, 使用枚举的typeHandler前提
-* 需要在字段中添加javaType类型, 指定具体的枚举类是什么, 否则直接使用typeHandler会抛出
-  Object does not represent an enum type的异常
-  ```xml
-    <resultMap id="demoMap" type="map">
-        <result column="user_id" property="userId"/>
-        <result column="status" property="status" javaType="枚举的具体类的class路径" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
-        <result column="age" property="age"/>
-    </resultMap>
-  ```
+  * 需要在字段中添加javaType类型, 指定具体的枚举类是什么, 否则直接使用typeHandler会抛出
+    Object does not represent an enum type的异常
+    ```xml
+      <resultMap id="demoMap" type="map">
+          <result column="user_id" property="userId"/>
+          <result column="status" property="status" javaType="枚举的具体类的class路径" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
+          <result column="age" property="age"/>
+      </resultMap>
+    ```
 
 #### 2.4.5 使用springboot 通过继承SqlSessionDaoSupport类集成mybatis
-* 必须重写setSqlSessionTemplate或者setSqlSessionFactory方法, 同时在方法中添加``@Autowire``注解来开启mybatis功能(注入sqlSessionTemplate)，
-  否则会抛初始化sqlSessionTemplate相关的异常
+  * 必须重写setSqlSessionTemplate或者setSqlSessionFactory方法, 同时在方法中添加``@Autowire``注解来开启mybatis功能(注入sqlSessionTemplate)，
+    否则会抛初始化sqlSessionTemplate相关的异常
+
+#### 2.4.6 typehandler
+  * resultMap中的typeHandler需要加双引号
+    ```xml
+      <resultMap type="Order" id="orderMap">
+          <id column="order_id" property="orderId"/>
+          <result column="status" property="status" typeHandler="com.eugene.dao.mybatis.typehandler.OrderStatusTypeHandler" />
+          <result column="price" property="price"/>
+          <result column="payment_type" property="paymentType" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
+      </resultMap>
+    ```
+  * insert和update中属性转换不需要双引号
+    ```xml
+        <insert id="insertSelective" parameterType="com.eugene.sumarry.sbrabbitmq.Entity.OrderRecord">
+            INSERT INTO
+                ORDERS
+            VALUES
+                #{orderId},
+                #{status, typeHandler=com.eugene.dao.mybatis.typehandler.OrderStatusTypeHandler}
+        </insert>
+    ```
+
+#### 2.4.7 mybatis继承oracle的坑
+  1. sql语句中不能添加分号, 否则会抛 ORA-00911: 无效字符的异常
+  2. 需要全局配置jdbcTypeForNull为null, 才能插入null。
+     ```txt
+       springboot配置的值为: mybatis.configuration.jdbcTypeForNull= 'NULL'
+       根据mybatis源码的configuration类中有jdbcTypeForNull属性得知上述配置, 当然也可以看官网
+     ```
 
 ### 2.5 MySql
 #### 2.5.1 export database/table command
@@ -1494,24 +1730,26 @@ mvn install:install-file -Dfile=c\common-auth-0.0.1-SNAPSHOT-core.jar -DgroupId=
     如果要将改动与本地的改动合并的话 还要多执行一个 git reset . 操作.
   ```
 #### 2.9.7 Github中提交的记录在Contribution中看不到
-* 原因: 记录是提交了, 但是author与git中的用户名和邮箱不一致  
-* 解决方案:  
-    1. git log 查看命令找到想要在Contribution生效的提交  
-    2. 执行git rebase -i -p commitId~  =>  与合并commit类似, 找到一个范围  
-    3. 进入修改页面, 将需要修改author信息的commit前面的pick修改成edit或者e
-    4. 保存退出(windows: Esc + : + wq + 回车)
-    5. 重新设置author信息: git commit --amend --author="AvengerEug <eugenesumarry@163.com>"  
-       包括用户名和邮箱
-    6. 执行: git rebase --continue 完成当前commit信息的修改.  
-    Notes:
-       若commitId和HEAD指针包含的commit较多  
-       则需要重复执行 3-6步  
-* 若想支持以后的提交都能生效, 则需要全局配置git的用户名和密码  
-* 若想针对单个项目生效则在对应的仓库中执行如下代码:  
-    git config user.name "xxxx"  
-    git config user.email "liu@example.com"  
-* 具体可参考[此](https://www.jianshu.com/p/72717f1a1e90)
+  * 原因: 记录是提交了, 但是author与git中的用户名和邮箱不一致  
+  * 解决方案:  
+      1. git log 查看命令找到想要在Contribution生效的提交  
+      2. 执行git rebase -i -p commitId~  =>  与合并commit类似, 找到一个范围  
+      3. 进入修改页面, 将需要修改author信息的commit前面的pick修改成edit或者e
+      4. 保存退出(windows: Esc + : + wq + 回车)
+      5. 重新设置author信息: git commit --amend --author="AvengerEug <eugenesumarry@163.com>"  
+         包括用户名和邮箱
+      6. 执行: git rebase --continue 完成当前commit信息的修改.  
+      Notes:
+         若commitId和HEAD指针包含的commit较多  
+         则需要重复执行 3-6步  
+  * 若想支持以后的提交都能生效, 则需要全局配置git的用户名和密码  
+  * 若想针对单个项目生效则在对应的仓库中执行如下代码:  
+      git config user.name "xxxx"  
+      git config user.email "liu@example.com"  
+  * 具体可参考[此](https://www.jianshu.com/p/72717f1a1e90)
 
+#### 2.9.8 gialab保护分支, merge代码时指定某种角色才能merge
+  * project => setting => repository => Protected Branched => 选择需要保护的分支, 设置merge和push的角色
 
 ### 2.10 设计模式与应用
 #### 2.10.1 简单工厂 + java多态性完成订单流水操作
@@ -1727,73 +1965,73 @@ linux若分别以普通user启动jenkins.war, 那么会在/home/user/.jenkins/ �
 ### 3.4 Nginx
 #### 3.4.1 配置反向代理
 * 在server部分添加如下配置:
-```ngxin
-  location /api/ {
-    proxy_pass http://127.0.0.1:8001/;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header REMOTE-HOST $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-  }
+  ```config
+    location /api/ {
+      proxy_pass http://127.0.0.1:8001/;
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header REMOTE-HOST $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
 
-表示: 当遇到后缀到/api的路由时, 反向代理到 127.0.0.1:8001,
+  表示: 当遇到后缀到/api的路由时, 反向代理到 127.0.0.1:8001,
 
-反响代理允许重新定义或者添加http请求头
-语法: proxy_set_header field value;
-```
+  反向代理允许重新定义或者添加http请求头
+  语法: proxy_set_header field value;
+  ```
 #### 3.4.2 配置多个vue.js单页面项目
 *  在server部分添加如下配置:
-```shell
-location / {
-  try_files $uri $uri/ /index.html;
-}
+  ```config
+    location / {
+      try_files $uri $uri/ /index.html;
+    }
 
-if (!-e $request_filename) {
-  rewrite ^/expo/.* /expo/index.html last;
-}
+    if (!-e $request_filename) {
+      rewrite ^/expo/.* /expo/index.html last;
+    }
 
-----------------------------------------------
-含义: 
-  第一个配置为常见的vue.js单页面配置, 只需要添加这行配置, 并将打好的包放入ngxin访问的根目录下即可完成部署
+    ----------------------------------------------
+    含义: 
+      第一个配置为常见的vue.js单页面配置, 只需要添加这行配置, 并将打好的包放入ngxin访问的根目录下即可完成部署
 
-  第二个配置为配置多个vue.js单页面的配置:
-  解析:
-    条件: 若请求的资源不是一个文件
-    条件内语句块: 若请求uri中以expo为前缀, 则重定向到 uri为/expo/index.html
+      第二个配置为配置多个vue.js单页面的配置:
+      解析:
+        条件: 若请求的资源不是一个文件
+        条件内语句块: 若请求uri中以expo为前缀, 则重定向到 uri为/expo/index.html
 
-    注: 1. 要保证build后的所有文件放在ngxin根目录下的expo文件夹下.
-        1. 静态资源要以expo文件夹为基准
-```
-eg: 在vue脚手架3.0版本之前, 初始化项目并采用[默认build的方式](https://github.com/EugeneHuang9638/treadpit/blob/master/common-build.png)打包的index.html文件内容为
-```html
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset=utf-8>
-    <meta name=viewport content="width=device-width,initial-scale=1">
-    <title>expo</title>
-    <link href=/static/css/app.2f09759cd2fab12147a7ee7a21efe173.css rel=stylesheet>
-  </head>
-  <body>
-    <div id=app></div>
-    <script type=text/javascript src=/static/js/manifest.28e76dc415eb565ab385.js></script>
-    <script type=text/javascript src=/static/js/vendor.3af6701d2adeecbcec08.js></script>
-    <script type=text/javascript src=/static/js/app.04c768f7c6f8cd515016.js></script>
-  </body>
-</html>
-```
-   重点在于link标签的```script```标签, 默认为当前目录下的static文件夹下. 其实真正的规则为
-   ```${assetsPublicPath}/${assetsSubDirectory}/css(js)/xxxx.css(js)```
-   而```assetsPublicPath```和```assetsSubDirectory```变量可以在```config/index.js```[文件中](https://github.com/EugeneHuang9638/treadpit/blob/master/common-build.png)配置,
-   所以在上述的配置中, 若请求的url为: ```127.0.0.1/expo/test``` 那么nginx内部会重定向到 ```127.0.0.1/expo/index.html``` 即进入ngxin第二种路由: 此时index.html各种静态资源在ngxin可访问的根目录下, 此时会报404.
+        注: 1. 要保证build后的所有文件放在ngxin根目录下的expo文件夹下.
+            1. 静态资源要以expo文件夹为基准
+  ```
+  eg: 在vue脚手架3.0版本之前, 初始化项目并采用[默认build的方式](https://github.com/EugeneHuang9638/treadpit/blob/master/common-build.png)打包的index.html文件内容为
+  ```html
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <meta charset=utf-8>
+      <meta name=viewport content="width=device-width,initial-scale=1">
+      <title>expo</title>
+      <link href=/static/css/app.2f09759cd2fab12147a7ee7a21efe173.css rel=stylesheet>
+    </head>
+    <body>
+      <div id=app></div>
+      <script type=text/javascript src=/static/js/manifest.28e76dc415eb565ab385.js></script>
+      <script type=text/javascript src=/static/js/vendor.3af6701d2adeecbcec08.js></script>
+      <script type=text/javascript src=/static/js/app.04c768f7c6f8cd515016.js></script>
+    </body>
+  </html>
+  ```
+  重点在于link标签的```script```标签, 默认为当前目录下的static文件夹下. 其实真正的规则为
+  ```${assetsPublicPath}/${assetsSubDirectory}/css(js)/xxxx.css(js)```
+  而```assetsPublicPath```和```assetsSubDirectory```变量可以在```config/index.js```[文件中](https://github.com/EugeneHuang9638/treadpit/blob/master/common-build.png)配置,
+  所以在上述的配置中, 若请求的url为: ```127.0.0.1/expo/test``` 那么nginx内部会重定向到 ```127.0.0.1/expo/index.html``` 即进入ngxin第二种路由: 此时index.html各种静态资源在ngxin可访问的根目录下, 此时会报404.
    
-   如果要访问expo/index.html 文件访问成功
-   1. 首先在ngxin根目录下创建```expo```文件夹
-   2. 并修改vue.js配置文件即build后的index.html文件  如下图:
-      ![修改后的配置文件](https://github.com/EugeneHuang9638/treadpit/blob/master/modified-build.png), 
-      ![修改配置后的index.html文件](https://github.com/EugeneHuang9638/treadpit/blob/master/modified-index.html.png)
-   3. 将build后的包整个丢进expo文件夹内
-   4. 重新reload ngxin, 再次访问即可
+  如果要访问expo/index.html 文件访问成功
+  1. 首先在ngxin根目录下创建```expo```文件夹
+  2. 并修改vue.js配置文件即build后的index.html文件  如下图:
+     ![修改后的配置文件](https://github.com/EugeneHuang9638/treadpit/blob/master/modified-build.png), 
+     ![修改配置后的index.html文件](https://github.com/EugeneHuang9638/treadpit/blob/master/modified-index.html.png)
+  3. 将build后的包整个丢进expo文件夹内
+  4. 重新reload ngxin, 再次访问即可
 
 #### 3.4.3 docker化basic auth(可配)
 1. 拉取准备好的镜像包
@@ -1808,6 +2046,27 @@ eg: 在vue脚手架3.0版本之前, 初始化项目并采用[默认build的方�
 各细节可跟踪至该[repository](https://github.com/EugeneHuang9638/docker-nginx-basic-auth.git)
 
 #### 3.4.4 配置Https证书, 支持https访问.
+
+
+#### 3.4.5 利用nginx正向代理
+  * 背景: 同一个局域网中的linux中被限制不能连外网, 所以可以代理到局域网中某台能上网的电脑
+  * 步骤:
+      1. nginx配置:
+        ```config
+          server {
+            resolver  xxxx; # 这里使用同网段的DNS域名, window中使用ipconfig -all 命令可以获取到
+            listen    YYYY; # 正向代理的端口
+            location / {
+              proxy_pass http://$http_host$request_url;
+            }
+          }
+        ```
+      2. linux中需要执行如下命令
+        ```shell
+          export http_proxy=http://用户名:密码@可以上网的nginx地址:监听代理的端口
+        ```
+  * 但只能代理到http请求, https请求代理不上
+
 
 ***
 
