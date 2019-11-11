@@ -79,6 +79,7 @@
     - [2.1.17 JVM 类加载器](#2117-jvm-类加载器)
     - [2.1.18 Map put进去的默认类型](#2118-map-put进去的默认类型)
     - [2.1.19 AtomicInteger CAS操作流程](#2119-atomicinteger-cas操作流程)
+    - [2.1.20 为什么要面向抽象编程](#2120-为什么要面向抽象编程)
   - [2.2 Spring Cloud](#22-spring-cloud)
     - [2.2.1 服务注册中心Eureka](#221-服务注册中心eureka)
     - [2.2.2 ApiGateWay(Zuul)](#222-apigatewayzuul)
@@ -111,6 +112,8 @@
     - [2.3.22 使用SPI功能集成spring自定义事件功能](#2322-使用spi功能集成spring自定义事件功能)
     - [2.3.23 启动springboot后执行某个特定的方法](#2323-启动springboot后执行某个特定的方法)
     - [2.3.24 springboot引用其它yml或者properties配置文件](#2324-springboot引用其它yml或者properties配置文件)
+    - [2.3.25 IOC和DI的关系:](#2325-ioc和di的关系)
+    - [2.3.26 Spring的编码风格](#2326-spring的编码风格)
   - [2.4 Mybatis](#24-mybatis)
     - [2.4.1 parameterType为int/long时, 参数为0的处理](#241-parametertype为intlong时-参数为0的处理)
     - [2.4.2 $和#区别](#242-和区别)
@@ -183,6 +186,7 @@
     - [3.4.3 docker化basic auth(可配)](#343-docker化basic-auth可配)
     - [3.4.4 配置Https证书, 支持https访问.](#344-配置https证书-支持https访问)
     - [3.4.5 利用nginx正向代理](#345-利用nginx正向代理)
+    - [3.4.6 Tomcat server.xml配置文件解析](#346-tomcat-serverxml配置文件解析)
 - [四. Linux](#四-linux)
   - [4.1 常用命令(常忘)](#41-常用命令常忘)
     - [4.1.1 给文件添加可执行权限](#411-给文件添加可执行权限)
@@ -985,6 +989,10 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
 #### 2.1.19 AtomicInteger CAS操作流程
   * 实例对象(eg: atomicInteger), atomicInteger.incrementAndGet() -> atomicInteger内部的UnSafe类的compareAndSwapInt方法 -> 虚拟机中的unsafe.cpp文件(c语言编写的compareAndSwapInt方法) -> 汇编语言实现原子性 -> cpu调用指令(因为整个操作变成了一个指令, 所以具备原子性了)
 
+#### 2.1.20 为什么要面向抽象编程
+  * 最大的好处是为了以后的扩展, 假设以后自己写的实现类不能实现某些需求的时候, 可以通过产生代理对象的方式
+    对这个类型进行填充, 这样的代码扩展性就高
+
 ### 2.2 Spring Cloud
 #### 2.2.1 服务注册中心Eureka
 * 服务注册中心包括Eureka和zookeeper
@@ -1199,8 +1207,21 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
       为啥呢？ 因为spring会将key load成 product[false] 或 product[true]
 
 #### 2.3.13 @Autowired和@Resource的区别
+
 * @Autowired: 默认按照byType的方式进行bean匹配, 是spring框架中的注解
 * @Resource: 默认按照byName的方式进行bean匹配, 是jdk中自带的注解
+
+  ```txt
+    @Autowired默认是根据byType的方式依赖注入, 若byType的类型的实例不止一个(内部把异常吃掉), 则会根据byName的方式来注入(也就是变成@Resource功能),此时是根据属性名来注入的, 它会将属性名首字母大写, 前面添加set关键字变成set方法, 然后利用反射调用set方法完成注入, 所以此时的 ***属性名*** 很重要,与自己添加的set方法无关. 所以此时的byName依赖注入方式与xml配置的byName又有差异, 因为xml配置依赖注入的byName方式是根据显示的set方法名决定的。
+
+    byName的几种情况:
+     *   1. xml配置的byName, 会根据set方法来注入
+     *   2. @Resource注解的byName, 会根据属性名(其实这个属性名就是bean的名字),
+     *      这个属性名又分是注解中的属性名还是变量名. 总而言之, 不管是@Resource注解中的
+     *      name属性名还是要依赖注入的变量名, 在@Resource的byName方式下, 这个名字一定
+     *      就是bean的名字
+     *   3. @Autowired注解当注入的类型有多个时, 会退化成@Resource的功能
+  ```
 
 #### 2.3.14 SpringBoot默认包扫描路径
 * 默认包扫描路径为Springboot项目入口类所在包及子包，所以如果项目中会依赖一些common的jar包, 并且jar包中包含一些
@@ -1371,6 +1392,16 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
 
 #### 2.3.24 springboot引用其它yml或者properties配置文件
   * 使用spring.profiles.include来配置. eg: spring.profiles.include=common 则会加载applicatioin-common.yml或application-common.properties文件
+
+#### 2.3.25 IOC和DI的关系:
+  * IOC是控制反转的意思(Inversion of control): 是面向对象的一种设计原则, 可以用来降低代码之间的耦合
+    DI(Dependency Injection)是依赖注入, 是IOC的一种实现, IOC的实现除了DI还有Dependency Lookup(eg: JNDI的实现)
+  * 依赖注入的方式: 构造器、set方法、接口注入(Spring3才有的, Spring4之后就没有了)
+
+#### 2.3.26 Spring的编码风格
+  1. schemal-based --- xml格式
+  2. anotation-based --- annotation
+  3. java-based --- javaconfig  =>  springboot基本上就是基于此模式开发的
 
 ### 2.4 Mybatis
 #### 2.4.1 parameterType为int/long时, 参数为0的处理
@@ -2047,7 +2078,6 @@ linux若分别以普通user启动jenkins.war, 那么会在/home/user/.jenkins/ �
 
 #### 3.4.4 配置Https证书, 支持https访问.
 
-
 #### 3.4.5 利用nginx正向代理
   * 背景: 同一个局域网中的linux中被限制不能连外网, 所以可以代理到局域网中某台能上网的电脑
   * 步骤:
@@ -2067,6 +2097,29 @@ linux若分别以普通user启动jenkins.war, 那么会在/home/user/.jenkins/ �
         ```
   * 但只能代理到http请求, https请求代理不上
 
+#### 3.4.6 Tomcat server.xml配置文件解析
+
+  * 连接器:Connector  
+    1. protocol解析默认是http/1.1(tomcat会默认采用当前版本默认的io模型启动进程, 也可以指定某个模型的类全路径来启动)  在tomcat8是采用java的nio传输模型,      在tomcat7之前是采用java的bio传输模型
+    2. minThread: 处理业务代码的线程池最小的线程数
+    3. maxThread: 处理业务代码的线程池初始化最大的线程数
+    4. acceptCount: 线程池中的数量满了, 后续的线程会进入等待队列中, 此配置就是限制队列中最大的等待数量, 若超出数量抛出异常, 若等待时间超时页抛出异常
+    5. connectionTimeout: 连接超时时间
+    6. SSLEnabled: 是否开启ssl验证在https访问时需要开启
+    7. enabledLookups: 如果为true则可以通过调用request.getRemoteHost进行DNS查询来的带远程客户端的实际主机名, 否则只返回远程客户端的ip地址
+  *. Engine: tomcat中的service和engine是一对一的
+    1. name: 对应的engine名
+    2. defaultHost: 默认主机名, 当输入localhost:8080时  会走到name为localhost的Host节点
+  *. Host: 一个Engine有多个Host
+    1. name: 对应的一个主机
+    2. appBase: host的根目录(用作于解析web项目的目录(自动解压war包)). 
+      表示这个主机工作的根目录, 相对于bin目录所处的目录而言.
+    3. unpackWARs: 设置为true, 表示默认解压war包
+    4. autoDeploy: 设置为true, 设置自动部署
+  *. Context: 上下文路径
+    1. docBase: 相对于Host标签下的appBase而言, 
+    2. path: 访问上下文路径. eg: Host的appBase为webapps, name为localhost; Context的docBase为eugene, Context的path为'/test', 那么访问localhost:8080/test 则会默认访问到
+            webapps/eugene文件夹去
 
 ***
 
