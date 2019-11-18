@@ -114,6 +114,9 @@
     - [2.3.24 springboot引用其它yml或者properties配置文件](#2324-springboot引用其它yml或者properties配置文件)
     - [2.3.25 IOC和DI的关系:](#2325-ioc和di的关系)
     - [2.3.26 Spring的编码风格](#2326-spring的编码风格)
+    - [2.3.27 循环依赖](#2327-循环依赖)
+    - [2.3.27 单例bean中依赖原型bean生效的方法](#2327-单例bean中依赖原型bean生效的方法)
+    - [2.3.28 spring aop](#2328-spring-aop)
   - [2.4 Mybatis](#24-mybatis)
     - [2.4.1 parameterType为int/long时, 参数为0的处理](#241-parametertype为intlong时-参数为0的处理)
     - [2.4.2 $和#区别](#242-和区别)
@@ -1221,6 +1224,12 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
      *      name属性名还是要依赖注入的变量名, 在@Resource的byName方式下, 这个名字一定
      *      就是bean的名字
      *   3. @Autowired注解当注入的类型有多个时, 会退化成@Resource的功能
+
+    byType自动装配有多个相同类型bean时的处理方法:
+     *   1. 将属性名设置成 要注入bean的名字(原理是会降级成@Resource注入模式, 即下述的第三点)
+     *   2. 在一个bean中添加@Primary注解, 表示当遇到多个类型的时候, 使用此bean进行注入
+     *   3. 修改成@Resource注解, 添加存在bean的set方法或者注解中添加bean的名称
+     *   4. @Autowired和@Qualifier结合使用, 并在@Qualifier注解中添加指定注入bean的name
   ```
 
 #### 2.3.14 SpringBoot默认包扫描路径
@@ -1402,6 +1411,52 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
   1. schemal-based --- xml格式
   2. anotation-based --- annotation
   3. java-based --- javaconfig  =>  springboot基本上就是基于此模式开发的
+
+#### 2.3.27 循环依赖
+  * spring 单例与单例之间的循环引用是ok的, 但是如果相互引用的bean中有原型对象(scope="prototype")的话, 那么会报错
+  
+#### 2.3.27 单例bean中依赖原型bean生效的方法
+  * 背景: 当一个单例bean中依赖了原型bean时, 当每次使用单例bean的时候里面的原型bean都是同一个对象， 这样就失去了原型bean的作用。现在要期待每次使用单例bean时里面的原型bean都是新new出来的
+  * 解决方法:
+      1. 除去依赖原型bean, 每次使用它的时候从使用spring上下文的getBean方法获取
+      2. 使用@Lookup注解。 如下, 每次都使用PrototypeUtils.getBasicService()来获取原型BasicService对象, 重载的带参数方法, 表示需要注入内部的属性, 所以BasicService需要提供不同的构造方法, 如下述的BasicService类
+         ```java
+            @Component
+            public abstract class PrototypeUtils {
+
+                @Lookup
+                public abstract BasicService getBasicService();
+
+                @Lookup
+                public abstract BasicService getBasicService(String name);
+            }
+         ```
+
+         ```java
+            @Component
+            @Scope("prototype")
+            public class BasicService {
+
+                private String userName;
+
+                public String getUserName() {
+                    return userName;
+                }
+
+                public void setUserName(String userName) {
+                    this.userName = userName;
+                }
+
+                public BasicService(String userName) {
+                    this.userName = userName;
+                }
+
+                public BasicService() {}
+            }
+         ```
+
+#### 2.3.28 spring aop
+  * 参考[此文件](https://github.com/AvengerEug/spring/tree/develop/aop)
 
 ### 2.4 Mybatis
 #### 2.4.1 parameterType为int/long时, 参数为0的处理
