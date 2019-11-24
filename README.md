@@ -117,6 +117,7 @@
     - [2.3.27 循环依赖](#2327-循环依赖)
     - [2.3.27 单例bean中依赖原型bean生效的方法](#2327-单例bean中依赖原型bean生效的方法)
     - [2.3.28 spring aop](#2328-spring-aop)
+    - [2.3.29 构建spring 5.0.x源码](#2329-构建spring-50x源码)
   - [2.4 Mybatis](#24-mybatis)
     - [2.4.1 parameterType为int/long时, 参数为0的处理](#241-parametertype为intlong时-参数为0的处理)
     - [2.4.2 $和#区别](#242-和区别)
@@ -1457,6 +1458,19 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
 
 #### 2.3.28 spring aop
   * 参考[此文件](https://github.com/AvengerEug/spring/tree/develop/aop)
+
+#### 2.3.29 构建spring 5.0.x源码
+  1. 安装gradle, 并配置环境变量(建议4.4.1版本)
+  2. 查看源码根目录的`import-into-idea.md`文件, 按照提示将`spring-aspects`模块去除, 并要先编译`spring-core` 和 `spring-oxm`两个项目
+  3. idea导入项目, 设置gradle安装目录和本地仓库地址。
+     为了避免jvm内存溢出,配置jvm参数 `-XX:MaxPermSize=2048m -Xmx2048m -XX:MaxHeapSize=2048m`
+  4. 导入项目进行build, 若报错`No such property: value for class: org.gradle.api.internal.tasks.DefaultTaskDependencyPossible solutions: values`
+     打开`spring-beans.gradle`文件并将`compileGroovy.dependsOn = compileGroovy.taskDependencies.values - "compileJava"`注释掉 
+  5. 重新build, 应该会成功
+  6. 若自己添加module进行集成并发现`spring-beans`模块编译报错, 一般是某个jar报没导入, 请确认`SpringNamingPolicy`类中的`DefaultNamingPolicy`
+     是否正常导入, 若无, 请依次执行如下命令: `gradle objenesisRepackJar`, `gradle cglibRepackJar`
+  7. 若出现 `java: 找不到符号 符号: 变量InstrumentationSavingAgent 位置` 错误, 请先编译下`spring-instrument`模块, 
+     最好是build完之后, 执行下gradle 根目录的编译按钮, 这样所有的子模块都会进行编译
 
 ### 2.4 Mybatis
 #### 2.4.1 parameterType为int/long时, 参数为0的处理
