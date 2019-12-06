@@ -146,6 +146,7 @@
     - [2.8.3 maven pom文件scope解析](#283-maven-pom文件scope解析)
     - [2.8.4 maven项目打包类型](#284-maven项目打包类型)
     - [2.8.5 maven代码混淆插件导致spring 创建的bean找不到类型](#285-maven代码混淆插件导致spring-创建的bean找不到类型)
+    - [2.8.6 搭建maven私服](#286-搭建maven私服)
   - [2.9 Git](#29-git)
     - [2.9.1 回退版本](#291-回退版本)
     - [2.9.2 查看分支树](#292-查看分支树)
@@ -155,6 +156,9 @@
     - [2.9.6 git reset HEAD~ 带来的坑](#296-git-reset-head-带来的坑)
     - [2.9.7 Github中提交的记录在Contribution中看不到](#297-github中提交的记录在contribution中看不到)
     - [2.9.8 gialab保护分支, merge代码时指定某种角色才能merge](#298-gialab保护分支-merge代码时指定某种角色才能merge)
+    - [2.9.9 git patch功能](#299-git-patch功能)
+    - [2.9.10 git绑定多个push源, 实现同时push](#2910-git绑定多个push源-实现同时push)
+    - [2.9.11 git改变push源](#2911-git改变push源)
   - [2.10 设计模式与应用](#210-设计模式与应用)
     - [2.10.1 简单工厂 + java多态性完成订单流水操作](#2101-简单工厂--java多态性完成订单流水操作)
     - [2.10.2 适配器模式 + 动态代理集成第三方类库, 完成日志记录操作](#2102-适配器模式--动态代理集成第三方类库-完成日志记录操作)
@@ -208,6 +212,7 @@
     - [4.1.13 压缩成tar.gz压缩包](#4113-压缩成targz压缩包)
     - [4.1.14 解压缩tar.gz包](#4114-解压缩targz包)
     - [4.1.15 Linux文件权限查看及无权限解决方案](#4115-linux文件权限查看及无权限解决方案)
+    - [4.1.16 基于linux和nginx搭建内网本地yum源](#4116-基于linux和nginx搭建内网本地yum源)
 - [五. Http](#五-http)
   - [5.1 ContentType](#51-contenttype)
 - [六. IDEA](#六-idea)
@@ -320,11 +325,11 @@ arr.splice(0, 1, 'test') // => 则对arr数组下标为0开始添加一个test�
 
 ### 1.3 Vue.js/Nuxt.js
 #### 1.3.1 vue.js生命周期
-![vue生命周期](https://github.com/EugeneHuang9638/treadpit/blob/master/vue-life-time.png)
-![myself](https://github.com/EugeneHuang9638/treadpit/blob/master/vue-life-myself.jpg)
+![vue生命周期](https://github.com/AvengerEug/treadpit/blob/master/vue-life-time.png)
+![myself](https://github.com/AvengerEug/treadpit/blob/master/vue-life-myself.jpg)
 
 #### 1.3.2 nuxt.js 生命周期
-![nuxt.js生命周期](https://github.com/EugeneHuang9638/treadpit/blob/master/nuxt-life-time.png)
+![nuxt.js生命周期](https://github.com/AvengerEug/treadpit/blob/master/nuxt-life-time.png)
 #### 1.3.3 computed(计算属性)
 ```javascript
 /* 举个栗子: 当前vue对象中有一个属性叫imageUrl, 但是因为它只是一个url,在动静分离的项目中,  
@@ -453,7 +458,7 @@ export default {
     ```最好别在bind钩子函数中操作其他dom元素, 因为它在虚拟dom树被创建时会被触发, 此时html的dom树还没有生成, 无法获取其他dom元素, 至于update钩子函数是否可以获取其他dom元素待确认```
 
 2. 解析
-![自定义指令解析](https://github.com/EugeneHuang9638/treadpit/blob/master/understand-directive.jpg)
+![自定义指令解析](https://github.com/AvengerEug/treadpit/blob/master/understand-directive.jpg)
 
 3. [自定义指令官方文档api](https://cn.vuejs.org/v2/guide/custom-directive.html)
 
@@ -500,8 +505,8 @@ watch: {
 * vue router插件必须在src目录下(第一层)
 #### 1.3.14 前端生成excel表格
 npm插件包: Track to this [plug](https://www.npmjs.com/package/export-excel-eug)
-插件包源码: Track to this [repository](https://github.com/EugeneHuang9638/export-excel-eug)
-测试包: Track to this [test repository](https://github.com/EugeneHuang9638/test-export-excel-eug)
+插件包源码: Track to this [repository](https://github.com/AvengerEug/export-excel-eug)
+测试包: Track to this [test repository](https://github.com/AvengerEug/test-export-excel-eug)
 #### 1.3.15 限制输入字符的语句在linux中会失效
 * 使用 return (/[\d]/.test(String.fromCharCode(ev.keyCode || ev.which))) || ev.which === 8 的方式限制输入字符, 在window环境上是可行的, 但是在linux系统下会失效
 #### 1.3.15 vue.js嵌套路由 子路由path的定义
@@ -1773,14 +1778,43 @@ mvn install:install-file -Dfile=c\common-auth-0.0.1-SNAPSHOT-core.jar -DgroupId=
 * maven父项目指定了version版本号后, 在依赖的子项目中,加入parent标签, 并将父模块的groupId、artifactId、version、relativePath指定后, 若子模块没有指定版本号, 则会继承父类的版本号. 若指定了, 则使用自己的, 否则使用父类的
 
 #### 2.8.5 maven代码混淆插件导致spring 创建的bean找不到类型
-```java
-  后台代码使用maven build代码混淆后, 最好是在spring bean 容器创建bean的时候指定名称, 并在注入时使用同样的名称,  
-  尤其是配置类, 在为配置类创建bean时指定bean的name(eg: @Componet(value="test")), 在使用  
-  @Resource注解时要指定name为test(eg: @Resource(name="test")),  
-  否则可能会遇到这种情况: Bean named 'XXX' is expected to be of type 'TTT' but was actually of type 'TTT'
+  ```java
+    后台代码使用maven build代码混淆后, 最好是在spring bean 容器创建bean的时候指定名称, 并在注入时使用同样的名称,  
+    尤其是配置类, 在为配置类创建bean时指定bean的name(eg: @Componet(value="test")), 在使用  
+    @Resource注解时要指定name为test(eg: @Resource(name="test")),  
+    否则可能会遇到这种情况: Bean named 'XXX' is expected to be of type 'TTT' but was actually of type 'TTT'
 
-  若使用@Autowired注入属性, 不会出现上述问题
-```
+    若使用@Autowired注入属性, 不会出现上述问题
+  ```
+
+#### 2.8.6 搭建maven私服
+  * 使用Nexus搭建私服
+    1. 背景: 某些公司使用局域网, 不能访问外网, 此时在一台能连接外网的机器中搭建私服, 开发者只需要将maven拉取仓库的地址指向它既可。
+    2. 步骤:
+      2.1. 参考此[教程](https://www.cnblogs.com/zishengY/p/7794923.html), 只需完成到`创建一个maven仓库`步骤既可, 需注意一点, Nexus开放的端口为`8081`, 第一次进入页面点击右上角的`Sign in`, 并按照页面的提示进行操作(这里会告诉我们用户名是什么, 密码存在服务器的哪个文件夹上, 并且会让你再次设置密码)
+      2.2. 配置Maven配置文件**settings.xml**, 指定`servers`地址和`mirrors`
+        ```xml
+          <servers>
+            <server>
+              <id>my_repository</id>
+              <username>admin</username>
+              <password>2.1步骤所说的再次设置的密码</password>
+            </server>
+          </servers>
+
+          <mirrors>
+            <mirror>
+              <id>tm_repository</id> <!-- 这里的id要和server的id对应上 -->
+              <mirrorOf>*</mirrorOf>
+              <name>TianMa Nexus Repository</name>
+              <url>http://nexus服务器ip:端口(默认8081,可以自己设置)/repository/创建的仓库地址/</url>
+            </mirror>
+          </mirrors>
+        ```
+       2.3. 使用idea使用该配置文件对应的maven
+    3. 注意: 该仓库只是`hostd`类型, 并没有设置代理, 所以若此仓库中无jar包, 那么就下载不下来, 若想将该仓库作为中转方,
+       当仓库中也没jar包时再从maven仓库中去下载, 则还需要添加一个代理仓库. 具体的可以搜一下相关资料或看官方文档.
+      
 
 ### 2.9 Git
 #### 2.9.1 回退版本
@@ -1809,7 +1843,7 @@ mvn install:install-file -Dfile=c\common-auth-0.0.1-SNAPSHOT-core.jar -DgroupId=
       1. 使用cherry-pick的方式将某个提交应用到当前分支和在当前分支修改代码提交代码一致.
       2. 使用merge的方式在流水线会多一个分支.
   ```
-![cherry-pick&merge区别](https://github.com/EugeneHuang9638/treadpit/blob/master/git-cherry-pick%26merge.jpg)
+![cherry-pick&merge区别](https://github.com/AvengerEug/treadpit/blob/master/git-cherry-pick%26merge.jpg)
 #### 2.9.5 合并commit
 背景: 合并commit有益于管理整个项目, 对于一个issue, 一个小模块应该是只包含一个commit, 这样能清晰的看到代码的改动
 命令: git rebase -i commitId~  或 git rebase -i HEAD~N
@@ -1851,11 +1885,36 @@ mvn install:install-file -Dfile=c\common-auth-0.0.1-SNAPSHOT-core.jar -DgroupId=
 #### 2.9.8 gialab保护分支, merge代码时指定某种角色才能merge
   * project => setting => repository => Protected Branched => 选择需要保护的分支, 设置merge和push的角色
 
+#### 2.9.9 git patch功能
+  * patch功能可以将每一个提交的改动打成一个patch文件, 也可以将领先于某个分支的改动打成patch
+  * 将领先于某个分支的改动打成patch
+    ```shell
+      git format-patch -M origin/test-ci
+    ```
+  * 将某个提交及之前的提交都打成patch
+    ```shell
+      git format-patch commitId~
+    ```
+  * 应用patch, 应用当前目录下的所有patch文件
+    ```shell
+      git am ./*.patch
+    ```
+
+#### 2.9.10 git绑定多个push源, 实现同时push
+  * 命令格式: git remote set-url --add <name> <newurl>
+  * 命令: git remote set-url --push origin git@host:AvengerEug/test.git
+    当执行git push origin branchName时, 会同时往两个仓库push代码
+
+#### 2.9.11 git改变push源
+  * 可以实现从某个仓库中拉代码, 并push到另外一个仓库
+  * git remote set-url --add origin git@host:AvengerEug/test.git
+    当执行git push origin branchName时, 会push到自己设置的origin源
+
 ### 2.10 设计模式与应用
 #### 2.10.1 简单工厂 + java多态性完成订单流水操作
-* 参考[此项目](https://github.com/EugeneHuang9638/simple-factory)
+* 参考[此项目](https://github.com/AvengerEug/simple-factory)
 #### 2.10.2 适配器模式 + 动态代理集成第三方类库, 完成日志记录操作
-* 参考[此项目](https://github.com/EugeneHuang9638/dynamic-proxy-adapter)
+* 参考[此项目](https://github.com/AvengerEug/dynamic-proxy-adapter)
 #### 2.10.3 模板方法
 * 参考[此项目](https://github.com/AvengerEug/template-method)
 #### 2.10.4 观察者模式
@@ -2102,7 +2161,7 @@ linux若分别以普通user启动jenkins.war, 那么会在/home/user/.jenkins/ �
         注: 1. 要保证build后的所有文件放在ngxin根目录下的expo文件夹下.
             1. 静态资源要以expo文件夹为基准
   ```
-  eg: 在vue脚手架3.0版本之前, 初始化项目并采用[默认build的方式](https://github.com/EugeneHuang9638/treadpit/blob/master/common-build.png)打包的index.html文件内容为
+  eg: 在vue脚手架3.0版本之前, 初始化项目并采用[默认build的方式](https://github.com/AvengerEug/treadpit/blob/master/common-build.png)打包的index.html文件内容为
   ```html
   <!DOCTYPE html>
   <html>
@@ -2122,28 +2181,28 @@ linux若分别以普通user启动jenkins.war, 那么会在/home/user/.jenkins/ �
   ```
   重点在于link标签的```script```标签, 默认为当前目录下的static文件夹下. 其实真正的规则为
   ```${assetsPublicPath}/${assetsSubDirectory}/css(js)/xxxx.css(js)```
-  而```assetsPublicPath```和```assetsSubDirectory```变量可以在```config/index.js```[文件中](https://github.com/EugeneHuang9638/treadpit/blob/master/common-build.png)配置,
+  而```assetsPublicPath```和```assetsSubDirectory```变量可以在```config/index.js```[文件中](https://github.com/AvengerEug/treadpit/blob/master/common-build.png)配置,
   所以在上述的配置中, 若请求的url为: ```127.0.0.1/expo/test``` 那么nginx内部会重定向到 ```127.0.0.1/expo/index.html``` 即进入ngxin第二种路由: 此时index.html各种静态资源在ngxin可访问的根目录下, 此时会报404.
    
   如果要访问expo/index.html 文件访问成功
   1. 首先在ngxin根目录下创建```expo```文件夹
   2. 并修改vue.js配置文件即build后的index.html文件  如下图:
-     ![修改后的配置文件](https://github.com/EugeneHuang9638/treadpit/blob/master/modified-build.png), 
-     ![修改配置后的index.html文件](https://github.com/EugeneHuang9638/treadpit/blob/master/modified-index.html.png)
+     ![修改后的配置文件](https://github.com/AvengerEug/treadpit/blob/master/modified-build.png), 
+     ![修改配置后的index.html文件](https://github.com/AvengerEug/treadpit/blob/master/modified-index.html.png)
   3. 将build后的包整个丢进expo文件夹内
   4. 重新reload ngxin, 再次访问即可
 
 #### 3.4.3 docker化basic auth(可配)
 1. 拉取准备好的镜像包
   ```
-    git clone https://github.com/EugeneHuang9638/docker-nginx-basic-auth.git
+    git clone https://github.com/AvengerEug/docker-nginx-basic-auth.git
   ```
 2. 执行命令
   ```
     TAG=auth USERNAME=eug PASSWORD=pwd123 ./build.sh docker_build
   ```
 
-各细节可跟踪至该[repository](https://github.com/EugeneHuang9638/docker-nginx-basic-auth.git)
+各细节可跟踪至该[repository](https://github.com/AvengerEug/docker-nginx-basic-auth.git)
 
 #### 3.4.4 配置Https证书, 支持https访问.
 
@@ -2247,7 +2306,50 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
 
 #### 4.1.15 Linux文件权限查看及无权限解决方案
 * 如下图
-![文件权限解读图](https://github.com/EugeneHuang9638/treadpit/blob/master/linux_file_permission.jpg)
+![文件权限解读图](https://github.com/AvengerEug/treadpit/blob/master/linux_file_permission.jpg)
+
+#### 4.1.16 基于linux和nginx搭建内网本地yum源
+  1. 背景: 内网无法上网, linux yum无法安装软件, 原因就是找不到yum源, 此时我们需要有一个公共的yum源
+  2. 前提: 要有yum源包, 可以在网上下载对应系统yum类库。比如如下是网易开源的yum包, 是一个镜像
+    eg: http://mirrors.163.com/centos/7.7.1908/isos/x86_64/CentOS-7-x86_64-Everything-1908.iso
+  3. 假设: 
+      搭建yum源的linux服务器ip地址为: 192.168.1.1 nginx开放的端口为80, 且没修改过nginx任何配置
+  4. nginx搭建yum源步骤:
+
+      4.1. 将镜像文件内容解压缩到/var/www/html目录下
+
+      4.2. 在nginx监听80端口的server节点下修改如下配置文件(将资源路径指向/var/www/html):
+        location / {
+          autoindex on;
+          root /var/www/html;
+        }
+
+      4.3. 访问http://192.168.1.1:80 若能查看到/var/www/html文件夹的目录则算安装成功
+
+  5. 使用搭建的yum源步骤:
+      5.1. 将/etc/yum.repos.d/文件下的所有.repo后缀名的文件内容的enabled设置成0
+
+      5.2. 创建文件/etc/yum.repos.d/local.repo
+
+      5.3. 填充如下内容至/etc/yum.repos.d/local.repo文件
+        ```shell
+          [local]
+          name=local
+          baseurl=http://192.168.1.1:80
+          enabled=1
+          gpgcheck=1
+          gpgkey=http://192.168.1.1:80/YYYY
+          ## gpgkey中的YYYY这一串字符串根据访问http://192.168.1.1:80的结果而定, 目的就是指定一个key.
+          ## 在网易提供的yum源(http://mirrors.163.com/centos/6/os/x86_64/)中,我们可以指定YYYY为RPM-GPG-KEY-CentOS-6
+        ```
+
+      5.4. 清理无用源
+        yum clean all
+
+      5.5. #查看是否存在local源
+        yum repolist
+
+      5.6. 若第五步存在则可以安装依赖了
 
 ## 五. Http
 ### 5.1 ContentType
