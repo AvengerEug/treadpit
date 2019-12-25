@@ -118,6 +118,7 @@
     - [2.3.27 单例bean中依赖原型bean生效的方法](#2327-单例bean中依赖原型bean生效的方法)
     - [2.3.28 spring aop](#2328-spring-aop)
     - [2.3.29 构建spring 5.0.x源码](#2329-构建spring-50x源码)
+    - [2.3.30 BeanDefinitionRegistryPostProcessor和BeanFactoryPostProcessor类型的后置处理器区别](#2330-beandefinitionregistrypostprocessor和beanfactorypostprocessor类型的后置处理器区别)
   - [2.4 Mybatis](#24-mybatis)
     - [2.4.1 parameterType为int/long时, 参数为0的处理](#241-parametertype为intlong时-参数为0的处理)
     - [2.4.2 $和#区别](#242-和区别)
@@ -213,6 +214,8 @@
     - [4.1.14 解压缩tar.gz包](#4114-解压缩targz包)
     - [4.1.15 Linux文件权限查看及无权限解决方案](#4115-linux文件权限查看及无权限解决方案)
     - [4.1.16 基于linux和nginx搭建内网本地yum源](#4116-基于linux和nginx搭建内网本地yum源)
+  - [4.2 keepalived实现主备部署](#42-keepalived实现主备部署)
+    - [4.2.1 两台centos7使用keepalived实现主备简单部署](#421-两台centos7使用keepalived实现主备简单部署)
 - [五. Http](#五-http)
   - [5.1 ContentType](#51-contenttype)
 - [六. IDEA](#六-idea)
@@ -822,7 +825,7 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
         }
      ```
 3. 再将输出流转成byte数组
-	    outStream.toByteArray()
+      outStream.toByteArray()
 4. 使用jdk自带的Base64 encode编码方法, 将byte数组转成base64
 
 * 使用字节限制每次读取的长度, 使用while循环保证能读取整个流
@@ -1477,6 +1480,16 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
   7. 若出现 `java: 找不到符号 符号: 变量InstrumentationSavingAgent 位置` 错误, 请先编译下`spring-instrument`模块, 
      最好是build完之后, 执行下gradle 根目录的编译按钮, 这样所有的子模块都会进行编译
 
+#### 2.3.30 BeanDefinitionRegistryPostProcessor和BeanFactoryPostProcessor类型的后置处理器区别
+
+  1. BeanDefinitionRegistryPostProcessor继承了BeanFactoryPostProcessor后置处理器  
+  2. BeanDefinitionRegistryPostProcessor可以获取BeanDefinitionRegistry, 可以手动添加自定义的  
+     BeanDefinition至bean工厂而BeanFactoryPostProcessor只提供了BeanFactory(ConfigListableBeanFactory),  
+     没有手动添加BeanDefinition的api
+  3. 通过上下文的addBeanFactoryPostProcessor方法添加BeanDefinitionRegistryPostProcessor类型的后置处理器是最先执行,  
+     是在执行BeanDefinitionRegistryPostProcessor(分别执行实现了PriorityOrdered、Ordered、和没实现PriorityOrdered和3  
+     Ordered接口的)类型的后置处理器之后完成的
+
 ### 2.4 Mybatis
 #### 2.4.1 parameterType为int/long时, 参数为0的处理
   * 若传入的参数为0, mybatis会将它当成```空字符串```处理, 所以会查出name为空字符串的数据
@@ -2127,7 +2140,7 @@ linux若分别以普通user启动jenkins.war, 那么会在/home/user/.jenkins/ �
   ```config
     location /api/ {
       proxy_pass http://127.0.0.1:8001/;
-      proxy_set_header Host $host;
+      proxy_set_header Host $host;   # 一定要加, 否则有可能会出现400的请求错误
       proxy_set_header X-Real-IP $remote_addr;
       proxy_set_header REMOTE-HOST $remote_addr;
       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -2351,6 +2364,95 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
 
       5.6. 若第五步存在则可以安装依赖了
 
+### 4.2 keepalived实现主备部署
+  
+#### 4.2.1 两台centos7使用keepalived实现主备简单部署
+
+  1. 搭建keepalived服务
+    * 设备A: centos7 64位操作系统
+      1. 安装keepalived服务
+         yum install keepalived
+      2. keepalived默认的配置文件在/etc/keepalived/keepalived.conf
+         更改配置文件内容为如下内容:
+
+          ```shell
+            ! Configuration File for keepalived
+
+            global_defs {
+              notification_email {
+              acassen@firewall.loc
+              failover@firewall.loc
+              sysadmin@firewall.loc
+              }
+              notification_email_from Alexandre.Cassen@firewall.loc
+              smtp_server 192.168.200.1
+              smtp_connect_timeout 30
+              router_id LVS_DEVEL
+              vrrp_skip_check_adv_addr
+              vrrp_strict
+              vrrp_garp_interval 0
+              vrrp_gna_interval 0
+            }
+
+            vrrp_instance VI_1 {
+              state MASTER   # 主节点
+              interface eth0 # 网卡, centos7 使用ip addr查看, centos一般为ens33
+              virtual_router_id 51 # 虚拟路由id, 这个要和副实例保持一致
+              priority 100
+              advert_int 1
+              authentication {
+                auth_type PASS
+                auth_pass 1111
+              }
+              virtual_ipaddress {
+                192.168.213.100 # 主实例的ip地址, 要求与当前主机的ip同一个网段, 到时候会根据此虚拟ip作为入口
+              }
+            }
+          ```
+        
+      3. 使用service keepalived start来启动服务
+      4. 使用service keepalived status来查看服务实例, 会在控制台中看到许多Sending gratuitous ARP on ens33 for
+         192.168.213.100的信息, 表示启动成功
+
+    * 设备B: centos7 64位操作系统
+      1. 与设备一的步骤一致, 需要修改的配置为: 修改vrrp_instance VI_1节点的state为BACKUP    => 标识它为一个备用节点
+    
+  
+  2. 做好验证准备工作
+  
+      * 我们需要搭建一个nginx(nginx的搭建步骤忽略)应用来验证
+    
+        在设备A中的nginx访问资源的根目录下(一般为nginx安装目录的html文件夹下): 
+          执行命令: echo "keepalived1" > test.html
+          
+        在设备B中的nginx访问资源的根目录下(一般为nginx安装目录的html文件夹下): 
+          执行命令: echo "keepalived1" > test.html
+      
+  3. 启动nginx
+    
+      * 第一步: 访问 192.168.213.100/test.html   =>   无论怎么刷新, 最后在页面上看到的内容始终为 "keepalived1"
+
+      * 第二步: 将设备A的keepalived1服务停掉: systemctl stop keepalived  再刷新页面, 可以看到内容变成了"keepalived2"
+      
+      * 第三步: 将设备A的keepalived1服务开启: systemctl start keepalived  再刷新页面, 可以看到内容又变成了"keepalived1"
+      
+      ==>  至此, keepalived的主备模式搭建成功
+    
+  4. 存在的几个缺陷: 
+
+      1.  因为它keepalived是通过虚拟ip进行交互的, 我们一般使用keepalived是想完成主备功能, 那肯定是要在主备中部署应用服务的,
+          若应用服务挂了, 比如前端vue.js项目, nginx没运行起来, 那么此时是不会将请求分发到备用服务器的, 所以我们可以写一个脚本
+          来检测: 如果应用服务挂了那么就将当前机器的keepalived的服务给杀掉,
+          所以可以在/etc/keepalived/keepalived.conf文件中添加如下代码:
+
+          ```shell
+            vrrp_script chk_http_port {
+              script "/usr/sbin/nginx.sh"  // 要执行的脚本, 脚本内容忽略, 大致内容就是nginx进程不再了, 就停止keepalived服务
+              interval 3     // 每隔3秒执行一次
+              weight 2
+            }
+          ```
+
 ## 五. Http
 ### 5.1 ContentType
 * ContentType存在的意义:
@@ -2374,7 +2476,7 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
 
 ## 七. 阿里云oss
 ### 7.1 上传图片
-#### 7.1.1 私密上传base64格式图片
+#### 7.1.1 私密上传base64格式图片 
 ```java
   OSSClient ossClient = new OSSClient(endpoint, accessId, accessKey);
   ObjectMetadata objectMetadata = new ObjectMetadata();
