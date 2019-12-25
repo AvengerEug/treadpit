@@ -214,6 +214,7 @@
     - [4.1.14 解压缩tar.gz包](#4114-解压缩targz包)
     - [4.1.15 Linux文件权限查看及无权限解决方案](#4115-linux文件权限查看及无权限解决方案)
     - [4.1.16 基于linux和nginx搭建内网本地yum源](#4116-基于linux和nginx搭建内网本地yum源)
+    - [4.1.17 在centos7中添加一个自定义服务](#4117-在centos7中添加一个自定义服务)
   - [4.2 keepalived实现主备部署](#42-keepalived实现主备部署)
     - [4.2.1 两台centos7使用keepalived实现主备简单部署](#421-两台centos7使用keepalived实现主备简单部署)
 - [五. Http](#五-http)
@@ -2363,6 +2364,34 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
         yum repolist
 
       5.6. 若第五步存在则可以安装依赖了
+
+#### 4.1.17 在centos7中添加一个自定义服务
+
+* 创建一个服务文件, eg创建nginx服务
+
+  ```shell
+    1. vim /usr/lib/systemd/system/nginx.service
+     
+    2. 修改内容如下(每一行后面的注释需要去掉):
+      [Unit]
+      Description=nginx - high performance web server  # 服务的描述
+      After=network.target remote-fs.target nss-lookup.target # 在启动network、remote-fs、nss-lookup服务启动后再启动
+
+      [Service]
+      Type=forking  # 以后台模式启动
+      ExecStart=/usr/local/nginx/sbin/nginx  # => systemctl start nginx
+      ExecReload=/usr/local/nginx/sbin/nginx -s reload  => systemctl reload nginx
+      ExecStop=/usr/local/nginx/sbin/nginx -s stop => systemctl stop nginx
+
+      [Install]
+      WantedBy=multi-user.target # 表示多用户命令行状态
+  ```
+
+* 重新加载服务systemctl daemon-reload
+
+* 设置开机自动启动`systemctl enable nginx.service` 或者
+  在`/etc/rc.d/rc.local` 文件夹中添加代码: `systemctl start nginx`
+  在将`/etc/rc.d/rc.local`设置成可执行文件: `chmod +x /etc/rc.d/rc.local`
 
 ### 4.2 keepalived实现主备部署
   
