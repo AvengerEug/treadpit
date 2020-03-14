@@ -174,6 +174,7 @@
     - [3.1.5 ADD命令的坑](#315-add命令的坑)
     - [3.1.6 Dockerfile常见命令解析](#316-dockerfile常见命令解析)
     - [3.1.7 指定docker 容器的时间参照物](#317-指定docker-容器的时间参照物)
+    - [3.1.8. docker commit命令](#318-docker-commit命令)
   - [3.2 Jenkins](#32-jenkins)
     - [3.2.1 自动化部署maven项目](#321-自动化部署maven项目)
     - [3.2.2 多job部署, job间传值](#322-多job部署-job间传值)
@@ -661,7 +662,7 @@ npm install --save file-saver@2.0.0
     | ----   |  ---- |
     | no_perms Private mode enable, only admin can publish this module | 默认镜像非官方的, 需要重新设置.命令: npm config set registry http://registry.npmjs.org　|  
     | npm publish failed put 500 unexpected status code 401 | 没有登录，需要登录: npm login 即可|  
-    | npm ERR! you do not have permission to publish “your module name”. Are you logged in as the correct user? | 包名被占用, 需要重新命名. 命名之前最好先去npm官网查看包名是否被占用 |  
+    | npm ERR! you do not have permission to publish "your module name". Are you logged in as the correct user? | 包名被占用, 需要重新命名. 命名之前最好先去npm官网查看包名是否被占用 |  
     | You cannot publish over the previously published versions | 每次发布时需要更新版本, 修改package.json文件的version字段即可.| 
     | npm publish时经常报403 | 可以确认下注册的账号是否在邮箱中验证完毕 |
 9. 发布包的一句核心话就是: 将所有的插件(插件存在install方法)export出去, 并在使用组件项目入口使用Vue.use(插件)的方式   
@@ -1193,7 +1194,7 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
        Around——通知包裹了被通知的方法，在被通知的方法调用之前和调用之后执行自定义的行为
     2. Join point(连接点): 业务方面的代码, 作为连接点
     3. Advice(引入): 引入允许我们向现有的类中添加方法或属性
-    4. Pointcut(切点): 切点定义了“何处”需要执行code, 即表达式定义。 切点会匹配通知所要织入的一个或者多个连接点
+    4. Pointcut(切点): 切点定义了"何处"需要执行code, 即表达式定义。 切点会匹配通知所要织入的一个或者多个连接点
 * Annotation
 
 #### 2.3.10 Spring bean作用域
@@ -1944,9 +1945,11 @@ mvn install:install-file -Dfile=c\common-auth-0.0.1-SNAPSHOT-core.jar -DgroupId=
 ### 3.1 Docker
 #### 3.1.1 搭建远程本地仓库
 1. 下载镜像registry： docker pull registry   => 默认在registry.hub.docker.com 中拉去镜像
+
 2. 运行镜像: docker run -itd -v /data/registry:/var/lib/registry -p 5555:5000
             --restart=always -name registry registry:latest
             
+        
             命令解析:
               -itd: 在容器中打开一个伪终端进行交互操作, 并在后台运行
               -v 把宿主机的 /data/registry目录绑定到容器的/var/lib/registry目录(该目录是registry容器中存放镜像文件的目录), 来实现数据持久化
@@ -1954,25 +1957,46 @@ mvn install:install-file -Dfile=c\common-auth-0.0.1-SNAPSHOT-core.jar -DgroupId=
               --restart=always: 重启策略, 假如容器异常退出会自动重启
               --name registry: 自定义容器名为registry
               registry:latest: 镜像名和tag名
+        
 3. 运行registry镜像成功后, 可以在另外一台机器创建镜像并push到该仓库中
+
 4. 在另外一台机器中(最好是linux), 
     创建Dockerfile文件, 内容如下:
     FROM ubuntu
-    AMD echo 'Hello docker!'
+    CMD echo 'Hello docker!'
     
-    并在与Dockerfile文件同级目录下执行 docker build -t 47.100.26.16:5555/project/vue-docker:v1 .  来build镜像, 
+    并在与Dockerfile文件同级目录下执行 `docker build -t 47.100.26.16:5555/project/vue-docker:v1 .`(命令中的`.`非常重要，它是一个上下文的路径，假设DockerFile中有一个指令为ADD test.jar test.jar，那么将在当前目录下找test.jar, 同时`.`也表示Dockerfile的路径)来build镜像, 
     或者使用docker build -t 47.100.26.16:5555/project/vue-docker:v1 Dockerfile文件的路径来build镜像
+    
 5. 执行完第4步的时候,  此时运行docker images命令 可以看到名称为47.100.26.16:5555/project/vue-docker tag为v1的镜像
-6. 此时在本地新建/etc/docker/daemon.json 文件, 若该文件中已存在, 则添加 "insecure-registries: ["远程registry1仓库的ip以及端口", "远程registry2仓库的ip以及端口", '等等, 以此类推']"
+
+6. 此时在本地新建`/etc/docker/daemon.json`文件, 若该文件中已存在, 则添加 "insecure-registries": ["远程registry1仓库的ip以及端口", "远程registry2仓库的ip以及端口", '等等, 以此类推'], eg如下:
+   
+    ```json
+    {
+      "insecure-registries": ["http://47.100.26.16:5555"]
+    }
+    ```
+    
+    
+    
     做此步骤的原因是, 若不添加 则会默认以https的请求去访问registry镜像仓库, 修改完之后需要重新加载daemon重启docker服务, 
-    命令: sudo systemctl daemon-reload && sudo systemctl restart docker
+    命令:
+    
+    ```shell
+     sudo systemctl daemon-reload && sudo systemctl restart docker
+    ```
+    
     重启之后 可以执行docker info命令查看刚刚的配置有没有生效, 若能看到配置则代表生效
+    
 7. 此时可以执行push命令, 将仓库push到自己搭建的仓库了
     命令: docker push 47.100.26.16:5555/project/vue-docker:v1
+
 8. 执行完第7步后, 可以选择在47.100.26.16机器上pull镜像或者在其他机器中pull镜像了.
     命令: docker pull 47.100.26.16:5555/project/vue-docker:v1 
     注: 若是在47.100.26.16本机上pull的话, 则可以直接把ip改成127.0.0.1或者也可以重复第六步的步骤, 将47.100.26.16:5555配置进去
         若是在没有将47.100.26.16:5555该配置配置到daemon.json文件的话, 需要额外配置一下才能拉取镜像
+
 9. 执行镜像
     命令: docker run -d -p 8000:80 镜像名:tag  或者 docker run -d -p 8000:80 镜像Id
 
@@ -2011,16 +2035,24 @@ eg: mv/(cp -r) ./test /root/test2  命令会将test整个文件夹放到 /root/t
 相当于 ```cp -r ./test/* /root/tes2```
 
 #### 3.1.6 Dockerfile常见命令解析
-|  命令  |  描述  |  示例  |   注意事项  |
-|  ---- | ------ | ------ | ---------- |
-|   FROM     |    指定基础镜像   |    FROM <镜像>:[TAG]     |     无    |
-| MAINTAINER |    镜像的维护者   | MAINTAINER 'eugenehuang@summary.com.cn' |    无     |
-|   COPY     | 将宿主机的文件复制到镜像中去 | COPY  源文件(夹) 目标文件(夹)  |     注意: 源文件路径必须与build同级,不能是其父级  |
-|   ADD      | 将宿主机的文件添加到镜像中去 |  ADD 源文件(夹) 目标文件(夹)   |     注意: 源文件路径必须与build同级,不能是其父级  |
-|  WORKDIR   | 指定工作目录, 在该命令下执行的文件操作 | WORKDIR /usr/local/src |  若在此命令后面执行了ADD或COPY命令,那么目标文件(夹)都会添加/usr/local/src前缀|
-|     ENV    |   指定环境变量, ENV <key>=<value> 或 ENV key value |  ENV JAVA_HOME /usr/local/jdk 、 ENV PATH $PATH:$JAVA_HOME/bin/ | 无 |
-|    RUN     |   后面接shell脚本的命令, 会按照shell脚本的格式解析  |   RUN echo 'Hello docker'  |  无
-|    CMD     |   后面接shell脚本命令, 与RUN不同的是, 该CMD后面接的命令是在docker中执行的 | 无 | 无
+
+* 格式
+  1. 注释行前面要加井号, 就算注释换了行也要加，和java的中"//"一致
+  2. 指令 + 参数的格式 eg: FROM centos     =>  FROM就是指令，centos就是参数
+  3. 第一个指令必须是FROM
+
+| 命令(不区分大小写，最好用大写，能更好的区别参数) | 描述                                                         | 示例                                                         | 注意事项                                                     |
+| ------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| FROM                                             | 指定基础镜像                                                 | FROM <镜像>:[TAG]                                            | 无                                                           |
+| MAINTAINER                                       | 镜像的维护者                                                 | MAINTAINER 'eugenehuang@summary.com.cn'                      | 无                                                           |
+| COPY                                             | 将宿主机的文件复制到镜像中去                                 | COPY  源文件(夹) 目标文件(夹)                                | 1. 必须是build上下文中的路径，不能是父目录中的文件<br/>2. 如果是目录，其内部文件或子目录会被递归复制，但目录自身不会被复制<br/>3. 如果指定了多个，或在中使用了通配符，则必须是一个目录，则必须以/结尾<br/>4. 如果不存在，将会被自动创建，包括其父目录路径 |
+| ADD                                              | 将宿主机的文件添加到镜像中去                                 | ADD 源文件(夹) 目标文件(夹)                                  | 1. 和COPY指令基本相同<br/>2. 支持tar文件和url路径<br/>3. 若是一个URL并且没有以/结尾，则执行的文件将被下载，但不会被解压<br/>4. 如果是一个本地系统上压缩格式的tar文件，它会展开成一个目录; 但是通过URL获取的tar文件不会自动展开<br/>5. 如果有多个，直接或间接使用了通配符指定多个资源，则必须是目录并且以/结尾 |
+| WORKDIR                                          | 指定工作目录, 在该命令下执行的文件操作                       | WORKDIR /usr/local/src                                       | 若在此命令后面执行了ADD或COPY命令,那么目标文件(夹)都会添加/usr/local/src前缀 |
+| ENV                                              | 指定环境变量, ENV <key>=<value> 或 ENV key value             | ENV JAVA_HOME /usr/local/jdk 、 ENV PATH $PATH:$JAVA_HOME/bin/ | 无                                                           |
+| RUN                                              | 后面接shell脚本的命令, 会按照shell脚本的格式解析             | RUN echo 'Hello docker'                                      | 无                                                           |
+| CMD                                              | 后面接shell脚本命令, 与RUN不同的是, 该CMD后面接的命令是在docker中执行的 | 无                                                           | 无                                                           |
+| ENTRYPOINT                                       | 镜像启动时需要执行的命令                                     | ENTRYPOINT ["java", "-jar", "/root/test.jat"]                |                                                              |
+
 #### 3.1.7 指定docker 容器的时间参照物
 * 背景: 在前后端分离的项目中, 难以避免在前端使用new Date()函数, 该函数获取的是当前电脑的时间, 
         加入当前电脑是UTC标准时间, 那么就会比我们正常的中国时间少8个小时。  
@@ -2033,6 +2065,12 @@ eg: mv/(cp -r) ./test /root/test2  命令会将test整个文件夹放到 /root/t
           ENV TZ=Asia/Shanghai
           RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo '$TZ' > /etc/timezone
 
+#### 3.1.8. docker commit命令
+
+```shell
+# 此命令一般用作于二次开发, 假设我们从docker hub中拉取了一个nginx镜像，然后我们要将我们的web前端vue项目丢进nginx里，我们先把nginx镜像运行起来，然后使用docker cp命令将vue build后的文件丢进nginx镜像中指定的可访问的目录下。再使用docker commit命令对容器进行提交，最终得到我们想要的镜像
+docker commit -m "提交信息" -a "作者" 容器id或者容器名称 新镜像名:新镜像tag
+```
 
 ### 3.2 Jenkins
 #### 3.2.1 自动化部署maven项目
