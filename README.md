@@ -387,7 +387,7 @@ computed: {
     是vue使用缓存的依据. 对于上面的例子, 当在web pc使用异步请求动态分页渲染列表的情景下, 若我们使用index作为当前  
     dom元素的key, 那么在渲染后面的页数时, 后面的index基本与上一页准备销毁的dom元素的key一致, vue为了尽可能高效  
     的渲染元素, 若发现销毁队列中的dom元素中与将要渲染的dom元素的key一致, 则会采用销毁掉列中的dom元素进行渲染.
-
+    
     所以, 在web pc使用异步请求动态分页渲染列表的情景下, 我们应该使用唯一标识作为dom元素的key, 这个唯一标识可以是  
     数据结构中的唯一值或者手动引入第三方uuid类库, 将uuid与dom元素的key绑定.
 
@@ -602,7 +602,7 @@ npm插件包: Track to this [plug](https://www.npmjs.com/package/export-excel-eu
             this.$emit("update:customerAttr", valueInner)
           }
         }
-      ```   
+      ```
       => 当在子组件中调用了notify方法时, 则会同时更新父组件的myValue的值为子组件$emit中的valueInner
 
 ### 1.4 ElementUI
@@ -641,7 +641,7 @@ npm install --save file-saver@2.0.0
       2. 新增libraryTarget="umd" -> // libraryTarget会生成不同umd的代码,可以只是commonjs标准的，也可以是指amd标准的，也可以只是通过script标签引入的
       3. 新增umdNamedDefine="true" -> // 会对 UMD 的构建过程中的 AMD 模块进行命名。否则就使用匿名的 define
       4. 修改filename为exportExcel.js
-    ```
+   ```
 6. 修改package.json文件, 指定插件入口  
    ```
       "private": false,  -> 需要发布, 因此需要将这个字段改为 false
@@ -660,10 +660,10 @@ npm install --save file-saver@2.0.0
 
     |  错误  |  原因  |
     | ----   |  ---- |
-    | no_perms Private mode enable, only admin can publish this module | 默认镜像非官方的, 需要重新设置.命令: npm config set registry http://registry.npmjs.org　|  
-    | npm publish failed put 500 unexpected status code 401 | 没有登录，需要登录: npm login 即可|  
-    | npm ERR! you do not have permission to publish "your module name". Are you logged in as the correct user? | 包名被占用, 需要重新命名. 命名之前最好先去npm官网查看包名是否被占用 |  
-    | You cannot publish over the previously published versions | 每次发布时需要更新版本, 修改package.json文件的version字段即可.| 
+    | no_perms Private mode enable, only admin can publish this module | 默认镜像非官方的, 需要重新设置.命令: npm config set registry http://registry.npmjs.org　|
+    | npm publish failed put 500 unexpected status code 401 | 没有登录，需要登录: npm login 即可|
+    | npm ERR! you do not have permission to publish "your module name". Are you logged in as the correct user? | 包名被占用, 需要重新命名. 命名之前最好先去npm官网查看包名是否被占用 |
+    | You cannot publish over the previously published versions | 每次发布时需要更新版本, 修改package.json文件的version字段即可.|
     | npm publish时经常报403 | 可以确认下注册的账号是否在邮箱中验证完毕 |
 9. 发布包的一句核心话就是: 将所有的插件(插件存在install方法)export出去, 并在使用组件项目入口使用Vue.use(插件)的方式   
    (Vue.use方法时会触发插件的install方法)生效.
@@ -874,13 +874,14 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
         控制台输出 "主线程休息3秒" 并程序一直在运行中, 给人的感觉就是无任何反应
     
        ==>  若想让线程能够执行完毕, 则只需要在ready变量添加volatile标识符进行修饰即可。
+  ```
 
 
        同时：还有一种能让人意想不到的方法, 在ReaderThread线程的run方法的死循环中, 添加System.out.print()输出语句,
             输出任何信息都行, 你会发现我不添加volatile标识符, 线程也能正常结束！！！！
-
+    
             这是为什么呢？？？
-
+    
             ==>  原因就在于System.out.print()源码中有synchronized关键字, 对于jvm而言, 有synchronized关键字的是需要
                  获取和释放对象的锁的, 这些操作对于jvm而言是需要等待时间的, 而此时jvm发现我有闲情了, 那么它就会优化
                  系统代码, 尽量保证临界区的变量能够对所有线程可见, 所以线程就正常结束了。
@@ -943,7 +944,7 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
 * 根据类加载器
     ```java
       Class c = Class.forName("包.类名");
-    ```
+  ```
 
 * 根据实例对象
     ```java
@@ -995,7 +996,7 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
               在程序中拿不到它的引用，但是它实际存在，由c++编写, 根加载器一般加载比较重要的类. 比如jdk安装目录下的jre/lib/rt.jar类库(里面存放着jdk类库的字节码文件, 这就是我们能使用jdk api的原因)
       ```
   * 具体java应用程序class加载时间调用顺序如下图所示:
-  ![JDK_Classloader](https://github.com/AvengerEug/treadpit/blob/master/jvm_classloader.jpg)
+    ![JDK_Classloader](https://github.com/AvengerEug/treadpit/blob/master/jvm_classloader.jpg)
 
 #### 2.1.18 Map put进去的默认类型
   * Map<String, Object>格式的map, 若put进去的类型时int类型, 那么get出来时虽然时object类型, 但是此时如果long类型来接收的话, 会抛出转型异常, 因为get出来的是int类型, int类型不能直接强转成long类型
@@ -1171,7 +1172,7 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
       想要具体的bean对象, 直接调用getBean方法即可.
       (注入到Spring IOC容器中的原因: spring启动时, 若有这样的类, 将会将上下文对象注入到
       实现ApplicationContextAware接口的对象的ApplicationContext属性中去)
-   ``` 
+   ```
 
 * 两种方式, 建议使用第二种。
 
@@ -1329,7 +1330,7 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
 
           }
       ```
-     
+
 
 #### 2.3.16 spring 描述bean的信息
   1. class: 类的全路径
@@ -1361,6 +1362,7 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
 
          总而言之就是, byType是根据bean name的首字母变成大写, 并添加set的方法名来注入的。
   2. byType: 
+       
        * 缺点： 当同一个类型有多个bean的时候, 注入时会抛出异常, 因为spring不知道注入哪一个
   3. 全局设置(xml配置): 
      ```xml
@@ -1425,7 +1427,7 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
 
 #### 2.3.27 循环依赖
   * spring 单例与单例之间的循环引用是ok的, 但是如果相互引用的bean中有原型对象(scope="prototype")的话, 那么会报错
-  
+
 #### 2.3.27 单例bean中依赖原型bean生效的方法
   * 背景: 当一个单例bean中依赖了原型bean时, 当每次使用单例bean的时候里面的原型bean都是同一个对象， 这样就失去了原型bean的作用。现在要期待每次使用单例bean时里面的原型bean都是新new出来的
   * 解决方法:
@@ -1518,9 +1520,11 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
 
 #### 2.4.3 ORM映射文件 type和map后缀的区别
   1. parameterType和parameterMap
+
     * parameterType指的是传递进去的参数类型, 基本数据类型以及pojo类型(map或类对象)
     * parameterMap 一般很少用, 懒得研究
   2. resultMap和resultType
+
     * resultType 返回基本数据类型
     * resultMap 返回对象类型, 同时该对象需要在xml文件中配置model与db字段的映射关系
 
@@ -1806,8 +1810,8 @@ mvn install:install-file -Dfile=c\common-auth-0.0.1-SNAPSHOT-core.jar -DgroupId=
   * 使用Nexus搭建私服
     1. 背景: 某些公司使用局域网, 不能访问外网, 此时在一台能连接外网的机器中搭建私服, 开发者只需要将maven拉取仓库的地址指向它既可。
     2. 步骤:
-      2.1. 参考此[教程](https://www.cnblogs.com/zishengY/p/7794923.html), 只需完成到`创建一个maven仓库`步骤既可, 需注意一点, Nexus开放的端口为`8081`, 第一次进入页面点击右上角的`Sign in`, 并按照页面的提示进行操作(这里会告诉我们用户名是什么, 密码存在服务器的哪个文件夹上, 并且会让你再次设置密码)
-      2.2. 配置Maven配置文件**settings.xml**, 指定`servers`地址和`mirrors`
+        2.1. 参考此[教程](https://www.cnblogs.com/zishengY/p/7794923.html), 只需完成到`创建一个maven仓库`步骤既可, 需注意一点, Nexus开放的端口为`8081`, 第一次进入页面点击右上角的`Sign in`, 并按照页面的提示进行操作(这里会告诉我们用户名是什么, 密码存在服务器的哪个文件夹上, 并且会让你再次设置密码)
+        2.2. 配置Maven配置文件**settings.xml**, 指定`servers`地址和`mirrors`
         ```xml
           <servers>
             <server>
@@ -1829,7 +1833,7 @@ mvn install:install-file -Dfile=c\common-auth-0.0.1-SNAPSHOT-core.jar -DgroupId=
        2.3. 使用idea使用该配置文件对应的maven
     3. 注意: 该仓库只是`hostd`类型, 并没有设置代理, 所以若此仓库中无jar包, 那么就下载不下来, 若想将该仓库作为中转方,
        当仓库中也没jar包时再从maven仓库中去下载, 则还需要添加一个代理仓库. 具体的可以搜一下相关资料或看官方文档.
-      
+    
 
 ### 2.9 Git
 #### 2.9.1 回退版本
@@ -2041,17 +2045,20 @@ eg: mv/(cp -r) ./test /root/test2  命令会将test整个文件夹放到 /root/t
   2. 指令 + 参数的格式 eg: FROM centos     =>  FROM就是指令，centos就是参数
   3. 第一个指令必须是FROM
 
-| 命令(不区分大小写，最好用大写，能更好的区别参数) | 描述                                                         | 示例                                                         | 注意事项                                                     |
-| ------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| FROM                                             | 指定基础镜像                                                 | FROM <镜像>:[TAG]                                            | 无                                                           |
-| MAINTAINER                                       | 镜像的维护者                                                 | MAINTAINER 'eugenehuang@summary.com.cn'                      | 无                                                           |
-| COPY                                             | 将宿主机的文件复制到镜像中去                                 | COPY  源文件(夹) 目标文件(夹)                                | 1. 必须是build上下文中的路径，不能是父目录中的文件<br/>2. 如果是目录，其内部文件或子目录会被递归复制，但目录自身不会被复制<br/>3. 如果指定了多个，或在中使用了通配符，则必须是一个目录，则必须以/结尾<br/>4. 如果不存在，将会被自动创建，包括其父目录路径 |
-| ADD                                              | 将宿主机的文件添加到镜像中去                                 | ADD 源文件(夹) 目标文件(夹)                                  | 1. 和COPY指令基本相同<br/>2. 支持tar文件和url路径<br/>3. 若是一个URL并且没有以/结尾，则执行的文件将被下载，但不会被解压<br/>4. 如果是一个本地系统上压缩格式的tar文件，它会展开成一个目录; 但是通过URL获取的tar文件不会自动展开<br/>5. 如果有多个，直接或间接使用了通配符指定多个资源，则必须是目录并且以/结尾 |
-| WORKDIR                                          | 指定工作目录, 在该命令下执行的文件操作                       | WORKDIR /usr/local/src                                       | 若在此命令后面执行了ADD或COPY命令,那么目标文件(夹)都会添加/usr/local/src前缀 |
-| ENV                                              | 指定环境变量, ENV <key>=<value> 或 ENV key value             | ENV JAVA_HOME /usr/local/jdk 、 ENV PATH $PATH:$JAVA_HOME/bin/ | 无                                                           |
-| RUN                                              | 后面接shell脚本的命令, 会按照shell脚本的格式解析             | RUN echo 'Hello docker'                                      | 无                                                           |
-| CMD                                              | 后面接shell脚本命令, 与RUN不同的是, 该CMD后面接的命令是在docker中执行的 | 无                                                           | 无                                                           |
-| ENTRYPOINT                                       | 镜像启动时需要执行的命令                                     | ENTRYPOINT ["java", "-jar", "/root/test.jat"]                |                                                              |
+| 命令(不区分大小写，最好用大写，能更好的区别参数) | 规则                                                         | 描述                                                         | 示例                                                         | 注意事项                                                     |
+| ------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| FROM                                             | FROM  镜像名                                                 | 指定基础镜像                                                 | FROM <镜像>:[TAG]                                            | 无                                                           |
+| MAINTAINER                                       | MAINTAINER    维护者信息                                     | 镜像的维护者                                                 | MAINTAINER 'eugenehuang@summary.com.cn'                      | 无                                                           |
+| COPY                                             | COPY <src>...<dest><br/>COPY ["<src>",..."<dest>"]           | 将宿主机的文件复制到镜像中去                                 | COPY  源文件(夹) 目标文件(夹)                                | 1. 必须是build上下文中的路径，不能是父目录中的文件<br/>2. 如果是目录，其内部文件或子目录会被递归复制，但目录自身不会被复制<br/>3. 如果指定了多个，或在中使用了通配符，则必须是一个目录，则必须以/结尾<br/>4. 如果不存在，将会被自动创建，包括其父目录路径 |
+| ADD                                              | ADD <src>...<dest><br/>ADD ["<src>",..."<dest>"]             | 将宿主机的文件添加到镜像中去                                 | ADD 源文件(夹) 目标文件(夹)                                  | 1. 和COPY指令基本相同<br/>2. 支持tar文件和url路径<br/>3. 若是一个URL则执行的文件将被下载，但不会被解压<br/>4. 如果是一个本地系统上压缩格式的tar文件，它会展开成一个目录; 但是通过URL获取的tar文件不会自动展开<br/>5. 如果有多个，直接或间接使用了通配符指定多个资源，则必须是目录并且以/结尾 |
+| WORKDIR                                          | WORKDIR <dirpath>                                            | 指定工作目录, 在该命令下执行的文件操作                       | WORKDIR /usr/local/src                                       | 若在此命令后面执行了ADD或COPY命令,那么目标文件(夹)都会添加/usr/local/src前缀<br/>同时我们进入容器后的工作目录也为/usr/local/src(这就是我们进入容器后发现有些容器是/目录, 有些是其他的目录) |
+| ENV                                              | ENV <key> <value><br/>ENV <key>=<value>...                   | 指定环境变量, ENV <key>=<value> 或 ENV key value             | ENV JAVA_HOME /usr/local/jdk <br/>ENV PATH $PATH:$JAVA_HOME/bin/ | 调用格式：$variableName或者${variableName}                   |
+| RUN                                              | RUN <command><br/>RUN ["<executable>","<param1>","<param2>"] | 后面接shell脚本的命令, 会按照shell脚本的格式解析.<br/>用来指定docker build过程中运行指定的命令 | RUN echo 'Hello docker'                                      | 无                                                           |
+| CMD                                              | CMD <command><br/>CMD ["<可执行的命令>","<param1>","<param2>"]<br/>CMD ["<param1>","<param2>"] | 后面接shell脚本命令, 与RUN不同的是, 该CMD后面接的命令是在镜像启动后被执行的 | 无                                                           | CMD命令可以写多个，但是只有最后一个CMD命令会生效, 所以我们在拉取其他人制作镜像的时候，若他人的镜像在启动时使用CMD命令来启动程序的，<br/>那么我们在使用docker run命令添加shell命令时，会将里面的CMD命令覆盖。eg: 使用docker run --name tomcat -it -d -p 8080:8080 tomcat:latest ls命令启动<br/>tomcat镜像时，容器不会被启动，容器启动时执行的命令为ls。<br/>CMD ["<param1>","<param2>"]  此种方式是为ENTRYPOINT指令添加参数的 |
+| ENTRYPOINT                                       | ENTRYPOINT<command><br/>ENTRYPOINT["<executable>","<param1>","<param2>"] | 容器启动时需要执行的命令                                     | ENTRYPOINT ["java", "-jar", "/root/test.jat"]                | 与CMD类似，但它不会被docker run中的命令给覆盖。 它和CMD指令，谁在最后面，谁就生效 |
+| VOLUME                                           | VOLUME <mountpoint><br/>VOLUME ["<mountpoint>"]              | 挂载卷，可以将容器中的某个目录挂在到宿主机的随机目录下，eg: mysql中的数据存储就可以使用此命令将mysql存放的持久化数据挂载到宿主机的随机目录下，<br/>保证容器重启后也能正常访问数据 |                                                              | VOLUME <mountpoint> 中的mountpoint为容器中的一个目录，而挂在到宿主机的目录是随机产生的。 可以使用docker inspact 容器id命令来查看数据，<br/>找到key为MOUNTS的信息就可以找到挂载到宿主机的详细目录了 |
+| ARG                                              | ARG userName = defaultValue                                  | 与ENV命令类似，定义环境变量的，但它支持我们在build镜像的时候使用--build-arg <key>=<value>格式来为变量填充值 | docker build -t test:latest --build-arg userName = eugene .  |                                                              |
+| ONBUILD                                          | ONBUILD                                                      | 用来在Dockerfile中定义一个触发器                             |                                                              |                                                              |
 
 #### 3.1.7 指定docker 容器的时间参照物
 * 背景: 在前后端分离的项目中, 难以避免在前端使用new Date()函数, 该函数获取的是当前电脑的时间, 
@@ -2235,7 +2242,7 @@ linux若分别以普通user启动jenkins.war, 那么会在/home/user/.jenkins/ �
   ```${assetsPublicPath}/${assetsSubDirectory}/css(js)/xxxx.css(js)```
   而```assetsPublicPath```和```assetsSubDirectory```变量可以在```config/index.js```[文件中](https://github.com/AvengerEug/treadpit/blob/master/common-build.png)配置,
   所以在上述的配置中, 若请求的url为: ```127.0.0.1/expo/test``` 那么nginx内部会重定向到 ```127.0.0.1/expo/index.html``` 即进入ngxin第二种路由: 此时index.html各种静态资源在ngxin可访问的根目录下, 此时会报404.
-   
+  
   如果要访问expo/index.html 文件访问成功
   1. 首先在ngxin根目录下创建```expo```文件夹
   2. 并修改vue.js配置文件即build后的index.html文件  如下图:
@@ -2287,16 +2294,16 @@ linux若分别以普通user启动jenkins.war, 那么会在/home/user/.jenkins/ �
     5. connectionTimeout: 连接超时时间
     6. SSLEnabled: 是否开启ssl验证在https访问时需要开启
     7. enabledLookups: 如果为true则可以通过调用request.getRemoteHost进行DNS查询来的带远程客户端的实际主机名, 否则只返回远程客户端的ip地址
-  *. Engine: tomcat中的service和engine是一对一的
+      *. Engine: tomcat中的service和engine是一对一的
     1. name: 对应的engine名
     2. defaultHost: 默认主机名, 当输入localhost:8080时  会走到name为localhost的Host节点
-  *. Host: 一个Engine有多个Host
+      *. Host: 一个Engine有多个Host
     1. name: 对应的一个主机
     2. appBase: host的根目录(用作于解析web项目的目录(自动解压war包)). 
-      表示这个主机工作的根目录, 相对于bin目录所处的目录而言.
+        表示这个主机工作的根目录, 相对于bin目录所处的目录而言.
     3. unpackWARs: 设置为true, 表示默认解压war包
     4. autoDeploy: 设置为true, 设置自动部署
-  *. Context: 上下文路径
+      *. Context: 上下文路径
     1. docBase: 相对于Host标签下的appBase而言, 
     2. path: 访问上下文路径. eg: Host的appBase为webapps, name为localhost; Context的docBase为eugene, Context的path为'/test', 那么访问localhost:8080/test 则会默认访问到
             webapps/eugene文件夹去
@@ -2355,6 +2362,7 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
   ```shell
     tar -zxvf test.tar.gz -c /root
   ``
+  ```
 
 #### 4.1.15 Linux文件权限查看及无权限解决方案
 * 如下图
@@ -2363,6 +2371,7 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
 #### 4.1.16 基于linux和nginx搭建内网本地yum源
   1. 背景: 内网无法上网, linux yum无法安装软件, 原因就是找不到yum源, 此时我们需要有一个公共的yum源
   2. 前提: 要有yum源包, 可以在网上下载对应系统yum类库。比如如下是网易开源的yum包, 是一个镜像
+
     eg: http://mirrors.163.com/centos/7.7.1908/isos/x86_64/CentOS-7-x86_64-Everything-1908.iso
   3. 假设: 
       搭建yum源的linux服务器ip地址为: 192.168.1.1 nginx开放的端口为80, 且没修改过nginx任何配置
@@ -2432,19 +2441,20 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
   在将`/etc/rc.d/rc.local`设置成可执行文件: `chmod +x /etc/rc.d/rc.local`
 
 ### 4.2 keepalived实现主备部署
-  
+
 #### 4.2.1 两台centos7使用keepalived实现主备简单部署
 
   1. 搭建keepalived服务
+
     * 设备A: centos7 64位操作系统
       1. 安装keepalived服务
          yum install keepalived
       2. keepalived默认的配置文件在/etc/keepalived/keepalived.conf
          更改配置文件内容为如下内容:
-
+    
           ```shell
             ! Configuration File for keepalived
-
+    
             global_defs {
               notification_email {
               acassen@firewall.loc
@@ -2460,7 +2470,7 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
               vrrp_garp_interval 0
               vrrp_gna_interval 0
             }
-
+    
             vrrp_instance VI_1 {
               state MASTER   # 主节点
               interface eth0 # 网卡, centos7 使用ip addr查看, centos一般为ens33
@@ -2480,23 +2490,24 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
       3. 使用service keepalived start来启动服务
       4. 使用service keepalived status来查看服务实例, 会在控制台中看到许多Sending gratuitous ARP on ens33 for
          192.168.213.100的信息, 表示启动成功
-
+    
     * 设备B: centos7 64位操作系统
       1. 与设备一的步骤一致, 需要修改的配置为: 修改vrrp_instance VI_1节点的state为BACKUP    => 标识它为一个备用节点
-    
+
   
+
   2. 做好验证准备工作
   
       * 我们需要搭建一个nginx(nginx的搭建步骤忽略)应用来验证
-    
+      
         在设备A中的nginx访问资源的根目录下(一般为nginx安装目录的html文件夹下): 
           执行命令: echo "keepalived1" > test.html
-          
+        
         在设备B中的nginx访问资源的根目录下(一般为nginx安装目录的html文件夹下): 
           执行命令: echo "keepalived1" > test.html
       
   3. 启动nginx
-    
+        
       * 第一步: 访问 192.168.213.100/test.html   =>   无论怎么刷新, 最后在页面上看到的内容始终为 "keepalived1"
 
       * 第二步: 将设备A的keepalived1服务停掉: systemctl stop keepalived  再刷新页面, 可以看到内容变成了"keepalived2"
