@@ -218,6 +218,7 @@
     - [4.1.17 在centos7中添加一个自定义服务](#4117-在centos7中添加一个自定义服务)
   - [4.2 keepalived实现主备部署](#42-keepalived实现主备部署)
     - [4.2.1 两台centos7使用keepalived实现主备简单部署](#421-两台centos7使用keepalived实现主备简单部署)
+  - [4.3 linux配置环境变量的坑](#43-linux配置环境变量的坑)
 - [五. Http](#五-http)
   - [5.1 ContentType](#51-contenttype)
 - [六. IDEA](#六-idea)
@@ -2568,6 +2569,17 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
               weight 2
             }
           ```
+
+### 4.3 linux配置环境变量的坑
+* 通常，在window系统下，有时候我们为了图方便，直接将bin目录下的某个文件配置在环境变量中。eg: jdk的安装目录在: `H:\JAVA-1.8-JDK`, 我们为了图方便，直接在系统变量中添加`H:\JAVA-1.8-JDK\bin`来达到环境变量的配置，在是在linux下，我们不能直接`export java的bin目录`, 会报如下错误
+  ```shell
+    -bash: export: `/root/jdk1.8/bin': not a valid identifier
+  ```
+  正确的格式应该为:
+  ```shell
+    export PATH=$PATH:/root/jdk1.8/bin
+  ```
+  要将`PATH`export出去
 
 ## 五. Http
 ### 5.1 ContentType
