@@ -221,6 +221,7 @@
   - [4.2 keepalived实现主备部署](#42-keepalived实现主备部署)
     - [4.2.1 两台centos7使用keepalived实现主备简单部署](#421-两台centos7使用keepalived实现主备简单部署)
   - [4.3 linux配置环境变量的坑](#43-linux配置环境变量的坑)
+  - [4.4. 使用软连接完美释放环境变量](#44-使用软连接完美释放环境变量)
 - [五. Http](#五-http)
   - [5.1 ContentType](#51-contenttype)
 - [六. IDEA](#六-idea)
@@ -2635,6 +2636,19 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
     export PATH=$PATH:/root/jdk1.8/bin
   ```
   要将`PATH`export出去
+
+### 4.4. 使用软连接完美释放环境变量
+* 由于在linux执行命令时，会从如下几个目录去查找: 
+  **/usr/local/bin/**, **/usr/bin**, **/root/bin**, **/bin**等等等等(其实这几个目录就是配在环境变量的)
+  其中，我们可以把命令软连接到上述的目录下，比如: **/usr/local/bin**
+
+  假设我们把jdk的安装包解压到了/usr/local/jdk下
+  那么我们可以不配置环境变量，直接使用如下命令
+  `ln -s /usr/local/jdk/bin/java /usr/local/bin/java`
+  即可完成java命令的环境变量配置，当然，这样的做法比较单一，
+  比如我一个目录下有很多命令(eg: zookeeper的bin目录，有zkServer.sh也有zkCli.sh).
+  这个时候就要诶个的去软连接，此时
+  比较好的做法就是配置环境变量了。
 
 ## 五. Http
 ### 5.1 ContentType
