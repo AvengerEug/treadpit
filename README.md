@@ -695,8 +695,8 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
 | 类别     | 底层实现 | 是否线程安全 | 是否可重复 | 是否有序 | 其他|
 | ----| ------ | ------ | ------ | ------ | ------ |
 | ArrayList |   线性表(数组)  |  `否`  |   是   |    否   |   默认容量为10，每次扩容1.5倍 + 1，查询快，新增、删除慢|
-| LinkedList |   链表  |  `否`   |  是  |   无  |  对于新增、删除快，查询慢|
-| Vector |   线性表   |  `是`   |   是   |   是   |  同ArrayList|
+| LinkedList |   链表  |  `否`   |  是  |   无  | 对于新增、删除快，查询慢，一个链表，内部维护了一个叫Node的内部类，代表的就是链表上的每一个元素 |
+| Vector |   线性表   |  `是`   |   是   |   是   | 同ArrayList，线程安全是因为内部所有操作数组的方法都加了synchronized关键字 |
 
 #### 2.1.13 HashMap, HashTable, ConcurrentHashMap
 
@@ -705,6 +705,176 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
 | HashMap |   ---   |  `否`   |   否   |  可允许key或值为null，实现的是Map接口|
 | HashTable |   ---   |  `是`   |   是   |  不允许key或值为null, 实现的是Directory接口 |
 | ConcurrentHashMap | -- | `是` | 是 | 与HashMap一致 |
+
+* HashMap源码
+
+  * 属性描述
+
+    ```java
+    // 默认容量大小
+    static final int DEFAULT_INITIAL_CAPACITY = 1 << 4;
+    
+    // 最大的容量大小, 即2的30次方
+    static final int MAXIMUM_CAPACITY = 1 << 30;
+    
+    // 默认的负载因子，扩容的参数
+    static final float DEFAULT_LOAD_FACTOR = 0.75f;
+    
+    // 转为红黑树的阈值, 当map中的size达到了8，此时变为红黑树
+    static final int TREEIFY_THRESHOLD = 8;
+    
+    // 红黑树转链表的阈值，当map的size慢慢减少到了6，此时就会转化成链表
+    static final int UNTREEIFY_THRESHOLD = 6;
+    
+    // 数组长度至少达到64才会进行转化红黑树，否则进行的是扩容操作
+    // 所以如果针对同一个index对应的长度为8的链表，连续插入两个数据，数组长度就会扩容到64，
+    // 再插入一次数据就会变化成红黑树
+    static final int MIN_TREEIFY_CAPACITY = 64;
+    ```
+
+  * put方法
+
+    ```java
+    final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
+                   boolean evict) {
+        // 定义了三个变量
+        // tab为hashMap中的数组
+        // p为数组中的链表
+        // n为数组的长度
+        // i为当前key hash过的index
+        Node<K,V>[] tab; Node<K,V> p; int n, i;
+        
+        // 若当前HashMap的实例变量table为null 或者长度为0
+        // 则进行实例变量table初始化
+        if ((tab = table) == null || (n = tab.length) == 0)
+            // resize() 为jdk1.8的扩容方法
+            // 此方法包含了初始化table和扩容操作
+            // resize默认容量为16
+            // 扩容时，负载因子是0.75
+            // 所以当size 的长度 > 12 即插入第13个元素时，会进行扩容
+            n = (tab = resize()).length;
+        
+        // i = (n - 1) & hash  ---> 获取hash的下表
+        // p为拿到key对应的节点(链表)
+        // 如果等于null，则表示数组中的i的位置上没有元素，直接new一个新的
+        // 节点放进去即可
+        if ((p = tab[i = (n - 1) & hash]) == null)
+            tab[i] = newNode(hash, key, value, null);
+        else {
+            // 如果key 对应的index中有数据, 
+            // 则有两种可能: 
+    	    // 链表转红黑树，或者直接塞在链表后面
+            
+            // e为要插入的新节点
+            // k为新节点key
+            Node<K,V> e; K k;
+            
+            // key相同的情况下，替换数组中的链表节点
+            if (p.hash == hash &&
+                ((k = p.key) == key || (key != null && key.equals(k))))
+                e = p;
+            
+            // 如果当前节点已经是树节点了，那么直接把它put到树中即可
+            else if (p instanceof TreeNode)
+                e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value);
+            
+            // 否则是链表的情况，准备把新节点塞到链表中
+            else {
+                // 无限循环(遍历链表)，使用binCount属性来统计链表中的个数
+                for (int binCount = 0; ; ++binCount) {
+                    // 如果p节点是最后一个节点
+                    if ((e = p.next) == null) {
+                        // 新建一个节点放在p的后面  <============> 这里是尾插法
+                        p.next = newNode(hash, key, value, null);
+                        // 如果此时链表的长度为8，则变成红黑树，要put第九个时才会转
+                        // 因为在put第8个的时候，size还没有加1
+                        if (binCount >= TREEIFY_THRESHOLD - 1) // -1 for 1st
+                            treeifyBin(tab, hash);
+                        break;
+                    }
+                    
+                    // 经过了上述if ((e = p.next) == null)的代码，
+                    // e存储的对象是p的下一个节点
+                    // 如果p的下一个节点与新增的节点是一模一样的，则直接跳出循环
+                    if (e.hash == hash &&
+                        ((k = e.key) == key || (key != null && key.equals(k))))
+                        break;
+                    
+                    // 此时将e赋值给p，而e是p的next节点
+                    // 所以现在要开始处理p的下一个节点了
+                    p = e;
+                }
+            }
+            
+            // 若e != null, 一定是走了
+    	    // if (e.hash == hash &&
+            //           ((k = e.key) == key || (key != null && key.equals(k))))
+            //           break;
+            // 的逻辑
+            if (e != null) { // existing mapping for key
+                V oldValue = e.value;
+                if (!onlyIfAbsent || oldValue == null)
+                    e.value = value;
+                afterNodeAccess(e);
+                return oldValue;
+            }
+        }
+        ++modCount;
+        
+        // 对map长度 + 1, 并且跟阈值作比较，如果比阈值大，则进行扩容
+        if (++size > threshold)
+            resize();
+        afterNodeInsertion(evict);
+        return null;
+    }
+    ```
+
+  * 为什么hashMap初始容量为16？
+
+    ```txt
+    因为初始容量会参与index的运算。在hashMap中，index = (n - 1) & hash; 其中的n就是为数组容量，hash是指key的hashCode方法 返回值h与h跟16做亦或操作后的值。因为16的二进制底四位全为0， 而16 - 1 = 15的底四位就全为1了。在hashMap的设计中，为了保证hash的散列性，如果以16来和hash做&运算的话，基本上index取决于为1的那一个位置。若变成15后，低四位全为1，所以index将会取决与key的hash值，这增加了key的散列性，即为了保证key能在数组中均匀分布
+    ```
+
+  * jdk 1.7和jdk 1.8的区别
+
+    ```txt
+    在jdk1.7时，hashMap的put操作采用的头插法，扩容条件除了size要大于默认容量16 * 负载因子0.75 = 12以外还需要数组当前index位置上不为空。而jdk1.8之后，扩容条件只有size大于12即可，并且put元素的时候采用的尾插法。
+    这解决了jdk1.7头插法在高并发的情况下会产生出环的情况。并且在jdk1.8时，对index的处理结果也变简单了，少了很多位运算，散列性相对于变低了，但是这影响不大，因为散列性变低了，可能发生的情况就是链表长度会比较长，但是在jdk 1.8中，当size数量超过8个且数组长度大于64时才会把链表转成红黑树。因为红黑树的查询、插入效率比链表的效率高，所以长度边长了也没关系
+    ```
+
+    1.7在高并发下会变成环的示意图:
+
+    ![1.7变成环](https://github.com/AvengerEug/javase/blob/develop/src/main/java/collections/myhashmap/hashMap1.7%E9%AB%98%E5%B9%B6%E5%8F%91%E5%8F%98%E6%88%90%E7%8E%AF.png)
+
+  * 有什么线程安全的类可以代替吗？
+
+    ```java
+    可以使用Collections.synchronizedMaps()将map进行转化或者使用hashTable进行替换。它们两者差别都不是特别大，都是将一些操作元素的方法加了synchronized关键字，但HashTable中put的value不能为null
+    ```
+
+  * 链表什么时候会被转化成红黑树？
+
+    ```markdown
+    当`map的size大于数组长度 * 负载因子` 且 `数组要被扩容两次达到64的长度后`，再往一个长度大于8的链表插入数据时，此时会被转化成红黑树
+    ```
+
+  * 默认初始化大小是多少？为啥是这么多？为啥大小都是2的幂？
+
+    ```txt
+    默认大小是16，至于为什么是16，这个我不太清楚，我觉得还可以是32,64,128. 为什么呢？因为hashMap为了保证它的每个key的散列性，会执行这么一个算法: (n - 1) & hash. 其中n是数组容量大小16，hash是key的hashcode并跟16做了异或运算。因为16 的二进制为 0001 0000(这里只列出后8位)，而16 - 1 = 15的二进制为0000 1111。两者相比，前者16做完运算后，只取决于hash的一个位置，而后者15取决于hash的后四位，能保证index在0-15的范围内。所以是为了保证key分布在数组中的散列性，即均匀分布。
+    ```
+
+  * HashMap的主要参数都有哪些？
+
+    ```txt
+    负载因子、默认容量大小、链表转红黑树的两个阈值(16 * 0.75 和 64)、红黑树转链表的阈值
+    ```
+
+  * HashMap是怎么处理hash碰撞的？
+
+    ```txt
+    通过使用key的hashcode值以及跟默认容量长度16做右移和异或操作
+    ```
 
 #### 2.1.14 创建Class对象的几种方法
 
@@ -777,12 +947,76 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
 
 #### 2.1.21 ArrayList源码及其总结
 
-* ArrayList长度能自定义，但是实际长度不能自定义，就算使用构造方法添加了默认长度，但是实际上他的长度还是0，它的实际长度是要通过add方法一个一个去添加时才会变，因为arrayList的size方法就是获取它内部的一个叫`size`的属性，而这个属性只有通过add方法时才会对它进行递增。
+* ArrayList长度能自定义，但是实际长度不能自定义，就算使用构造方法添加了默认长度，但是实际上他的长度还是0(因为传入的长度是指给了arrayList一个缓冲区的数组长度)，它的实际长度是要通过add方法一个一个去添加时才会变，因为arrayList的size方法就是获取它内部的一个叫`size`的属性，而这个属性只有通过add方法时才会对它进行递增。
+
 * add("element")方法默认扩容：当前数组实际长度 + 当前数组实际长度/2，即扩容当前长度的1.5倍，且扩容的过程为创建一个比原来数组长度 * 1.5倍的数组，然后把原数组完全copy过去，最终再将新加入的元素放在最后，完成扩容。
+
 * add(index, "element")方法的扩容：首先会校验index是否越界，其次再根据将`index即后面所有的元素copy成一个新数组，然后再将它们放在index + 1的位置上，最后再将新增的元素放入index处`，
+
 * remove(index)方法的删除：其实在arrayList中，这个不叫删除，它只是将`index + 1及其后面所有的元素copy成一个新数组，然后再把这个数组放在index位置上`，它只是一个覆盖的过程
+
 * arrayList线程不安全，要想线程安全，可以使用Vector或者使用Collections.synchronizedList api，把一个list包装成一个线程安全的list，其实就是给所有方法加了synchronized关键字，与vector一致
+
 * Arraylist是一个数组，在插入和删除数据时都会造成整个数组结构的变化，所以一般不建议使用arrayList作为队列
+
+* 源码注意事项：
+
+  ```txt
+  A. DEFAULT_CAPACITY  =>  ArrayList的默认大小，默认为10
+  B. EMPTY_ELEMENTDATA  ==> 内部维护的一个空数组，当使用带容量的构造方法初始化arrayList时，会将此对象赋值给elementData  
+  C. DEFAULTCAPACITY_EMPTY_ELEMENTDATA ==> 内部维护的一个空数组，
+  	----> 其实这一点我觉得做的蛮好，jdk做到了变量单一原则，每个变量有自己的意义
+  
+  D. elementData  ===>  实际存放数据的数组
+  E. size ==>  数组的真实大小   
+  
+  -----------------------------------------
+  1. 默认构造方法
+  直接将DEFAULTCAPACITY_EMPTY_ELEMENTDATA空数据 赋值为elementData，完成初始化
+  
+  2. 带容量的构造方法
+  若大于0  ==>  根据容量大小直接new一个新的   
+  若==0   ===>  直接将EMPTY_ELEMENTDATA赋值给elementData
+  若小于0 ===> 抛异常
+  
+  所有的构造方法中，对于arrayList的所有默认大小都没有变化, 一直都是10
+  
+  3. add操作
+  因为要add，容器长度肯定会变成size + 1
+  所以需要用size + 1 去判断是否需要扩容
+  
+  扩容的逻辑(ensureCapacityInternal):
+    --> 如果elementData是DEFAULTCAPACITY_EMPTY_ELEMENTDATA的话, 即使用的是默认构造方法构造ArrayList的话
+        会从DEFAULT_CAPACITY和传入的 size + 1 取出谁最大，取出最大的值后再调用ensureExplicitCapacity(最大       值)方法
+        可以确定的是，如果通过指定容量的方式来初始化arrayList的话，基本上不会走这一个逻辑，因为此时的
+        elementData是新new出来的而不是DEFAULTCAPACITY_EMPTY_ELEMENTDATA
+    
+    --> 明确扩容大小(ensureExplicitCapacity)
+        modCount++  ==>  用来标识此arrayList数据被修改多少次
+        有一个扩容的条件, 需要传入的值 与容器实际元素的大小的差 > 0
+  	 (minCapacity - elementData.length > 0), minCapacity为上述说的DEFAULT_CAPACITY和size + 1的最大
+  	 值随后调用grow扩容
+  	 扩容机制就是，扩大elementData数组长度的1.5倍(1.8采用了右移一位的方式，性能比除以2高)
+  	 然后创建一个长度为elementData数组长度的1.5倍的数组，最后将原数组加进来，
+       完成扩容后，最后再将新元素放到elementData.length + 1的位置上
+  	  
+  所以这里可以看到，arrayList的size 都是通过add操作来添加的，它的大小并不是与elementData.length对等的，
+  比如说我新new一个长度自定义的，此时的elementData.length就是自定义的长度，但是size还是0
+  
+  4. add(index, element)操作
+     rangeCheckForAdd  --->  校验index的可靠性
+     ensureCapacityInternal  --->  扩容机制，新增一次扩容的变量
+     这里的扩容机制也是通过数组复制的方式，
+     如果长度够，不需要扩容，则把index 及其后面的数据都copy一份，然后把它放在index + 1的位置上，
+       最后再将新增的元素放在index位置上
+     如果长度不够，则需要扩容，扩容后，同上，也是将index及其后面的数据copy一份，并放在index + 1的位置上，
+       最后再将新增的元素放在index位置上
+  	 
+  5. remove操作
+     rangeCheck  -->  校验index的可靠性， 是将index与size进行比较，而size的大小是通过add方法一步步增加的
+     删除的操作也比较有意思，它并不是真正的删除，而是将index + 1及其后面的数据copy了一份，
+     最后将这份数据放置index的位置上
+  ```
 
 ### 2.2 Spring Cloud
 #### 2.2.1 服务注册中心Eureka
@@ -2594,6 +2828,10 @@ ps: 可以写一个死循环来测试上述方案。
 * File -> setting -> keymap -> 搜索basic -> 将Alt + 空格 的快捷键改成Alt + /
 #### 6.1.8 修改idea关闭当前类tab快捷键为 ctrl + w
 * File -> setting -> keymap -> 搜索close -> 找到Window下面的Editor Tabs下面的Close， 改成Ctrl + w
+
+### 6.1.9 IDEA调试hashMap源码显示不了hashMap内部一些属性
+
+* 参考链接[https://blog.csdn.net/qq_31772441/article/details/96469953](https://blog.csdn.net/qq_31772441/article/details/96469953)
 
 ## 七. 阿里云oss
 ### 7.1 上传图片
