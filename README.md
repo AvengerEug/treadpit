@@ -6,7 +6,7 @@
 ### 1.1 Css/Scss
 #### 1.1.1 层叠性
 ```
-  浏览器的渲染机制是从上至下, 当有多个样式同时应用到同一个dom元素时, 默认使用最后一个样式。(不考虑手动设置权重的case)
+浏览器的渲染机制是从上至下, 当有多个样式同时应用到同一个dom元素时, 默认使用最后一个样式。(不考虑手动设置权重的case)
 ```
 #### 1.1.2 继承性
 ```
@@ -17,11 +17,12 @@
     h1标签不可以继承字体大小, 继承过来会做一些 `计算`.
 ```
 #### 1.1.3 优先级
-| 类别     | !important | 行内样式 | id选择器 | 类选择器 | 标签选择器 | 默认样式
+| 类别   | !important | 行内样式 | id选择器 | 类选择器 | 标签选择器 | 默认样式
 | ----| ------ | ------ | ------ | ------ | ------ | ------ |
-| 对应权重 |   1000以上  |  1000   |   100   |    10   |     1      | 0
+| 对应权重 |   1000以上  |  1000   |   100   |    10   |     1      | 0 |
+
 ```
-  对于所有的选择器, 都会统计权重, 哪个权重大, 使用哪个(若权重一样, 则应用最后一个)
+对于所有的选择器, 都会统计权重, 哪个权重大, 使用哪个(若权重一样, 则应用最后一个)
 ```
 #### 1.1.4 backgroud设置背景图片样式顺序决定是否生效
 1. backgroud: url('xxxx'); 的样式必须写在最前面。
@@ -101,11 +102,11 @@ arr.splice(0, 1, 'test') // => 则对arr数组下标为0开始添加一个test�
 
 ### 1.3 Vue.js/Nuxt.js
 #### 1.3.1 vue.js生命周期
-![vue生命周期](https://github.com/AvengerEug/treadpit/blob/master/vue-life-time.png)
-![myself](https://github.com/AvengerEug/treadpit/blob/master/vue-life-myself.jpg)
+![vue生命周期](./vue-life-time.png)
+![myself](./vue-life-myself.jpg)
 
 #### 1.3.2 nuxt.js 生命周期
-![nuxt.js生命周期](https://github.com/AvengerEug/treadpit/blob/master/nuxt-life-time.png)
+![nuxt.js生命周期](./nuxt-life-time.png)
 #### 1.3.3 computed(计算属性)
 ```javascript
 /* 举个栗子: 当前vue对象中有一个属性叫imageUrl, 但是因为它只是一个url,在动静分离的项目中,  
@@ -205,18 +206,18 @@ export default {
 * 场景: 在当前的vue实例中有一个名为currentUser的对象, 该对象只有一个id的属性, 现需要
   给该对象添加一个name和age属性, 以至于在页面中能够支持响应式渲染。
 ```js
-   方法1: 在初始化vue对象的时候给currentUser对象添加name和age属性 value均为空字符串
-   方法2: 使用Vue.set(this.currentUser, 'name', value) or this.$set(this.currentUser, 'name', value)
-   方法3: this.currentUser = Object.assign({},  this.currentUser, {
-            name: 'Eugene',
-            age: 23
-          })
-          //一定要将Object.assign创建一个新对象并重新赋值给this.currentUser对象, 而不要这样使用
-          Object.assign(this.currentUser. {
-            name: 'Eugene',
-            age: 23
-          })
-          // 因为Object.assign是将结果作为返回值返回
+方法1: 在初始化vue对象的时候给currentUser对象添加name和age属性 value均为空字符串
+方法2: 使用Vue.set(this.currentUser, 'name', value) or this.$set(this.currentUser, 'name', value)
+方法3: this.currentUser = Object.assign({},  this.currentUser, {
+    name: 'Eugene',
+    age: 23
+})
+//一定要将Object.assign创建一个新对象并重新赋值给this.currentUser对象, 而不要这样使用
+Object.assign(this.currentUser. {
+              name: 'Eugene',
+              age: 23
+              })
+// 因为Object.assign是将结果作为返回值返回
 ```
 
 #### 1.3.7 自定义指令
@@ -245,10 +246,10 @@ export default {
 #### 1.3.9 Nuxt v-for嵌套v-if的坑
 如下case:(若v-if 里面包含的标签中要使用的判断是否渲染dom元素的变量, eg如下的{{message.type}}要用到v-if的message, )
 ```js
-    <div v-if="message">{{message.type}}</message>
-    一定要将前面的v-if改成v-show, 否则页面会在挂载(mounted钩子函数不会被执行)的时候失败。
-    具体错误如下: [nuxt] Error while initializing app DOMException: Failed to execute 'appendChild' on 'Node': This node type does not support this method.
-    (前提: message 在实例化vue 对象时 要为false)
+<div v-if="message">{{message.type}}</message>
+一定要将前面的v-if改成v-show, 否则页面会在挂载(mounted钩子函数不会被执行)的时候失败。
+具体错误如下: [nuxt] Error while initializing app DOMException: Failed to execute 'appendChild' on 'Node': This node type does not support this method.
+(前提: message 在实例化vue 对象时 要为false)
 ```
 #### 1.3.10 .native添加原生事件
 * 使用组件ui库, 若第三方ui库提供的组件中存在@click事件, 则直接使用@click会生效, 否者请加上.native    
@@ -657,7 +658,7 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
   ```
 
 ##### 2.1.9.2 JDK线程状态及转换图
-![JDK线程状态及转换图](https://github.com/AvengerEug/treadpit/blob/master/jdk_thread_status.jpg)
+![JDK线程状态及转换图](./jdk_thread_status.jpg)
 
 #### 2.1.10 抽象类和接口的区别
 * 抽象类
@@ -1197,44 +1198,44 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
 
 #### 2.1.15 ArrayList.asList()的坑
 ```java
-  String strArr[] = new String[] {"a", "b"};
-  List list = Arrays.asList(strArr);
+String strArr[] = new String[] {"a", "b"};
+List list = Arrays.asList(strArr);
 
-  // => 此时执行list.add()方法会抛出UnsupportedOperationException异常, 因为返回的list类型为Arrays的内部类, 里面并没有重写add方法, 所以调用了父类的AbstractList add方法, 在AbstractList类中的add方法中抛出了UnsupportedOperationException异常并且执行strArr[0] = "h"  list中的第一个元素也会改变
+// => 此时执行list.add()方法会抛出UnsupportedOperationException异常, 因为返回的list类型为Arrays的内部类, 里面并没有重写add方法, 所以调用了父类的AbstractList add方法, 在AbstractList类中的add方法中抛出了UnsupportedOperationException异常并且执行strArr[0] = "h"  list中的第一个元素也会改变
 ```
 
 #### 2.1.16 不要在 foreach 循环里进行元素的 remove/add 操作
 ```
-  由于单线程的fail-fast机制, 当多个线程对fail-fast集合进行修改时, 可能会抛出ConcurrentModificationException  
-  所以最好是通过迭代器 Iterator来操作, 利用迭代器的remove方法来进行删除
+由于单线程的fail-fast机制, 当多个线程对fail-fast集合进行修改时, 可能会抛出ConcurrentModificationException  
+所以最好是通过迭代器 Iterator来操作, 利用迭代器的remove方法来进行删除
 ```
 
 #### 2.1.17 JVM 类加载器
   * 背景:
       ```
-        我们都知道java是跨平台的，但所谓的跨平台是指编译后的class字节码文件通过jvm能运行在不同的平台上，而jvm在   
-        对应平台jdk的安装过程中就已经安装完成。那么运行一个普通的java程序(eg: 控制台输出Hello World)jvm在底层   
-        做了哪些事呢？
+      我们都知道java是跨平台的，但所谓的跨平台是指编译后的class字节码文件通过jvm能运行在不同的平台上，而jvm在   
+      对应平台jdk的安装过程中就已经安装完成。那么运行一个普通的java程序(eg: 控制台输出Hello World)jvm在底层   
+      做了哪些事呢？
       ```
   * javac命令:  
       ```
-        javac命令的主要作用就是将.java后缀名文件编译成.class字节码文件, 在大多数IDE中, 这一步骤在run程序的时候   
-        都帮我们完成了。
+      javac命令的主要作用就是将.java后缀名文件编译成.class字节码文件, 在大多数IDE中, 这一步骤在run程序的时候   
+      都帮我们完成了。
       ```
   * java命令:  
       ```
-        java命令就是将javac命令编译后的.class字节码文件运行起来。在此时, JVM将起着非常重要的作用。   
-        首先, 一个普通无继承的类拥有四个类加载器:   
-          1. 自身的classLoader:  
-          2. AppClassLoader:  
-              主要加载应用程序的类, 如自己编写的类、第三方jar包的类库。eg: maven中引入中的所有第三方jar包
-          3. ExtClassLoader:  
-              能拿到它的引用，一般加载jdk安装目录下的jre/lib/ext文件下的所有jar包。
-          4. null(根类加载器):  
-              在程序中拿不到它的引用，但是它实际存在，由c++编写, 根加载器一般加载比较重要的类. 比如jdk安装目录下的jre/lib/rt.jar类库(里面存放着jdk类库的字节码文件, 这就是我们能使用jdk api的原因)
+      java命令就是将javac命令编译后的.class字节码文件运行起来。在此时, JVM将起着非常重要的作用。   
+      首先, 一个普通无继承的类拥有四个类加载器:   
+      1. 自身的classLoader:  
+      2. AppClassLoader:  
+      主要加载应用程序的类, 如自己编写的类、第三方jar包的类库。eg: maven中引入中的所有第三方jar包
+      3. ExtClassLoader:  
+      能拿到它的引用，一般加载jdk安装目录下的jre/lib/ext文件下的所有jar包。
+      4. null(根类加载器):  
+      在程序中拿不到它的引用，但是它实际存在，由c++编写, 根加载器一般加载比较重要的类. 比如jdk安装目录下的jre/lib/rt.jar类库(里面存放着jdk类库的字节码文件, 这就是我们能使用jdk api的原因)
       ```
   * 具体java应用程序class加载时间调用顺序如下图所示:
-    ![JDK_Classloader](https://github.com/AvengerEug/treadpit/blob/master/jvm_classloader.jpg)
+    ![JDK_Classloader](./jvm_classloader.jpg)
 
 #### 2.1.18 Map put进去的默认类型
   * Map<String, Object>格式的map, 若put进去的类型时int类型, 那么get出来时虽然时object类型, 但是此时如果long类型来接收的话, 会抛出转型异常, 因为get出来的是int类型, int类型不能直接强转成long类型
@@ -1390,30 +1391,30 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
     ```
   2. 在api网关处添加swagger配置信息(添加Bean到Spring IOC容器中去)
     ```java
-      @Configuration
-      public class SwaggerResourcesConfiguration {
+  @Configuration
+  public class SwaggerResourcesConfiguration {
 
-          @Primary
-          @Bean
-          public SwaggerResourcesProvider swaggerResourcesProvider() {
-              return new SwaggerResourcesProvider() {
-                  @Override
-                  public List<SwaggerResource> get() {
-                      List resources = new ArrayList();
-                      resources.add(createResource("service-user", "service-user", "1.0"));
-                      return resources;
-                  }
-              };
-          }
-
-          private SwaggerResource createResource(String name, String registeredEurekaServiceName, String version) {
-              SwaggerResource swaggerResource = new SwaggerResource();
-              swaggerResource.setName(name);
-              swaggerResource.setLocation("/" + registeredEurekaServiceName + "/v1/docs");
-              swaggerResource.setSwaggerVersion(version);
-              return swaggerResource;
-          }
+      @Primary
+      @Bean
+      public SwaggerResourcesProvider swaggerResourcesProvider() {
+          return new SwaggerResourcesProvider() {
+              @Override
+              public List<SwaggerResource> get() {
+                  List resources = new ArrayList();
+                  resources.add(createResource("service-user", "service-user", "1.0"));
+                  return resources;
+              }
+          };
       }
+
+      private SwaggerResource createResource(String name, String registeredEurekaServiceName, String version) {
+          SwaggerResource swaggerResource = new SwaggerResource();
+          swaggerResource.setName(name);
+          swaggerResource.setLocation("/" + registeredEurekaServiceName + "/v1/docs");
+          swaggerResource.setSwaggerVersion(version);
+          return swaggerResource;
+      }
+  }
     ```
   3. 在ApiGateWay入口文件处添加@EnableSwagger2注解开启swagger功能
 
@@ -1469,20 +1470,20 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
 #### 2.3.8 Spring获取ioc容器上下文的两种方式
 1. 通过WebApplicationContextUtil.getApplicationContext(ServletContext)的方式
    ```java
-      WebApplicationContextUtil.getApplicationContext(request.getSession().getServletContext())
-      // 通常需要获取tomcat容器中的HttpServletRequest对象来获取上下文,  
-      // 虽然 HttpServletRequest 对象可以直接在方法里将该对象注入进去, 但是还是引入了比较重的对象, 不推荐该方式
+   WebApplicationContextUtil.getApplicationContext(request.getSession().getServletContext())
+       // 通常需要获取tomcat容器中的HttpServletRequest对象来获取上下文,  
+       // 虽然 HttpServletRequest 对象可以直接在方法里将该对象注入进去, 但是还是引入了比较重的对象, 不推荐该方式
    ```
 2. 通过ApplicationContextAware接口
    ```
-      1. 创建类并实现这个接口, 添加静态的ApplicationContext类型的对象。
-      2. 重写里面的方法setApplicationContext方法, 初始化ApplicationContext类型的对象
-      3. 将当前类注入到Spring IOC容器中. 
-      
-      这样, Ioc容器对象就是上述的 静态的ApplicationContext类型的对象. 
-      想要具体的bean对象, 直接调用getBean方法即可.
-      (注入到Spring IOC容器中的原因: spring启动时, 若有这样的类, 将会将上下文对象注入到
-      实现ApplicationContextAware接口的对象的ApplicationContext属性中去)
+   1. 创建类并实现这个接口, 添加静态的ApplicationContext类型的对象。
+   2. 重写里面的方法setApplicationContext方法, 初始化ApplicationContext类型的对象
+   3. 将当前类注入到Spring IOC容器中. 
+   
+   这样, Ioc容器对象就是上述的 静态的ApplicationContext类型的对象. 
+   想要具体的bean对象, 直接调用getBean方法即可.
+   (注入到Spring IOC容器中的原因: spring启动时, 若有这样的类, 将会将上下文对象注入到
+   实现ApplicationContextAware接口的对象的ApplicationContext属性中去)
    ```
 
 * 两种方式, 建议使用第二种。
@@ -1561,18 +1562,16 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
   
   eg: 
     ```
-      假设一个springboot项目依赖一个jar包, 其中这个jar包会存在一个spring 上下文的工具类(一般用于因加载顺序无法
-      进行依赖注入属性时, 会用它来获取spring管理的bean, 通常是实现ApplicationContextAware接口)。 当在使用redis
-      作为mybatis的二级缓存时, 需要对实现mybatis Cache接口的类添加redisTemplate类型的对象, 并重写一些方法,
-      此时redisTemplate是无法依赖注入进去的。 此时就会通过获取spring上下文的工具类来获取bean, 所以此时若该工具类
-      存在实例化bean的相关注解时, 必须保证该类会在springboot的包扫描有效路径下。
-      
-      不仅是在这种case下, 比如说在过滤器、拦截器中要注入一些属性时, 也是会注入失败的(因为过滤器或者拦截器加载的时
-      间是在spring上下文之前的), 此时必须要依赖spring上下文来获取bean对象。
+  假设一个springboot项目依赖一个jar包, 其中这个jar包会存在一个spring 上下文的工具类(一般用于因加载顺序无法
+  进行依赖注入属性时, 会用它来获取spring管理的bean, 通常是实现ApplicationContextAware接口)。 当在使用redis
+  作为mybatis的二级缓存时, 需要对实现mybatis Cache接口的类添加redisTemplate类型的对象, 并重写一些方法,
+  此时redisTemplate是无法依赖注入进去的。 此时就会通过获取spring上下文的工具类来获取bean, 所以此时若该工具类
+  存在实例化bean的相关注解时, 必须保证该类会在springboot的包扫描有效路径下。
+  
+  不仅是在这种case下, 比如说在过滤器、拦截器中要注入一些属性时, 也是会注入失败的(因为过滤器或者拦截器加载的时
+  间是在spring上下文之前的), 此时必须要依赖spring上下文来获取bean对象。
     ```
   
-
-
 
 #### 2.3.15 springboot后台允许跨域及实现自定义请求头
   1. 集成WebMvcConfigurerAdapter类, 重写addCorsMappings方法, 添加针对请求mapping设置允许的请求方法、源等其它关于跨域的设置.如下:
@@ -1585,61 +1584,61 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
      ```
   2. 引入spring security类库. 写一个过滤器继承WebSecurityConfigurerAdapter并重写configure方法, 配置允许自定义请求头的部分信息，以及将继承OncePerRequestFilter的过滤器添加到UsernamePasswordAuthenticationFilter过滤器前面. 如下
       ```java
-        public class CorsConfigration extends WebSecurityConfigurerAdapter {
+      public class CorsConfigration extends WebSecurityConfigurerAdapter {
 
-            @Override
-            protected void configure(HttpSecurity http) throws Exception {
-                http.csrf()
-                        .disable()
-                        .cors()
-                        .and()
-                        .authorizeRequests()
-                        .antMatchers(
-                                "/**"
-                        )
-                        .permitAll()
-                        .anyRequest().authenticated();
+          @Override
+          protected void configure(HttpSecurity http) throws Exception {
+              http.csrf()
+                  .disable()
+                  .cors()
+                  .and()
+                  .authorizeRequests()
+                  .antMatchers(
+                  "/**"
+              )
+                  .permitAll()
+                  .anyRequest().authenticated();
 
-                http.headers().cacheControl().disable();
+              http.headers().cacheControl().disable();
 
-                // add jwt filter
-                http.addFilterBefore(new JwtAuthFilter(), UsernamePasswordAuthenticationFilter.class);
-            }
-        }
+              // add jwt filter
+              http.addFilterBefore(new JwtAuthFilter(), UsernamePasswordAuthenticationFilter.class);
+          }
+      }
       ```
 
       ```java
-          public class JwtAuthFilter extends OncePerRequestFilter {
+      public class JwtAuthFilter extends OncePerRequestFilter {
 
-              @Override
-              public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
+          @Override
+          public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
 
-                  Boolean isFilter = !request.getRequestURI().equals("/user/login");
+              Boolean isFilter = !request.getRequestURI().equals("/user/login");
 
-                  if (isFilter) {
+              if (isFilter) {
 
-                      if (getJwtToken(request) == null) {
-                          response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "无token");
-                          return;
-                      }
-
-                      String authToken = request.getHeader("jwt-token");
-                      logger.info(authToken);
+                  if (getJwtToken(request) == null) {
+                      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "无token");
+                      return;
                   }
 
-                  chain.doFilter(request, response);
+                  String authToken = request.getHeader("jwt-token");
+                  logger.info(authToken);
               }
 
-              @Override
-              public void destroy() {
-                  // Nothing to do
-              }
-
-              private String getJwtToken(HttpServletRequest request) {
-                  return request.getHeader(ContextUtil.JWT_TOKEN);
-              }
-
+              chain.doFilter(request, response);
           }
+
+          @Override
+          public void destroy() {
+              // Nothing to do
+          }
+
+          private String getJwtToken(HttpServletRequest request) {
+              return request.getHeader(ContextUtil.JWT_TOKEN);
+          }
+
+      }
       ```
 
 
@@ -1745,38 +1744,38 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
       1. 除去依赖原型bean, 每次使用它的时候从使用spring上下文的getBean方法获取
       2. 使用@Lookup注解。 如下, 每次都使用PrototypeUtils.getBasicService()来获取原型BasicService对象, 重载的带参数方法, 表示需要注入内部的属性, 所以BasicService需要提供不同的构造方法, 如下述的BasicService类
          ```java
-            @Component
-            public abstract class PrototypeUtils {
+         @Component
+         public abstract class PrototypeUtils {
 
-                @Lookup
-                public abstract BasicService getBasicService();
+             @Lookup
+             public abstract BasicService getBasicService();
 
-                @Lookup
-                public abstract BasicService getBasicService(String name);
-            }
+             @Lookup
+             public abstract BasicService getBasicService(String name);
+         }
          ```
 
          ```java
-            @Component
-            @Scope("prototype")
-            public class BasicService {
+         @Component
+         @Scope("prototype")
+         public class BasicService {
 
-                private String userName;
+             private String userName;
 
-                public String getUserName() {
-                    return userName;
-                }
+             public String getUserName() {
+                 return userName;
+             }
 
-                public void setUserName(String userName) {
-                    this.userName = userName;
-                }
+             public void setUserName(String userName) {
+                 this.userName = userName;
+             }
 
-                public BasicService(String userName) {
-                    this.userName = userName;
-                }
+             public BasicService(String userName) {
+                 this.userName = userName;
+             }
 
-                public BasicService() {}
-            }
+             public BasicService() {}
+         }
          ```
 
 #### 2.3.28 spring aop
@@ -1801,9 +1800,7 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
   2. BeanDefinitionRegistryPostProcessor可以获取BeanDefinitionRegistry, 可以手动添加自定义的  
      BeanDefinition至bean工厂而BeanFactoryPostProcessor只提供了BeanFactory(ConfigListableBeanFactory),  
      没有手动添加BeanDefinition的api
-  3. 通过上下文的addBeanFactoryPostProcessor方法添加BeanDefinitionRegistryPostProcessor类型的后置处理器是最先执行,  
-     是在执行BeanDefinitionRegistryPostProcessor(分别执行实现了PriorityOrdered、Ordered、和没实现PriorityOrdered和3  
-     Ordered接口的)类型的后置处理器之后完成的
+    3. 通过上下文的addBeanFactoryPostProcessor方法添加BeanDefinitionRegistryPostProcessor类型的后置处理器是最先执行,  是在执行BeanDefinitionRegistryPostProcessor(分别执行实现了PriorityOrdered、Ordered、和没实现PriorityOrdered和Ordered接口的)类型的后置处理器之后完成的
 
 ### 2.4 Mybatis
 #### 2.4.1 parameterType为int/long时, 参数为0的处理
@@ -1822,32 +1819,37 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
   * $会存在sql注入的风险, #不会。 因为$是将数据和sql语句一起编译的 而#是先编译sql语句再将数据绑定上去, 即跟原生jdbc的问号占位符一样(?, ?, ?....)
   * 所以通常在模糊模糊查找时会添加bind标签将需要模糊查找的key预先编译好, 再直接用#将bind定义的变量keywordWrapper进行筛选即可,。
     ```XML
-      <bind name="keywordWrapper" value="keyword + '%'"/>
+    <bind name="keywordWrapper" value="keyword + '%'"/>
 
-      <![CDATA[
+    <![CDATA[
         SELECT * FROM user WHERE name LIKE #{keywordWrapper}
-      ]]>
+    ]]>
     ```
 
 #### 2.4.3 ORM映射文件 type和map后缀的区别
   1. parameterType和parameterMap
 
-    * parameterType指的是传递进去的参数类型, 基本数据类型以及pojo类型(map或类对象)
-    * parameterMap 一般很少用, 懒得研究
+     ```markdown
+     * parameterType指的是传递进去的参数类型, 基本数据类型以及pojo类型(map或类对象)
+     * parameterMap 一般很少用
+     ```
+
   2. resultMap和resultType
 
-    * resultType 返回基本数据类型
-    * resultMap 返回对象类型, 同时该对象需要在xml文件中配置model与db字段的映射关系
+     ```markdown
+     * resultType 返回基本数据类型
+     * resultMap 返回对象类型, 同时该对象需要在xml文件中配置model与db字段的映射关系
+     ```
 
 #### 2.4.4 Mybatis resultMap中type=map, 使用枚举的typeHandler前提
   * 需要在字段中添加javaType类型, 指定具体的枚举类是什么, 否则直接使用typeHandler会抛出
     Object does not represent an enum type的异常
     ```xml
-      <resultMap id="demoMap" type="map">
-          <result column="user_id" property="userId"/>
-          <result column="status" property="status" javaType="枚举的具体类的class路径" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
-          <result column="age" property="age"/>
-      </resultMap>
+    <resultMap id="demoMap" type="map">
+        <result column="user_id" property="userId"/>
+        <result column="status" property="status" javaType="枚举的具体类的class路径" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
+        <result column="age" property="age"/>
+    </resultMap>
     ```
 
 #### 2.4.5 使用springboot 通过继承SqlSessionDaoSupport类集成mybatis
@@ -1857,42 +1859,41 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
 #### 2.4.6 typehandler
   * resultMap中的typeHandler需要加双引号
     ```xml
-      <resultMap type="Order" id="orderMap">
-          <id column="order_id" property="orderId"/>
-          <result column="status" property="status" typeHandler="com.eugene.dao.mybatis.typehandler.OrderStatusTypeHandler" />
-          <result column="price" property="price"/>
-          <result column="payment_type" property="paymentType" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
-      </resultMap>
+    <resultMap type="Order" id="orderMap">
+    	<id column="order_id" property="orderId"/>
+         <result column="status" property="status" typeHandler="com.eugene.dao.mybatis.typehandler.OrderStatusTypeHandler" />
+         <result column="price" property="price"/>
+         <result column="payment_type" property="paymentType" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
+    </resultMap>
     ```
   * insert和update中属性转换不需要双引号
     ```xml
-        <insert id="insertSelective" parameterType="com.eugene.sumarry.sbrabbitmq.Entity.OrderRecord">
-            INSERT INTO
-                ORDERS
-            VALUES
-                #{orderId},
-                #{status, typeHandler=com.eugene.dao.mybatis.typehandler.OrderStatusTypeHandler}
-        </insert>
+    <insert id="insertSelective" parameterType="com.eugene.sumarry.sbrabbitmq.Entity.OrderRecord">
+        INSERT INTO
+        	ORDERS
+        VALUES
+        	#{orderId},
+        	#{status, typeHandler=com.eugene.dao.mybatis.typehandler.OrderStatusTypeHandler}
+    </insert>
     ```
 
 #### 2.4.7 mybatis集成oracle的坑
   1. sql语句中不能添加分号, 否则会抛 ORA-00911: 无效字符的异常
   2. 需要全局配置jdbcTypeForNull为null, 才能插入null。
      ```txt
-       springboot配置的值为: mybatis.configuration.jdbcTypeForNull= 'NULL'
-       根据mybatis源码的configuration类中有jdbcTypeForNull属性得知上述配置, 当然也可以看官网
+     springboot配置的值为: mybatis.configuration.jdbcTypeForNull= 'NULL'
+     根据mybatis源码的configuration类中有jdbcTypeForNull属性得知上述配置, 当然也可以看官网
      ```
 
 #### 2.4.8 mybatis用redis作为二级缓存的坑
   1. 控制台输出二级缓存Cache Hit Ratio一直未0.0
 
-    ```
-      从如下几个方面检查问题:
-      1. 命名空间是否开启了二级缓存
-      2. mybatis的二级缓存是否配置为true
-      3. 实体类是否实现了序列化接口
-    ```
-  2. 
+     ```txt
+     从如下几个方面检查问题:
+     1. 命名空间是否开启了二级缓存
+     2. mybatis的二级缓存是否配置为true
+     3. 实体类是否实现了序列化接口
+     ```
 
 
 ### 2.5 MySql
@@ -2168,7 +2169,7 @@ ps: --default-character-set=xxx  编码格式具体根据导出的db时选择的
   可以排序，比如首页中的热点新闻、热点商品。我们可以符合条件的数据找出来，然后使用sortset进行排序，这样的话可以省去
   db中的排序压力。
 
-#### 2.7.8 Redis主从集群
+#### 2.7.9 Redis主从集群
 * master节点: 关闭RDB、AOF机制，这些功能由从节点去做就好了。修改当前对应的pid、日志文件名即可、可
   设置密码(设置的话，从节点要保持一致)。
   
@@ -2185,11 +2186,11 @@ ps: --default-character-set=xxx  编码格式具体根据导出的db时选择的
 
   可以动态扩容，但是动态扩容设置的主节点信息都会在下次重启后丢失。
 
-#### 2.7.9 哨兵模式
+#### 2.7.10 哨兵模式
 
 * 参考链接：[哨兵模式相关总结](https://github.com/AvengerEug/redis-study#52-哨兵模式)
 
-#### 2.7.10 高可用集群模式
+#### 2.7.11 高可用集群模式
 
 * 参考链接：[高可用集群模式总结](https://github.com/AvengerEug/redis-study#52-哨兵模式)
 
@@ -2294,22 +2295,22 @@ mvn install:install-file -Dfile=c\common-auth-0.0.1-SNAPSHOT-core.jar -DgroupId=
         2.1. 参考此[教程](https://www.cnblogs.com/zishengY/p/7794923.html), 只需完成到`创建一个maven仓库`步骤既可, 需注意一点, Nexus开放的端口为`8081`, 第一次进入页面点击右上角的`Sign in`, 并按照页面的提示进行操作(这里会告诉我们用户名是什么, 密码存在服务器的哪个文件夹上, 并且会让你再次设置密码)
         2.2. 配置Maven配置文件**settings.xml**, 指定`servers`地址和`mirrors`
         ```xml
-          <servers>
+        <servers>
             <server>
-              <id>my_repository</id>
-              <username>admin</username>
-              <password>2.1步骤所说的再次设置的密码</password>
+                <id>my_repository</id>
+                <username>admin</username>
+                <password>2.1步骤所说的再次设置的密码</password>
             </server>
         </servers>
     
-          <mirrors>
+        <mirrors>
             <mirror>
-              <id>tm_repository</id> <!-- 这里的id要和server的id对应上 -->
-              <mirrorOf>*</mirrorOf>
-              <name>TianMa Nexus Repository</name>
-              <url>http://nexus服务器ip:端口(默认8081,可以自己设置)/repository/创建的仓库地址/</url>
+                <id>tm_repository</id> <!-- 这里的id要和server的id对应上 -->
+                <mirrorOf>*</mirrorOf>
+                <name>TianMa Nexus Repository</name>
+                <url>http://nexus服务器ip:端口(默认8081,可以自己设置)/repository/创建的仓库地址/</url>
             </mirror>
-          </mirrors>
+        </mirrors>
         ```
        2.3. 使用idea使用该配置文件对应的maven
        
@@ -2353,7 +2354,7 @@ git log --graph --pretty=oneline --abbrev-commit
       1. 使用cherry-pick的方式将某个提交应用到当前分支和在当前分支修改代码提交代码一致.
       2. 使用merge的方式在流水线会多一个分支.
   ```
-![cherry-pick&merge区别](https://github.com/AvengerEug/treadpit/blob/master/git-cherry-pick%26merge.jpg)
+![cherry-pick&merge区别](./git-cherry-pick%26merge.jpg)
 #### 2.9.5 合并commit
 背景: 合并commit有益于管理整个项目, 对于一个issue, 一个小模块应该是只包含一个commit, 这样能清晰的看到代码的改动
 命令: git rebase -i commitId~  或 git rebase -i HEAD~N
@@ -2578,7 +2579,6 @@ git log --graph --pretty=oneline --abbrev-commit
   curl -i http://192.168.2.101:5555/v2_catalog
   ```
 
-  
 
 #### 3.1.3 使用ssh远程执行命令运行容器
 #### 3.1.4 挂载宿主机目录
@@ -2657,35 +2657,38 @@ linux若分别以普通user启动jenkins.war, 那么会在/home/user/.jenkins/ �
 ```
 #### 3.2.4 Jenkins支持maven多模块项目(每个模块都是一个git仓库)多环境同时部署思想
 * 背景:
-```js
-问: 什么情况下会不支持多环境同时部署?
-答: 众所周知, maven项目的仓库设置的只有一个, 当在同一台搭建jenkins的电脑部署生产环境和测试环境的时,
-    使用的是同一个本地仓库, 生产环境一般部署是master分支, 测试环境部署测试环境的branch, 在maven项目build
-    的过程中, 一般都需要install jar包到本地仓库, 以便于打包的时候能找到依赖. 试问, 同时install不同branch的
-    jar包, 但jar包的groupId、artifactId、version都没有改变, 那肯定会出问题呀.
 
-解决方案:
-  引入版本控制插件:
-  1. 在根项目pom文件中的build -> plugins标签中添加如下代码, 引入插件:
-    <plugin>
-      <groupId>org.codehaus.mojo</groupId>
-      <artifactId>versions-maven-plugin</artifactId>
-      <version>2.3</version>
-      <configuration>
-        <generateBackupPoms>false</generateBackupPoms>
-      </configuration>
-    </plugin>
-  2. 在每个环境中部署前执行命令
-    mvn versions:set -DnewVersion=版本号
-    该命令的含义是根项目的pom文件的version设置成上面的 "版本号"
-    同时会将其它模块依赖另一个模块的version号都更新成上述的 "版本号"
-    (Notice: 子模块不要添加自己的version, 要完全依赖父模块的version), 否则pom文件会乱.
-  3. 每一个模块打包的版本都指定好了, 随后直接install & package就行了。
-    注意: 最好是每一个环境都有一个对应的backend项目, 否则在部署qa环境的时候, 运行了更新版本号的命令, 
-    并且在install的过程中, 又需要同时部署生产环境, 那么此时又会重新设置每一个模块的版本号。
-    要解决这个问题则是每一个环境有一个对应的backend目录, 并对该banckend目录更新版本号进行打包
-  4. 打包完成后, 还要修改对应的制作镜像的Dockerfile文件, 因为要指定具体的目录拿具体打包好的jar包
-```
+  ```TXT
+  问: 什么情况下会不支持多环境同时部署?
+  答: 众所周知, maven项目的仓库设置的只有一个, 当在同一台搭建jenkins的电脑部署生产环境和测试环境的时,
+      使用的是同一个本地仓库, 生产环境一般部署是master分支, 测试环境部署测试环境的branch, 在maven项目build
+      的过程中, 一般都需要install jar包到本地仓库, 以便于打包的时候能找到依赖. 试问, 同时install不同branch的
+      jar包, 但jar包的groupId、artifactId、version都没有改变, 那肯定会出问题呀.
+  
+  解决方案:
+    引入版本控制插件:
+    1. 在根项目pom文件中的build -> plugins标签中添加如下代码, 引入插件:
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>2.3</version>
+        <configuration>
+          <generateBackupPoms>false</generateBackupPoms>
+        </configuration>
+      </plugin>
+    2. 在每个环境中部署前执行命令
+      mvn versions:set -DnewVersion=版本号
+      该命令的含义是根项目的pom文件的version设置成上面的 "版本号"
+      同时会将其它模块依赖另一个模块的version号都更新成上述的 "版本号"
+      (Notice: 子模块不要添加自己的version, 要完全依赖父模块的version), 否则pom文件会乱.
+    3. 每一个模块打包的版本都指定好了, 随后直接install & package就行了。
+      注意: 最好是每一个环境都有一个对应的backend项目, 否则在部署qa环境的时候, 运行了更新版本号的命令, 
+      并且在install的过程中, 又需要同时部署生产环境, 那么此时又会重新设置每一个模块的版本号。
+      要解决这个问题则是每一个环境有一个对应的backend目录, 并对该banckend目录更新版本号进行打包
+    4. 打包完成后, 还要修改对应的制作镜像的Dockerfile文件, 因为要指定具体的目录拿具体打包好的jar包
+  ```
+
+  
 #### 3.2.5 jenkins multijob build多模块(每个模块都是一个git仓库)
 * 背景: 在多模块的springboot项目中, 可能会存在项目中统一以来的common类库(自己编写的), 在改common类库
         会添加许多common的配置, eg: jdbc, log, mybatis mapping扫描包, mybatis别名配置等等. 所以
@@ -2813,22 +2816,24 @@ linux若分别以普通user启动jenkins.war, 那么会在/home/user/.jenkins/ �
   如果要访问expo/index.html 文件访问成功
   1. 首先在ngxin根目录下创建```expo```文件夹
   2. 并修改vue.js配置文件即build后的index.html文件  如下图:
-     ![修改后的配置文件](https://github.com/AvengerEug/treadpit/blob/master/modified-build.png), 
-     ![修改配置后的index.html文件](https://github.com/AvengerEug/treadpit/blob/master/modified-index.html.png)
+     ![修改后的配置文件](./modified-build.png), 
+     ![修改配置后的index.html文件](./modified-index.html.png)
   3. 将build后的包整个丢进expo文件夹内
   4. 重新reload ngxin, 再次访问即可
 
 #### 3.4.3 docker化basic auth(可配)
 1. 拉取准备好的镜像包
-  ```
-    git clone https://github.com/AvengerEug/docker-nginx-basic-auth.git
-  ```
-2. 执行命令
-  ```
-    TAG=auth USERNAME=eug PASSWORD=pwd123 ./build.sh docker_build
-  ```
 
-各细节可跟踪至该[repository](https://github.com/AvengerEug/docker-nginx-basic-auth.git)
+   ```powershell
+   git clone https://github.com/AvengerEug/docker-nginx-basic-auth.git
+   ```
+2. 执行命令
+
+   ```shell
+   TAG=auth USERNAME=eug PASSWORD=pwd123 ./build.sh docker_build
+   ```
+
+   各细节可跟踪至该[repository](https://github.com/AvengerEug/docker-nginx-basic-auth.git)
 
 #### 3.4.4 配置Https证书, 支持https访问.
 
@@ -2921,19 +2926,18 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
 #### 4.1.13 压缩成tar.gz压缩包
 * 将当前目录压缩成test.tar.gz
   ```shell
-    tar -czf test.tar.gz ./*
+  tar -czf test.tar.gz ./*
   ```
 
 #### 4.1.14 解压缩tar.gz包
 * 解压缩test.tar.gz包 至root目录下
-  ```shell
-    tar -zxvf test.tar.gz -c /root
-  ``
+  ```SHELL
+  tar -zxvf test.tar.gz -c /root
   ```
 
 #### 4.1.15 Linux文件权限查看及无权限解决方案
 * 如下图
-![文件权限解读图](https://github.com/AvengerEug/treadpit/blob/master/linux_file_permission.jpg)
+![文件权限解读图](./linux_file_permission.jpg)
 
 #### 4.1.16 基于linux和nginx搭建内网本地yum源
   1. 背景: 内网无法上网, linux yum无法安装软件, 原因就是找不到yum源, 此时我们需要有一个公共的yum源
@@ -3060,11 +3064,6 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
     
     * 设备B: centos7 64位操作系统
       1. 与设备一的步骤一致, 需要修改的配置为: 修改vrrp_instance VI_1节点的state为BACKUP    => 标识它为一个备用节点
-
-  
-
-
-
 
   2. 做好验证准备工作
   
