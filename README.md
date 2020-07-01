@@ -497,17 +497,17 @@ Object.assign(this.currentUser. {
     ```最好别在bind钩子函数中操作其他dom元素, 因为它在虚拟dom树被创建时会被触发, 此时html的dom树还没有生成, 无法获取其他dom元素, 至于update钩子函数是否可以获取其他dom元素待确认```
 
 2. 解析
-![自定义指令解析](https://github.com/AvengerEug/treadpit/blob/master/understand-directive.jpg)
+![自定义指令解析](./understand-directive.jpg)
 
 3. [自定义指令官方文档api](https://cn.vuejs.org/v2/guide/custom-directive.html)
 
 #### 1.3.8 vue-router base属性
 ```
-  添加该属性后 route会默认在每次跳转路由前把这个前缀给加上, 此时在浏览器中添加这个前缀或者不添加这个前缀都能match上路由
+添加该属性后 route会默认在每次跳转路由前把这个前缀给加上, 此时在浏览器中添加这个前缀或者不添加这个前缀都能match上路由
 ```
 #### 1.3.9 Nuxt v-for嵌套v-if的坑
 如下case:(若v-if 里面包含的标签中要使用的判断是否渲染dom元素的变量, eg如下的{{message.type}}要用到v-if的message, )
-```js
+```html
 <div v-if="message">{{message.type}}</message>
 一定要将前面的v-if改成v-show, 否则页面会在挂载(mounted钩子函数不会被执行)的时候失败。
 具体错误如下: [nuxt] Error while initializing app DOMException: Failed to execute 'appendChild' on 'Node': This node type does not support this method.
@@ -566,7 +566,7 @@ npm插件包: Track to this [plug](https://www.npmjs.com/package/export-excel-eu
 
 #### 1.3.16 Nuxt.js 官网提供的自定义loading组件. 并将该组件定义在nuxt.config.js的loading 选项中
 * 组件
-  ```js
+  ```vue
     <template>
       <el-container class="loading-container" v-show="loading">
         <el-main class="loading-main" v-loading="true"
@@ -624,20 +624,58 @@ npm插件包: Track to this [plug](https://www.npmjs.com/package/export-excel-eu
 
 #### 1.3.18 vue.js .sync修饰符
 * 背景: 都知道在编写vue组件的时候只能使用一个v-model 完成双向数据绑定, 若想绑定多个双向数据绑定的变量呢？
+
 * 解决方案: 使用.sync修饰符  
     1. 父组件parent.vue   
-      ```
-        <children v-model="value" :customerAttr.sync="myValue" />
-      ```
+    
+       ```html
+       <children v-model="value" :customerAttr.sync="myValue" />
+       ```
+    
     2. 子组件chirldren.vue  
-      ```
-        methods: {
+    
+       ```javascript
+       methods: {
+           notify (valueInner) {
+               this.$emit("update:customerAttr", valueInner)
+           }
+       }
+       ```
+    
+         => 当在子组件中调用了notify方法时, 则会同时更新父组件的myValue的值为子组件$emit中的valueInner
+
+#### 1.3.19 vue.js 实现自定义组件v-model
+
+* 需求：我们需要针对一个组件添加一个属性，能支持双向数据绑定，如下
+
+  ```html
+  // parent.vue
+  <my-component v-model="test" />
+  ```
+
+  当myComponent.vue文件中的test修改后，parent.vue中的test属性也会随之改变
+
+* 实现步骤:
+
+  1. 父组件
+
+     ```html
+     // parent.vue
+     <my-component v-model="test" /
+     ```
+
+  2. myComponent
+
+     ```javascript
+      methods: {
           notify (valueInner) {
-            this.$emit("update:customerAttr", valueInner)
+              // 此段代码会将valueInner中的值会同步至parent.vue文件中的test
+              this.$emit("input", valueInner)
           }
-        }
-      ```
-      => 当在子组件中调用了notify方法时, 则会同时更新父组件的myValue的值为子组件$emit中的valueInner
+      }
+     ```
+
+     
 
 ### 1.4 ElementUI
 ### 1.5 npm
