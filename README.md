@@ -707,12 +707,14 @@ npm install --save file-saver@2.0.0
 3. 撰写自定义组件
 4. 调用Vue.component api全局注册组件
 5. 修改webpack.config.js文件, 修改打包配置
-   ```
+   ```txt
     * output配置: 
       1. 新增library="exportExcel"  -> // 模块名, 其他类库使用require的方式引用的原因就是配置了这个
       2. 新增libraryTarget="umd" -> // libraryTarget会生成不同umd的代码,可以只是commonjs标准的，也可以是指amd标准的，也可以只是通过script标签引入的
       3. 新增umdNamedDefine="true" -> // 会对 UMD 的构建过程中的 AMD 模块进行命名。否则就使用匿名的 define
       4. 修改filename为exportExcel.js
+    * entry配置
+      1. 修改entry配置为: entry: './src/index.js',  => 指定插件打包时使用哪个入口，此index.js文件内容一般就是添加一个对象， 且对象中包含一个叫install的方法，此install方法的第一个参数就是vue，当调用Vue.use方法时就会把当前的vue对象传入，目的就是可以使用vue这个对象创建对象的组件、指令等等
    ```
 6. 修改package.json文件, 指定插件入口  
    ```
