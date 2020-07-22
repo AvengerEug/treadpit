@@ -2245,7 +2245,7 @@ ps: --default-character-set=xxx  编码格式具体根据导出的db时选择的
 ```mysql
   A. 配置mysql bin目录的环境变量
   B. 执行mysqld --initialize-insecure --user=mysql  (若执行时报xxxx120.dll文件不存在, 则需下载vcredist_x64.exe并安装)
-  C. 执行mysqld -install   -> 安装服务
+  C. 执行mysqld --install   -> 安装服务
   D. 执行net start mysql   -> 启动服务
   E. 默认用户名是root 无密码
 ```
@@ -2354,6 +2354,114 @@ ps: --default-character-set=xxx  编码格式具体根据导出的db时选择的
     docker pull registry.cn-hangzhou.aliyuncs.com/avengereug/mysql:5.7
   ```
   
+
+#### 2.5.11 mysql(5.7.23)离线安装在linux(非docker镜像)
+
+1. 官网下载linux通用版本：
+
+   ```shell
+   # 下载地址
+   https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.31-linux-glibc2.12-x86_64.tar.gz
+   ```
+
+2. 将压缩包移动至linux中
+
+3. 解压缩并重命名
+
+   ```shell
+   tar -zxvf mysql-5.7.31-linux-glibc2.12-x86_64.tar.gz \
+   mv mysql-5.7.31-linux-glibc2.12-x86_64 /usr/local/mysql
+   ```
+
+4. 创建mysql用户和mysql专用文件夹(为了保证关于mysql的文件只允许mysql用户来修改)
+
+   ```shell
+   useradd mysql && mkdir -p /data/mysql && chown mysql:mysql -R /data/mysql
+   ```
+
+5. 创建mysql配置文件，并填充内容
+
+   ```shell
+   vim /etc/my.cnf
+   
+   ## 内容如下
+   [mysqld]
+   bind-address=0.0.0.0
+   port=3306
+   user=mysql
+   basedir=/usr/local/mysql
+   datadir=/data/mysql
+   socket=/tmp/mysql.sock
+   log-error=/data/mysql/mysql.err
+   pid-file=/data/mysql/mysql.pid
+   #character config
+   character_set_server=utf8mb4
+   symbolic-links=0
+   ```
+
+6. 初始化mysql服务(此步骤执行完，会在/data/mysql文件夹内生成mysql核心文件)
+
+   ```shell
+   /usr/local/mysql/bin/mysqld --defaults-file=/etc/my.cnf --basedir=/usr/local/mysql/ --datadir=/data/mysql/ --user=mysql --initialize
+   ```
+
+7. 查看mysql密码
+
+   ```shell
+   cat /data/mysql/mysql.err | grep password
+   ```
+
+8. 添加mysql环境变量(也可以使用软连接)
+
+   ```shell
+   vim /etc/profile
+   
+   # 在最后一行填充如下代码
+   export MYSQL_HOME=/usr/local/mysql/
+   export PATH=$PATH:$MYSQL_HOME/bin
+   
+   # 更新环境变量
+   source /etc/profile
+   ```
+
+9. 将mysql添加服务并设置开机自动启动
+
+   ```shell
+   # 挨个执行如下代码
+   cp /usr/local/mysql/support-files/mysql.server /etc/rc.d/init.d/mysqld
+   
+   chmod +x /etc/rc.d/init.d/mysqld
+   
+   chkconfig --add mysqld
+   ```
+
+10. 启动mysql服务
+
+    ```shell
+    service mysqld start
+    ```
+
+11. 登录mysql
+
+    ```shell
+    # 需要注意，这里会提示输入密码，将上述第7步看到的密码填充至此即可
+    mysql -u root -p
+    ```
+
+12. 登录mysql重设密码(如果想使用默认密码，可忽略此步骤)
+
+    ```shell
+    set password = password('root');
+    ```
+
+13. 配置远程连接
+
+    ```mysql
+    # 在登录mysql命令行中挨个执行如下命令
+    grant all privileges on *.* to 'root'@'%' identified by 'root';
+    
+    flush privileges;
+    ```
 
 ### 2.6 Elasticsearch
 #### 2.6.1 linux构建es的坑
