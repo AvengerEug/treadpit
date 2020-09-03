@@ -3768,3 +3768,29 @@ systemctl start rc-local.service  => 开启rc-local服务
 #### 7.2.1 前端访问私密图片
 * 原理: 根据需要请求的资源, 由后端对此资源进行临时授权(新增签名以及请求过期时间, 返回对该资源访问的完整url), 具体参考[oss临时授权文档, ```使用签名URL进行临时授权部分```](https://help.aliyun.com/document_detail/32016.html?spm=a2c4g.11186623.2.13.4de27e31juVYXF)
 
+## 八、大咖们发的文章涉及到的知识点
+
+### 8.1  INSERT INTO SELECT语句造成的锁表事件
+
+* 文章地址(点击跳转)：[一条 SQL 引发的事故。来自：`Java 一日一条公众号`](https://mp.weixin.qq.com/s/-wBZcxJ--wus9UGR2ITAiQ)
+
+* 总结：
+
+  > 在**MySQL**的**InnerDB**存储引擎中，默认的事务隔离级别机制为：`可重复读`。在可重复读的机制下，我们执行如下sql(假设name字段有索引)
+  >
+  > ```sql
+  > SELECT id FROM table WHERE name = '123' FOR UPDATE
+  > ```
+  >
+  > 此时会锁住索引树中 name为123的那个叶子节点，如果我们除了筛选出id还要筛选出其他的信息，比如age，如下：
+  >
+  > ```SQL
+  > SELECT id, age FROM table WHERE name = '123' FOR UPDATE
+  > ```
+  >
+  > 此时因为age这个字段不在索引name对应的B+树内，因此会进行回表操作。又因为我们指定了**FOR UPDATE**，因此会添加排他锁，所以最终此条SQL会造成name为'123'对应的id，以及id对应的那条数据被锁住，这就是所谓的行锁，如果name没有索引时，此时就会进行全表扫描，直接上升为表锁。
+  >
+  > 根据文章的内容可知，**INSERT INTO SELECT** 语句会添加锁，所以我们在执行这样的sql语句时，一定要保证where条件走索引，否则就会升级为表锁，最终导致锁表，无法执行其他插入、更新、删除操作
+
+  
+
