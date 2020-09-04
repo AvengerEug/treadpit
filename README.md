@@ -3772,7 +3772,7 @@ systemctl start rc-local.service  => 开启rc-local服务
 
 ### 8.1  INSERT INTO SELECT语句造成的锁表事件
 
-* 文章地址(点击跳转)：[一条 SQL 引发的事故。来自：`Java 一日一条公众号`](https://mp.weixin.qq.com/s/-wBZcxJ--wus9UGR2ITAiQ)
+* 文章地址(点击右侧链接跳转)：[一条 SQL 引发的事故。来自：`Java 一日一条公众号`](https://mp.weixin.qq.com/s/-wBZcxJ--wus9UGR2ITAiQ)
 
 * 总结：
 
@@ -3792,5 +3792,25 @@ systemctl start rc-local.service  => 开启rc-local服务
   >
   > 根据文章的内容可知，**INSERT INTO SELECT** 语句会添加锁，所以我们在执行这样的sql语句时，一定要保证where条件走索引，否则就会升级为表锁，最终导致锁表，无法执行其他插入、更新、删除操作
 
-  
+### 8.2 Java Bean Copy框架性能对比
+
+* 背景：今日，项目团队进行了**code review**的环节，因为团队使用的是微服务架构，因此会有许多的PO、VO，这就避免不了要对VO、PO一些公共属性的
+
+  copy。在review环节，我提出了为什么不采用Bean Copy(eg：Spring Framework)框架来替代大量的set方法，然后才得知Bean Copy框架会影响性能。因此特
+
+  地搜索了一些相关文章并做了如下总结。
+
+* 文章地址(点击右侧链接跳转)：[Java Bean Copy框架性能对比](http://www.bieryun.com/1046.html)
+
+* 总结：
+
+  > 所有的Java Bean Copy框架底层都会用反射，用了反射就会影响性能，根据文章中的内容结论可知：
+  >
+  > `setter` > `cglib` > `spring` > `apache`
+  >
+  > 实践建议：
+  >
+  > 1、要性能要求较高的部分，避免使用Bean Copy框架，而是采用`set`的方式进行处理
+  >
+  > 2、如果要使用Bean Copy框架，优先使用cglib
 
