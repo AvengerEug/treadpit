@@ -1734,6 +1734,10 @@ System.out.println(B.class.isAssignableFrom(A.class));
 * Ribbon: 负载均衡, 该组件存储在ApiGateWay中, 采用轮询算法, 依次请求服务的每一个实例
 * Feigh: 服务间内部调用, 底层采用动态代理, 根据feignClient接口中mvc的一些注解, 组装http请求
 * Hystrix: 熔断器, 防止因某个微服务崩溃而导致整个微服务雪崩。具体内部使用采用的是每个服务走自己的线程池
+#### 2.2.7 微服务开发需要注意的点
+
+*  微服务开发中，假设A依赖了B的model，且B的model做了修改，那么一定要将A重启，否则使用的是老对象
+
 ### 2.3 Spring
 #### 2.3.1 @RequestParam 类型映射
 |  后台定义类型 |  前台传数据格式 |
@@ -2462,6 +2466,10 @@ ps: --default-character-set=xxx  编码格式具体根据导出的db时选择的
     
     flush privileges;
     ```
+
+#### 2.5.12 开发精度问题
+
+* 在MySQL中bitint类型的值已经不能用Long类型的来装了，会出现精度丢失的问题，此时应该改为String类型来装
 
 ### 2.6 Elasticsearch
 #### 2.6.1 linux构建es的坑
@@ -3813,4 +3821,30 @@ systemctl start rc-local.service  => 开启rc-local服务
   > 1、要性能要求较高的部分，避免使用Bean Copy框架，而是采用`set`的方式进行处理
   >
   > 2、如果要使用Bean Copy框架，优先使用cglib
+
+### 8.3 如下两条SQL的抉择：
+
+* SQL本身
+
+  ```sql
+  SELECT
+      COUNT(p.id)
+  FROM
+      (SELECT id FROM pay WHERE createTime < '2020-09-05' AND accountId = '123456') tmp
+  INNER JOIN pay p ON tmp.id = p.id
+  WHERE state IN (0, 1)
+  
+  
+  SELECT COUNT(id) FROM paybill WHERE createTime < '2020-09-05' AND accountId = '123456' AND state IN (0, 1)
+  ```
+
+* 背景条件：在`pay`表中存在500多万条数据，且存在`accountId`和`createTime`组成的二级索引。因现在要做一个统计功能，出于性能考虑，因此写了这两条SQL来敲定最终写在代码中的版本。
+
+* **个人拙见**：
+
+  ```txt
+  在accountId和createTime组成的二级索引下，因为有state字段的筛选，这两条sql在执行的过程中应该都会进行回表操作，但是第一条sql有join操作，需要耗费时间申请临时表内存，因此第一条SQL执行效率可能会更差一点
+  ```
+
+* 待做：**需要从根源去考虑，这两条SQL在`accountId`和`createTime`组成的二级索引下，哪条SQL更佳！**
 
