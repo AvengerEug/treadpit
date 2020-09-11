@@ -3760,7 +3760,15 @@ systemctl start rc-local.service  => 开启rc-local服务
 	同时需要在resources文件夹下新建conf文件夹并在里面创建不同环境的文件夹，并在不同环境的文件夹中新增以properties结尾的配置文件。
 ```
 
+## 6.3 IDEA 2019编译项目找不到sun.misc包
+
+* 原因：**sun.misc**包可能会在jdk高版本中被移掉，而IDEA 2019版本在编译project时，默认使用的是JDK11的版本，在JDK11中，已经没有**sun.misc**包了。因此我们需要显示的把它降低版本为jdk1.8
+* 执行步骤：
+  * 1、Ctrl + Shift + Alt + s  打开项目结构图
+  * 2、找到**Project Structure -> Project -> Project SDK**，将版本改成jdk 1.8即可(需要指定本地安装jdk1.8的路径)
+
 ## 七. 阿里云oss
+
 ### 7.1 上传图片
 #### 7.1.1 私密上传base64格式图片 
 ```java
