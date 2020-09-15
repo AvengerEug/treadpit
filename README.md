@@ -3839,23 +3839,23 @@ systemctl start rc-local.service  => 开启rc-local服务
   >
   > 2、如果要使用Bean Copy框架，优先使用cglib
 
-### 8.3 如下两条SQL的抉择：
+### 8.3 如下两条SQL的抉择
 
 * SQL本身
 
   ```sql
   SELECT
-      COUNT(p.id)
+      COUNT(p.pay_id)
   FROM
-      (SELECT id FROM pay WHERE createTime < '2020-09-05' AND accountId = '123456') tmp
-  INNER JOIN pay p ON tmp.id = p.id
-  WHERE state IN (0, 1)
+      (SELECT pay_id FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c') tmp
+  INNER JOIN pay p ON tmp.pay_id = p.pay_id
+  WHERE state IN (0, 1);
   
   
-  SELECT COUNT(id) FROM paybill WHERE createTime < '2020-09-05' AND accountId = '123456' AND state IN (0, 1)
+  SELECT COUNT(pay_id) FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c' AND state IN (0, 1);
   ```
 
-* 背景条件：在`pay`表中存在500多万条数据，且存在`accountId`和`createTime`组成的二级索引。因现在要做一个统计功能，出于性能考虑，因此写了这两条SQL来敲定最终写在代码中的版本。
+* 背景条件：在`pay`表中存在500多万条数据，且存在`account_id`和`create_time`组成的二级索引。因现在要做一个统计功能，出于性能考虑，因此写了这两条SQL来敲定最终写在代码中的版本。
 
 * **个人拙见**：
 
@@ -3863,5 +3863,185 @@ systemctl start rc-local.service  => 开启rc-local服务
   在accountId和createTime组成的二级索引下，因为有state字段的筛选，这两条sql在执行的过程中应该都会进行回表操作，但是第一条sql有join操作，需要耗费时间申请临时表内存，因此第一条SQL执行效率可能会更差一点
   ```
 
-* 待做：**需要从根源去考虑，这两条SQL在`accountId`和`createTime`组成的二级索引下，哪条SQL更佳！**
+* 追溯根源：
+
+  > 背景:
+  >
+  > ```txt
+  > 由于500多万条数据比较多，就算换成脚本也需要好几十兆，因此建议使用应用程序或者SQL的存储过程进行插入，由于鄙人对MySQL的存储过程比较蹩脚，因此我采用程序的方式来表进行插入500万条数据
+  > ```
+  >
+  > 执行步骤：
+  >
+  > 1. 执行如下SQL建DB、表
+  >
+  >    ```sql
+  >    -- 创建库
+  >    CREATE DATABASE test;
+  >    
+  >    -- 创建表
+  >    USE test;
+  >    
+  >    CREATE TABLE pay(
+  >      pay_id INT PRIMARY KEY AUTO_INCREMENT,
+  >      account_id VARCHAR(36) NOT NULL COMMENT '账户ID',
+  >      create_time DATETIME NOT NULL COMMENT '创建时间',
+  >      state TINYINT(1) NOT NULL COMMENT '支付状态. 0:成功,1:失败,2:冻结'
+  >    );
+  >    ```
+  >
+  > 2. 执行指定程序地址，[点击跳转](https://github.com/AvengerEug/java-backend/blob/develop/mysql/init-data/src/main/java/com/eugene/sumarry/initdata/Entry.java)
+  >
+  > 3. 添加索引(放在第三步的原因：因为每次插入数据都会更新索引，为了提高程序插入数据的效率)
+  >
+  >    ```sql
+  >    -- 创建accountId和createTime组成的二级索引
+  >    ALTER TABLE pay ADD INDEX index_accountId_createTime(account_id, create_time);
+  >    ```
+  >
+  > 4. 分别按如下步骤执行上述两条SQL，并根据查询优化器来确定哪个SQL更好
+  >
+  >    * 执行INNER JOIN的SQL
+  >
+  >    ```sql
+  >    -- 第一步：打开查询优化器的日志追踪功能
+  >    SET optimizer_trace="enabled=on";
+  >    
+  >    -- 第二步：执行SQL
+  >    SELECT
+  >        COUNT(p.pay_id)
+  >    FROM
+  >        (SELECT pay_id FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c') tmp
+  >    INNER JOIN pay p ON tmp.pay_id = p.pay_id
+  >    WHERE state IN (0, 1);
+  >    
+  >    -- 第三步: 获取上述SQL的查询优化结果
+  >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
+  >    
+  >    -- 第四步: 分析查询优化结果
+  >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
+  >    "table_scan": {
+  >      "rows": 996970,
+  >      "cost": 203657
+  >    },
+  >    
+  >    -- 走index_accountId_createTime索引的分析，评分为1.21
+  >    "analyzing_range_alternatives": {
+  >      "range_scan_alternatives": [
+  >        {
+  >          "index": "index_accountId_createTime",
+  >          "ranges": [
+  >            "fe3bce61-8604-4ee0-9ee8-0509ffb1735c <= account_id <= fe3bce61-8604-4ee0-9ee8-0509ffb1735c AND create_time < 0x99a74a0000"
+  >          ],
+  >          "index_dives_for_eq_ranges": true,
+  >          "rowid_ordered": false,
+  >          "using_mrr": false,
+  >          "index_only": true,
+  >          "rows": 1,
+  >          "cost": 1.21,
+  >          "chosen": true
+  >        }
+  >      ],
+  >      "analyzing_roworder_intersect": {
+  >        "usable": false,
+  >        "cause": "too_few_roworder_scans"
+  >      }
+  >    },
+  >    
+  >    -- 最终选择走index_accountId_createTime索引，因为评分最低，只有1.21
+  >    "chosen_range_access_summary": {
+  >      "range_access_plan": {
+  >        "type": "range_scan",
+  >        "index": "index_accountId_createTime",
+  >        "rows": 1,
+  >        "ranges": [
+  >          "fe3bce61-8604-4ee0-9ee8-0509ffb1735c <= account_id <= fe3bce61-8604-4ee0-9ee8-0509ffb1735c AND create_time < 0x99a74a0000"
+  >        ]
+  >      },
+  >      "rows_for_plan": 1,
+  >      "cost_for_plan": 1.21,
+  >      "chosen": true
+  >    }
+  >    
+  >    综上所述，针对于INNER JOIN，在MySQL处理后，它最终选择走index_accountId_createTime索引，而且评分为1.21
+  >    
+  >    ```
+  >
+  >    * 执行另外一条SQL
+  >
+  >    ```sql
+  >    -- 第一步：打开查询优化器的日志追踪功能
+  >    SET optimizer_trace="enabled=on";
+  >    
+  >    -- 第二步：执行SQL
+  >    SELECT COUNT(pay_id) FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c' AND state IN (0, 1);
+  >    
+  >    -- 第三步: 获取上述SQL的查询优化结果
+  >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
+  >    
+  >    -- 第四步: 分析查询优化结果
+  >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
+  >    "table_scan": {
+  >      "rows": 996970,
+  >      "cost": 203657
+  >    }
+  >    
+  >    
+  >    -- 走index_accountId_createTime索引的分析，评分为2.21
+  >    "analyzing_range_alternatives": {
+  >      "range_scan_alternatives": [
+  >        {
+  >          "index": "index_accountId_createTime",
+  >          "ranges": [
+  >            "fe3bce61-8604-4ee0-9ee8-0509ffb1735c <= account_id <= fe3bce61-8604-4ee0-9ee8-0509ffb1735c AND create_time < 0x99a74a0000"
+  >          ],
+  >          "index_dives_for_eq_ranges": true,
+  >          "rowid_ordered": false,
+  >          "using_mrr": false,
+  >          "index_only": false,
+  >          "rows": 1,
+  >          "cost": 2.21,
+  >          "chosen": true
+  >        }
+  >      ],
+  >      "analyzing_roworder_intersect": {
+  >        "usable": false,
+  >        "cause": "too_few_roworder_scans"
+  >      }
+  >    }
+  >    
+  >    -- 最终选择走index_accountId_createTime索引，跟全表扫描的评分相比,比全表扫描低太多
+  >    "chosen_range_access_summary": {
+  >      "range_access_plan": {
+  >        "type": "range_scan",
+  >        "index": "index_accountId_createTime",
+  >        "rows": 1,
+  >        "ranges": [
+  >          "fe3bce61-8604-4ee0-9ee8-0509ffb1735c <= account_id <= fe3bce61-8604-4ee0-9ee8-0509ffb1735c AND create_time < 0x99a74a0000"
+  >        ]
+  >      },
+  >      "rows_for_plan": 1,
+  >      "cost_for_plan": 2.21,
+  >      "chosen": true
+  >    }
+  >    ```
+  >
+  > 5. 总结
+  >
+  >    ```txt
+  >    综上所述，针对于评分而言，第一条SQL(使用INNER JOIN的方式比较好)，因此优先选择第一条SQL。
+  >    所以，以后遇到这种SQL选择问题时，按照如上方案，把查询优化器的记录搬出来，这样就能知道这条SQL可能走哪些索引，最终走了哪个索引，以及具体的评分是多少。
+  >    ```
+  >
+  >    
+  >
+  > 
+  >
+  > 
+  >
+  > 
+  >
+  > 
+
+  
 
