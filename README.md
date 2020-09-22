@@ -2223,6 +2223,45 @@ SpringBoot默认包扫描路径为入口类所在包及所有子包, 当依赖�
      3. 实体类是否实现了序列化接口
      ```
 
+#### 2.4.9 mybatis @Select注解版本的坑
+
+* 在mybatis支持将sql写在@Select注解中，eg
+
+  ```java
+  @Select("SELECT * FROM user WHERE user_id = #{userId}")
+  ```
+
+  但是这有个前提，就是保证mybatis的版本在**3.4.3**及以上。在今天遇到的坑是：
+
+  项目中依赖**mybatis-spring-boot-starter 1.2.0**版本你，其内置依赖的mybatis版本为**3.4.2**，而项目中使用到了**@Select注解**，导致项目启动一直失败，报错如下：
+
+  ```java
+  Caused by: java.lang.NoSuchFieldError: INSTANCE
+  	at com.baomidou.mybatisplus.core.MybatisMapperAnnotationBuilder.parseStatement(MybatisMapperAnnotationBuilder.java:341)
+  	at com.baomidou.mybatisplus.core.MybatisMapperAnnotationBuilder.parse(MybatisMapperAnnotationBuilder.java:155)
+  	at com.baomidou.mybatisplus.core.MybatisMapperRegistry.addMapper(MybatisMapperRegistry.java:86)
+  	at com.baomidou.mybatisplus.core.MybatisConfiguration.addMapper(MybatisConfiguration.java:122)
+  	at org.apache.ibatis.builder.xml.XMLMapperBuilder.bindMapperForNamespace(XMLMapperBuilder.java:408)
+  	at org.apache.ibatis.builder.xml.XMLMapperBuilder.parse(XMLMapperBuilder.java:94)
+  ```
+
+  追踪至MybatisMapperAnnotationBuilder类的parseStatement方法的**341**行后发现：
+
+  ```java
+  public class NoKeyGenerator implements KeyGenerator {
+  
+    /**
+     * A shared instance.
+     * @since 3.4.3
+     */
+    public static final NoKeyGenerator INSTANCE = new NoKeyGenerator();
+      
+    // .....
+  }
+  ```
+
+  其内部调用的**NoKeyGenerator.INSTANCE**属性在**3.4.3**版本才生效，因此项目启动不起来。最终发现，它与@Select注解有关。因此解决这个问题有两个方案：一个是升级**mybatis-spring-boot-starter**为**1.3.0**版本，另一个是将@Select注解的功能移动到xml中去。为了不影响其他的模块(微服务项目)，因此选择将@Select注解的功能移动到xml中去，完美解决这个问题。
+
 
 ### 2.5 MySQL
 
