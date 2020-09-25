@@ -879,6 +879,10 @@ npm install --save file-saver@2.0.0
 
 * 子组件要获取父组件的一些异步请求资源，如果父组件是在生命周期钩子函数调用的，那么这个异步请求资源就会一直pendding，**直到父子组件都渲染结束后，这个请求才会继续往下走**。
 
+#### 1.10.2 react dispatch的坑
+
+* 在react中，如果我们使用dispatch机制调用了module的某个具体的方法，其中，我们对这个dispatch做了promise的then操作，目的是在dispatch执行完毕后执行then里面的操作来达到同步的目的。但是，若dispatch中的逻辑有错误，比如出现了这种**xxx of undefined**的错误，此时不会进入then方法，如果dispatch中有call api的操作，此时的api就会一直处于pendding状态。总结就是：dispatch内部的逻辑出错后，不会进入then后面的操作，且不会报错，这个错误会被框架给吃掉的。
+
 ## 二. 后端
 ### 2.1 Java basic
 #### 2.1.1 Double引发的Null Pointer Exception
