@@ -56,6 +56,9 @@
     - [1.8.1 出现跨域的原因](#181-出现跨域的原因)
     - [1.8.2 预检操作](#182-预检操作)
   - [1.9 some方法](#19-some方法)
+  - [1.10 React](#110-react)
+    - [1.10.1 在生命周期中调用异步请求的坑](#1101-在生命周期中调用异步请求的坑)
+    - [1.10.2 react dispatch的坑](#1102-react-dispatch的坑)
 - [二. 后端](#二-后端)
   - [2.1 Java basic](#21-java-basic)
     - [2.1.1 Double引发的Null Pointer Exception](#211-double引发的null-pointer-exception)
@@ -132,6 +135,7 @@
     - [2.4.6 typehandler](#246-typehandler)
     - [2.4.7 mybatis集成oracle的坑](#247-mybatis集成oracle的坑)
     - [2.4.8 mybatis用redis作为二级缓存的坑](#248-mybatis用redis作为二级缓存的坑)
+    - [2.4.9 mybatis @Select注解版本的坑](#249-mybatis-select注解版本的坑)
   - [2.5 MySQL](#25-mysql)
     - [2.5.1 export database/table command](#251-export-databasetable-command)
     - [2.5.2 import database/table command](#252-import-databasetable-command)
@@ -268,7 +272,7 @@
 - [八、大咖们发的文章涉及到的知识点](#八大咖们发的文章涉及到的知识点)
   - [8.1  INSERT INTO SELECT语句造成的锁表事件](#81-insert-into-select语句造成的锁表事件)
   - [8.2 Java Bean Copy框架性能对比](#82-java-bean-copy框架性能对比)
-  - [8.3 如下两条SQL的抉择：](#83-如下两条sql的抉择)
+  - [8.3 如下两条SQL的抉择](#83-如下两条sql的抉择)
 
 <!-- /TOC -->
 
