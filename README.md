@@ -2144,7 +2144,12 @@ System.out.println(B.class.isAssignableFrom(A.class));
 SpringBoot默认包扫描路径为入口类所在包及所有子包, 当依赖其他包(其他包中有springboot的相关注解, eg: 通用类的jar包)时, 依赖的包毕竟在扫描范围内注解才会生效。 背景: 主项目的默认扫描包为com.eugene.demo(即springboot入口类在该包下), 而依赖的一个类ApplicationContextHolder(主要是为了获取spring的上下文，方便获取bean)在com.eugene.demo中, 导致这个类的注解一直没有生效。
 ```
 
+#### 2.3.32 spring 抽象父类也支持Autowired
+
+* spring若子类是一个bean，父类没有添加相关注解，那么父类的一些属性如果有@Autowired注解的话，也是能依赖注入的(就算父类为抽象类一样能完成注入)
+
 ### 2.4 Mybatis
+
 #### 2.4.1 parameterType为int/long时, 参数为0的处理
   * 若传入的参数为0, mybatis会将它当成```空字符串```处理, 所以会查出name为空字符串的数据
     ```xml
