@@ -2117,6 +2117,24 @@ System.out.println(B.class.isAssignableFrom(A.class));
 #### 2.3.28 spring aop
   * 参考[此文件](https://github.com/AvengerEug/spring/tree/develop/aop)
 
+  * 关于spring的aop，它支持同一个织入绑定多个切点，eg:
+
+    ```java
+    @Pointcut(
+                "execution(public * org.springframework.data.repository.CrudRepository.save(..)) || " +
+                "execution(public * com.baomidou.mybatisplus.core.mapper.BaseMapper.insert(..)) || " +
+                "execution(public * com.baomidou.mybatisplus.core.mapper.BaseMapper.update*(..))")
+    public void aroundPointcut() {
+    }
+    
+    @Around("aroundPointcut()")
+    public Object process(ProceedingJoinPoint proceedingJoinPoint) {
+        // Do something
+    }
+    ```
+
+    如上代码指定了，一个环绕通知同时绑定了三个切点：分别为**org.springframework.data.repository.CrudRepository的save方法**、**com.baomidou.mybatisplus.core.mapper.BaseMapper的insert方法**、**com.baomidou.mybatisplus.core.mapper.BaseMapper以update打头的方法**。在执行这三个切点指定的方法之前，都会执行环绕通知内的逻辑
+
 #### 2.3.29 构建spring 5.0.x源码
   1. 安装gradle, 并配置环境变量(建议4.4.1版本)
   2. 查看源码根目录的`import-into-idea.md`文件, 按照提示将`spring-aspects`模块去除, 并要先编译`spring-core` 和 `spring-oxm`两个项目
