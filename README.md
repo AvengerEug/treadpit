@@ -2166,6 +2166,17 @@ SpringBoot默认包扫描路径为入口类所在包及所有子包, 当依赖�
 
 * spring若子类是一个bean，父类没有添加相关注解，那么父类的一些属性如果有@Autowired注解的话，也是能依赖注入的(就算父类为抽象类一样能完成注入)
 
+#### 2.3.33 spring @ConditionalOnBean注解的工作原理
+
+* spring中@ConditionalOnBean注解的工作原理大致可以以如下步骤进行描述
+
+  ```txt
+  首先@Condition系列的注解的工作原理是发生在构建BeanDefinition的check部分，在spring中我们可以把扫描出来的对象以BeanDefinition的形式进行描述。在构建好BeanDefinition对象后，因为有条件注解功能的存在，所以spring需要对BeanDefinition进行check。其中有一个注解叫@ConditionalOnBean。它的含义为：当前bean的构建依赖于@ConditionalOnBean注解传入的值。那么就有可能出现依赖的bean还未被扫描到就进行了check，进而导致bean不能被spring扫描到。
+  因此@ConditionalOnBean注解的使用需要check的bean是否在check之前就被加入到spring容器中去了
+  ```
+
+  
+
 ### 2.4 Mybatis
 
 #### 2.4.1 parameterType为int/long时, 参数为0的处理
