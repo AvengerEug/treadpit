@@ -126,6 +126,8 @@
     - [2.3.29 构建spring 5.0.x源码](#2329-构建spring-50x源码)
     - [2.3.30 BeanDefinitionRegistryPostProcessor和BeanFactoryPostProcessor类型的后置处理器区别](#2330-beandefinitionregistrypostprocessor和beanfactorypostprocessor类型的后置处理器区别)
     - [2.3.31 springboot默认扫描路径导致无法加载第三方jar包的bean](#2331-springboot默认扫描路径导致无法加载第三方jar包的bean)
+    - [2.3.32 spring 抽象父类也支持Autowired](#2332-spring-抽象父类也支持autowired)
+    - [2.3.33 spring @ConditionalOnBean注解的工作原理](#2333-spring-conditionalonbean注解的工作原理)
   - [2.4 Mybatis](#24-mybatis)
     - [2.4.1 parameterType为int/long时, 参数为0的处理](#241-parametertype为intlong时-参数为0的处理)
     - [2.4.2 $和#区别](#242-和区别)
