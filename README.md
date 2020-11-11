@@ -1678,7 +1678,12 @@ List list = Arrays.asList(strArr);
 System.out.println(B.class.isAssignableFrom(A.class));
 ```
 
+#### 2.1.23 BigDecimal的几个总结
+
+* 使用`signum()`方法判断一个BigDecimal是否为正负数
+
 ### 2.2 Spring Cloud
+
 #### 2.2.1 服务注册中心Eureka
 * 服务注册中心包括Eureka和zookeeper
 * 选择Eureka作为服务注册中心原因如下:
@@ -2201,7 +2206,10 @@ SpringBoot默认包扫描路径为入口类所在包及所有子包, 当依赖�
   因此@ConditionalOnBean注解的使用需要check的bean是否在check之前就被加入到spring容器中去了
   ```
 
-  
+#### 2.3.34 spring集成mongodb的几个总结
+
+* springboot集成mongodb，添加@Indexed注解就可以为某个字段添加缓存。看了下源码：这是因为它内部有一个MongoPersistentEntityIndexResolver的类在底层为指定的字段添加了索引。
+* spring集成mongodb，只需要在接口中定义方法就可以进行数据查询了
 
 ### 2.4 Mybatis
 
