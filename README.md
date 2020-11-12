@@ -2209,7 +2209,7 @@ SpringBoot默认包扫描路径为入口类所在包及所有子包, 当依赖�
 #### 2.3.34 spring集成mongodb的几个总结
 
 * springboot集成mongodb，添加@Indexed注解就可以为某个字段添加缓存。看了下源码：这是因为它内部有一个MongoPersistentEntityIndexResolver的类在底层为指定的字段添加了索引。
-* spring集成mongodb，只需要在接口中定义方法就可以进行数据查询了
+* spring集成mongodb，只需要在接口中定义方法就可以进行数据查询了。如果方法的定义是一个list接收的话，会返回一个list。如果是一个单纯的po对象接收的话，假设插件条件可以查出来多条，但是最终获取到的是第一条数据
 
 ### 2.4 Mybatis
 
