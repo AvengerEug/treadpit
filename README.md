@@ -1682,6 +1682,17 @@ System.out.println(B.class.isAssignableFrom(A.class));
 
 * 使用`signum()`方法判断一个BigDecimal是否为正负数
 
+* 精度问题导致的**java.lang.ArithmeticException: Rounding necessary**异常：
+
+  ```txt
+  如果我们调用bigdecimal的setScala调整精度问题时，需要指定舍入模式，eg: 四舍五入模式。
+  如果没有指定舍入模式时。默认使用的是ROUND_UNNECESSARY模式，在此模式下，如果bigdecimal的
+  值为10.222444的话，你强行给他保留两位小数时，jdk会抛出信息为Rounding necessary的计算异常。
+  所以我们在调用setScala方法设置精度时，可以为它添加一个舍入模式，来预防这种情况下使用哪种
+  舍入模式进行处理，比如我们可以设置ROUND_HALF_UP模式，即四舍五入模式, 这样的话，当我们传入
+  10.222444的数字进来之后，会进行四舍五入，最终变成10.22
+  ```
+
 ### 2.2 Spring Cloud
 
 #### 2.2.1 服务注册中心Eureka
