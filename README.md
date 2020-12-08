@@ -1693,6 +1693,34 @@ System.out.println(B.class.isAssignableFrom(A.class));
   10.222444的数字进来之后，会进行四舍五入，最终变成10.22
   ```
 
+#### 2.1.24 时间区间校验遇到的坑
+
+* 在工作中，通常会有与第三方系统的调用，但难免会出现第三方系统的维护阶段。假设第三方系统规定了：在22:00 到 00:30之间是不允许调用第三方系统的，即使调用了，也会返回不允许调用的错误。此时，作为调用方，需要对时间段做一些内部校验，比如：在22:00 到 00:30之间不允许调用第三方接口。因此，在做校验时，需要判断当前时间是否位于22:00 到 00:30之间。
+
+* 起初，自己做的方法很“傻”，被这个时间段给吓住了，觉得跨天了，应该会很难。结果去询问下同事后，被同事给“教训”了，同事说：不需要想那么多，只需要获取到当前时间的小时和分钟就行了，然后挨个对比。被他这么一说，我恍然大悟，于是我们可以这个去做：
+
+  ```txt
+  只需要获取当前时间的 时分 时间即可，然后分别对小时、分钟上的数字进行比较即可。
+  可以使用SimpleDateFormat formatter = new SimpleDateFormat("HH:mm")的format来获取。
+  ```
+
+  大致的代码如下所示：
+
+  ```java
+  SimpleDateFormat formatter = new SimpleDateFormat("HH:mm");
+  String dateString = formatter.format(currentTime);
+  String[] split = timeShort.split(":");
+  int hourVal = Integer.valueOf(split[0]);
+  int minVal = Integer.valueOf(split[1]);
+  if ((hourVal >= 22 && minVal >= 0) || (hourVal == 0 && minVal <= 30)) {
+      // 日切点，不允许操作
+      LOGGER.info("中信23:55-00:15之间不允许操作基本户。");
+      return false;
+  }
+  ```
+
+* 总结起来就是：自己对时间的操作不是特别熟悉，有时候请教下同事就能达到事半功倍的效果。如果让自己在跨天这个思维里面一直走的话，那肯定是一个死胡同，费时费力
+
 ### 2.2 Spring Cloud
 
 #### 2.2.1 服务注册中心Eureka
@@ -1895,7 +1923,7 @@ System.out.println(B.class.isAssignableFrom(A.class));
   * session: 每次会话都会new一个新对象, 同一次会话共用一个实例
   * global-session: 所有会话共用一个实例
 
-#### 2.3.11 SpringBoot是job注解和异步调用注解生效前提
+#### 2.3.11 SpringBoot使job注解和异步调用注解生效前提
 * 异步注解:  @Async
     要使注解生效, 需要在入口处添加@EnableAsync注解
 * job注解: @Scheduled  
