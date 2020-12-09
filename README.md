@@ -3451,18 +3451,74 @@ linux若分别以普通user启动jenkins.war, 那么会在/home/user/.jenkins/ �
 #### 3.4.1 配置反向代理
 * 在server部分添加如下配置:
   ```config
-    location /api/ {
-      proxy_pass http://127.0.0.1:8001/;
-      proxy_set_header Host $host;   # 一定要加, 否则有可能会出现400的请求错误
-      proxy_set_header X-Real-IP $remote_addr;
-      proxy_set_header REMOTE-HOST $remote_addr;
-      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    }
-
-  表示: 当遇到后缀到/api的路由时, 反向代理到 127.0.0.1:8001,
-
+  #user  nobody;
+  worker_processes  1;
+  
+  #error_log  logs/error.log;
+  #error_log  logs/error.log  notice;
+  #error_log  logs/error.log  info;
+  
+#pid        logs/nginx.pid;
+  
+events {
+      worker_connections  1024;
+  }
+  
+  
+  http {
+      include       mime.types;
+      default_type  application/json;
+      sendfile        on;
+      keepalive_timeout  65;
+  
+      #gzip  on;
+  
+      upstream domain{   
+        server 192.168.1.110;
+      }
+  
+      server {
+          listen       80;
+  	   server_name  192.168.1.122;
+  
+          location /api {
+               # 使用固定的域名去请求后端，有可能后端指定了一定要使用域名才能访问
+               # 如果要获取请求的真实域名的话，只需要配置成：proxy_set_header Host $Host;  即可
+               proxy_set_header Host "in-domain.com";
+               # 将请求头携带到后端
+               proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  			# 如果http://adomain后面不加/，则会匹配192.168.1.122，将192.168.1.122后面的所有uri添加到in-domain.com后面
+  			# 如果http://domain后面加了/，则会匹配192.168.1.122/api，将192.168.1.122/api后面的所有url添加到in-domain.com后面
+  		    proxy_pass http://domain/;
+  		}
+  
+        
+          error_page   500 502 503 504  /50x.html;
+          location = /50x.html {
+              root   html;
+          }
+  
+          
+      }
+  }  
+  
+  
   反向代理允许重新定义或者添加http请求头
   语法: proxy_set_header field value;
+  ```
+  
+* 根据proxy_pass的不同，最终反向代理的url也会不同，具体如下所示：
+
+  |   proxy_pass的定义    |             请求url              |         反向代理后的url          |                             备注                             |
+  | :-------------------: | :------------------------------: | :------------------------------: | :----------------------------------------------------------: |
+  | http://192.168.1.122  | http://192.168.1.122/api/test.do | http://192.168.1.110/api/test.do | 因为proxy_pass中没有添加**/**，因此会认为host后面所有的uri都要被反向代理到后端去 |
+  | http://192.168.1.122/ | http://192.168.1.122/api/test.do |   http://192.168.1.110/test.do   | 因为proxy_pass中有添加**/**，因此会认为**/api**后面所有的uri都要被反向代理到后端去 |
+
+* 同时，若后端项目指定了一定要固定的域名才能访问的话，此时我们可以使用proxy_set_header Host来配置固定的域名，比如如下配置：
+
+  ```shell
+  # 配置了，在进行反向代理时，将域名固定成：in-domain.com
+  proxy_set_header Host "in-domain.com"; 
   ```
 #### 3.4.2 配置多个vue.js单页面项目
 *  在server部分添加如下配置:
