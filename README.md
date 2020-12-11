@@ -1721,6 +1721,15 @@ System.out.println(B.class.isAssignableFrom(A.class));
 
 * 总结起来就是：自己对时间的操作不是特别熟悉，有时候请教下同事就能达到事半功倍的效果。如果让自己在跨天这个思维里面一直走的话，那肯定是一个死胡同，费时费力
 
+#### 2.1.25 对接第三方需要发起https请求的证书存储策略
+
+* 在对接第三方应用时，无疑需要以https的方法进行交互的，这就涉及到一个问题：需要我们在代码层面发送一个https请求，而https请求的特点就是需要一个CA颁布的证书，因此我们需要在请求中携带证书，而证书是一个二进制文件。在存储它的时候我们有多种方式，以及他们的优缺点如下所示：
+
+  |                       存储证书的方式                        |                             优点                             |                             缺点                             |
+  | :---------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
+  | 将证书放在项目中的classpath下，到时候直接使用文件流读取即可 |                          简单，方便                          | 1、不安全，证书直接放在了项目中了</br>2、每次读取需要有io消耗，耗时，性能低 |
+  |                将证书转成base64存在数据库中                 | 1、相对安全，将证书存在持久层了</br>2、每次读取直接从数据库中查，相对而言耗时少，性能高 | 1、每次要进行base64解码，这段过程可能会消耗一点性能，但与io消耗相比，可以忽略不计 |
+
 ### 2.2 Spring Cloud
 
 #### 2.2.1 服务注册中心Eureka
@@ -3458,29 +3467,31 @@ linux若分别以普通user启动jenkins.war, 那么会在/home/user/.jenkins/ �
   #error_log  logs/error.log  notice;
   #error_log  logs/error.log  info;
   
+  ```
+
 #pid        logs/nginx.pid;
-  
+
 events {
       worker_connections  1024;
   }
-  
-  
+
+
   http {
       include       mime.types;
       default_type  application/json;
       sendfile        on;
       keepalive_timeout  65;
-  
+
       #gzip  on;
-  
+      
       upstream domain{   
         server 192.168.1.110;
       }
-  
+      
       server {
           listen       80;
   	   server_name  192.168.1.122;
-  
+
           location /api {
                # 使用固定的域名去请求后端，有可能后端指定了一定要使用域名才能访问
                # 如果要获取请求的真实域名的话，只需要配置成：proxy_set_header Host $Host;  即可
@@ -3491,18 +3502,19 @@ events {
   			# 如果http://domain后面加了/，则会匹配192.168.1.122/api，将192.168.1.122/api后面的所有url添加到in-domain.com后面
   		    proxy_pass http://domain/;
   		}
-  
-        
+
+
           error_page   500 502 503 504  /50x.html;
           location = /50x.html {
               root   html;
           }
-  
-          
+
+
+​          
       }
   }  
-  
-  
+
+
   反向代理允许重新定义或者添加http请求头
   语法: proxy_set_header field value;
   ```
