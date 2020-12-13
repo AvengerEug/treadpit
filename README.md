@@ -4339,5 +4339,6 @@ systemctl start rc-local.service  => 开启rc-local服务
   >
   > 
 
-  
+
+新增ubuntu 18.04 美化主题教程地址: https://www.cnblogs.com/ldu-xingjiahui/p/12594031.html 
 
