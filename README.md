@@ -2279,6 +2279,7 @@ SpringBoot默认包扫描路径为入口类所在包及所有子包, 当依赖�
 
 * springboot集成mongodb，添加@Indexed注解就可以为某个字段添加缓存。看了下源码：这是因为它内部有一个MongoPersistentEntityIndexResolver的类在底层为指定的字段添加了索引。
 * spring集成mongodb，只需要在接口中定义方法就可以进行数据查询了。如果方法的定义是一个list接收的话，会返回一个list。如果是一个单纯的po对象接收的话，假设插件条件可以查出来多条，但是最终获取到的是第一条数据
+* mongodb更新一条记录时，若字段不存在了，那在保存时，此字段也不会在mongo中保存了。即若id为1的记录保存在mongo时，它存在name个age的属性，假设下次存储id为1的记录时，它只提供了一个叫age的属性，那么在mongdo中存储的数据将会只包含id和age属性，name属性就会**消失**。
 
 ### 2.4 Mybatis
 
@@ -3492,72 +3493,63 @@ linux若分别以普通user启动jenkins.war, 那么会在/home/user/.jenkins/ �
   #error_log  logs/error.log;
   #error_log  logs/error.log  notice;
   #error_log  logs/error.log  info;
+  #pid        logs/nginx.pid;
   
-  ```
-
-#pid        logs/nginx.pid;
-
-events {
-      worker_connections  1024;
+  events {
+  	worker_connections  1024;
   }
-
-
-  http {
-      include       mime.types;
-      default_type  application/json;
-      sendfile        on;
-      keepalive_timeout  65;
-
-      #gzip  on;
-      
-      upstream domain{   
-        server 192.168.1.110;
-      }
-      
-      server {
-          listen       80;
-  	   server_name  192.168.1.122;
-
-          location /api {
-               # 使用固定的域名去请求后端，有可能后端指定了一定要使用域名才能访问
-               # 如果要获取请求的真实域名的话，只需要配置成：proxy_set_header Host $Host;  即可
-               proxy_set_header Host "in-domain.com";
-               # 将请求头携带到后端
-               proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-  			# 如果http://adomain后面不加/，则会匹配192.168.1.122，将192.168.1.122后面的所有uri添加到in-domain.com后面
-  			# 如果http://domain后面加了/，则会匹配192.168.1.122/api，将192.168.1.122/api后面的所有url添加到in-domain.com后面
-  		    proxy_pass http://domain/;
-  		}
-
-
-          error_page   500 502 503 504  /50x.html;
-          location = /50x.html {
-              root   html;
-          }
-
-
-​          
-​      }
-  }  
-
-
-  反向代理允许重新定义或者添加http请求头
-  语法: proxy_set_header field value;
-  ```
   
-* 根据proxy_pass的不同，最终反向代理的url也会不同，具体如下所示：
-
-  |   proxy_pass的定义    |             请求url              |         反向代理后的url          |                             备注                             |
-  | :-------------------: | :------------------------------: | :------------------------------: | :----------------------------------------------------------: |
-  | http://192.168.1.122  | http://192.168.1.122/api/test.do | http://192.168.1.110/api/test.do | 因为proxy_pass中没有添加**/**，因此会认为host后面所有的uri都要被反向代理到后端去 |
-  | http://192.168.1.122/ | http://192.168.1.122/api/test.do |   http://192.168.1.110/test.do   | 因为proxy_pass中有添加**/**，因此会认为**/api**后面所有的uri都要被反向代理到后端去 |
-
-* 同时，若后端项目指定了一定要固定的域名才能访问的话，此时我们可以使用proxy_set_header Host来配置固定的域名，比如如下配置：
-
-  ```shell
-  # 配置了，在进行反向代理时，将域名固定成：in-domain.com
-  proxy_set_header Host "in-domain.com"; 
+  http {
+  	include       mime.types;
+  	default_type  application/json;
+  	sendfile        on;
+  	keepalive_timeout  65;
+  	#gzip  on;
+    
+  	upstream domain {
+  		server 192.168.1.110;
+  	}
+    
+    	server {
+        listen       80;
+        server_name  192.168.1.122;
+        location /api {
+             # 使用固定的域名去请求后端，有可能后端指定了一定要使用域名才能访问
+             # 如果要获取请求的真实域名的话，只需要配置成：proxy_set_header Host $Host;  即可
+             proxy_set_header Host "in-domain.com";
+             # 将请求头携带到后端
+             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+             # 如果http://adomain后面不加/，则会匹配192.168.1.122，将192.168.1.122后面的所有uri添加到in-domain.com后面
+  
+    		   # 如果http://domain后面加了/，则会匹配192.168.1.122/api，将192.168.1.122/api后面的所有url添加到in-domain.com后面
+    		   proxy_pass http://domain/;
+         }
+    	  error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+        
+      }
+    }  
   ```
+
+    反向代理允许重新定义或者添加http请求头
+    语法: proxy_set_header field value;
+
+  * 根据proxy_pass的不同，最终反向代理的url也会不同，具体如下所示：
+
+  * |   proxy_pass的定义    |             请求url              |         反向代理后的url          |                             备注                             |
+    | :-------------------: | :------------------------------: | :------------------------------: | :----------------------------------------------------------: |
+    | http://192.168.1.122  | http://192.168.1.122/api/test.do | http://192.168.1.110/api/test.do | 因为proxy_pass中没有添加**/**，因此会认为host后面所有的uri都要被反向代理到后端去 |
+    | http://192.168.1.122/ | http://192.168.1.122/api/test.do |   http://192.168.1.110/test.do   | 因为proxy_pass中有添加**/**，因此会认为**/api**后面所有的uri都要被反向代理到后端去 |
+
+  * 同时，若后端项目指定了一定要固定的域名才能访问的话，此时我们可以使用proxy_set_header Host来配置固定的域名，比如如下配置：
+
+    ```shell
+    # 在进行反向代理时，将域名固定成：in-domain.com
+    proxy_set_header Host "in-domain.com"; 
+    ```
+
 #### 3.4.2 配置多个vue.js单页面项目
 *  在server部分添加如下配置:
   ```config
@@ -3668,8 +3660,7 @@ events {
     4. autoDeploy: 设置为true, 设置自动部署
         *. Context: 上下文路径
     1. docBase: 相对于Host标签下的appBase而言, 
-    2. path: 访问上下文路径. eg: Host的appBase为webapps, name为localhost; Context的docBase为eugene, Context的path为'/test', 那么访问localhost:8080/test 则会默认访问到
-            webapps/eugene文件夹去
+    15. path: 访问上下文路径. eg: Host的appBase为webapps, name为localhost; Context的docBase为eugene, Context的path为'/test', 那么访问localhost:8080/test 则会默认访问到webapps/eugene文件夹去
 
 ***
 
@@ -3737,15 +3728,19 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
     eg: http://mirrors.163.com/centos/7.7.1908/isos/x86_64/CentOS-7-x86_64-Everything-1908.iso
   3. 假设: 
       搭建yum源的linux服务器ip地址为: 192.168.1.1 nginx开放的端口为80, 且没修改过nginx任何配置
+      
   4. nginx搭建yum源步骤:
 
       4.1. 将镜像文件内容解压缩到/var/www/html目录下
 
       4.2. 在nginx监听80端口的server节点下修改如下配置文件(将资源路径指向/var/www/html):
-        location / {
-          autoindex on;
-          root /var/www/html;
-        }
+
+      ```shell
+      location / {
+      	autoindex on;
+      	root /var/www/html;
+      }
+      ```
 
       4.3. 访问http://192.168.1.1:80 若能查看到/var/www/html文件夹的目录则算安装成功
 
@@ -3756,14 +3751,14 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
 
       5.3. 填充如下内容至/etc/yum.repos.d/local.repo文件
         ```shell
-          [local]
-          name=local
-          baseurl=http://192.168.1.1:80
-          enabled=1
-          gpgcheck=1
-          gpgkey=http://192.168.1.1:80/YYYY
-          ## gpgkey中的YYYY这一串字符串根据访问http://192.168.1.1:80的结果而定, 目的就是指定一个key.
-          ## 在网易提供的yum源(http://mirrors.163.com/centos/6/os/x86_64/)中,我们可以指定YYYY为RPM-GPG-KEY-CentOS-6
+      [local]
+      name=local
+      baseurl=http://192.168.1.1:80
+      enabled=1
+      gpgcheck=1
+      gpgkey=http://192.168.1.1:80/YYYY
+      ## gpgkey中的YYYY这一串字符串根据访问http://192.168.1.1:80的结果而定, 目的就是指定一个key.
+      ## 在网易提供的yum源(http://mirrors.163.com/centos/6/os/x86_64/)中,我们可以指定YYYY为RPM-GPG-KEY-CentOS-6
         ```
 
       5.4. 清理无用源
@@ -3995,11 +3990,11 @@ systemctl start rc-local.service  => 开启rc-local服务
 #### 6.1.8 修改idea关闭当前类tab快捷键为 ctrl + w
 * File -> setting -> keymap -> 搜索close -> 找到Window下面的Editor Tabs下面的Close， 改成Ctrl + w
 
-### 6.1.9 IDEA调试hashMap源码显示不了hashMap内部一些属性
+#### 6.1.9 IDEA调试hashMap源码显示不了hashMap内部一些属性
 
 * 参考链接[https://blog.csdn.net/qq_31772441/article/details/96469953](https://blog.csdn.net/qq_31772441/article/details/96469953)
 
-## 6.2 IDEA手动搭建springmvc maven项目
+### 6.2 IDEA手动搭建springmvc maven项目
 
 ```txt
 1. 新建maven项目，并添加springmvc的依赖
@@ -4064,14 +4059,14 @@ systemctl start rc-local.service  => 开启rc-local服务
 	同时需要在resources文件夹下新建conf文件夹并在里面创建不同环境的文件夹，并在不同环境的文件夹中新增以properties结尾的配置文件。
 ```
 
-## 6.3 IDEA 2019编译项目找不到sun.misc包
+### 6.3 IDEA 2019编译项目找不到sun.misc包
 
 * 原因：**sun.misc**包可能会在jdk高版本中被移掉，而IDEA 2019版本在编译project时，默认使用的是JDK11的版本，在JDK11中，已经没有**sun.misc**包了。因此我们需要显示的把它降低版本为jdk1.8
 * 执行步骤：
   * 1、Ctrl + Shift + Alt + s  打开项目结构图
   * 2、找到**Project Structure -> Project -> Project SDK**，将版本改成jdk 1.8即可(需要指定本地安装jdk1.8的路径)
 
-## 6.4 IDEA  切换同一个目录下多个项目的分支
+### 6.4 IDEA  切换同一个目录下多个项目的分支
 
 * 背景：现在是微服务的时代，一个项目下可能有多个服务，同时这些服务对应的是一个单独的仓库。然后我们可能会出现在develop-1.1.0分支开发的时候，突然有个紧急情况，需要切换到release-1.0.0分支修bug。此时我们使用git 命令行一个仓库一个仓库的切换分支，效率有点低。此时可以借助IDEA来完成
 
