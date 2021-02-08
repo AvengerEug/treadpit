@@ -3862,6 +3862,17 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
   在`/etc/rc.d/rc.local` 文件夹中添加代码: `systemctl start nginx`
   在将`/etc/rc.d/rc.local`设置成可执行文件: `chmod +x /etc/rc.d/rc.local`
 
+#### 4.1.18 如何使用命令下载sftp服务器中的文件
+
+* 通常，我们使用的是scp命令下载服务器的文件，但为了安全，可能会使用sftp。那如何使用命令下载呢？
+
+  ```shell
+  sftp -o port=端口号 用户名@服务器ip地址:/root/aaa.txt ./
+  # 意思就是将服务器中的/root/aaa.txt文件下载到本地
+  ```
+
+  
+
 ### 4.2 keepalived实现主备部署
 
 #### 4.2.1 两台centos7使用keepalived实现主备简单部署
