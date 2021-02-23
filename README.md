@@ -3280,6 +3280,21 @@ git log --graph --pretty=oneline --abbrev-commit
 
 * 服务消费者要调用服务提供者的某个方法时，设置了请求的超时时间。比如20s，当请求时间超过20s时，消费者会中断线程，直接返回（相当于服务降级）。**但是服务提供者实际上还是在执行方法。**。并不是说消费者直接返回超时后，请求就没有执行了，这是不对的！
 
+#### 2.13.2 Dubbo RpcContext透传附件信息的坑
+
+* 在使用Dubbo进行微服务开发时，可能需要将服务A的一些信息，传递到服务B中。这个时候有两种方式：
+
+  > 第一种方式：在服务B的接口中添加对应的参数，在服务A调用服务B时直接将参数写在服务B的参数签名处即可
+  >
+  > 第二种方式：在rpc调用时做一些手脚，如果是普通的http的话，我们可以把参数放在请求头中。如果是Dubbo微服务框架的话，我们可以使用Dubbo透传机制，即把参数放在RpcContext的attachments中，其底层就是基于ThreadLocal的map。使用方式为：
+  >
+  > ```java
+  > 放值：RpcContext.getContext().setAttachment(key, value);
+  > 取值：RpcContext.getContext().getAttachment(key);
+  > ```
+  >
+  > 但需要注意，里面的变量是基于线程而言的，如果服务A开了另外一个线程去透传信息的话，服务B是无法接收透传信息的。因为RpcContext.getContext()这段代码的含义就是获取当前线程所对应的RpcContext。而RpcContext.getContext().setAttachment(key, value);整段代码的含义就是将key和value放到当前线程对应的RpcContext中的map中去。这只是一个准备过程，后续在发起RPC调用之前，会拿到当前线程对应的RpcContext中的map信息填充到http中，然后在服务B中再从http中拿到对应的请求参数，完成透传。假设我们是在服务A中开了另外一个线程去透传信息的，那么RpcContext.getContext().setAttachment(key, value)的代码的作用就是将key和value放到另外线程对应的rpcContext中的map中去了。自然在执行rpc调用前获取不到透传信息，就无法将透传信息放到http中去了
+
 ***
 
 ## 三. DevOps
