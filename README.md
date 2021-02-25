@@ -3295,6 +3295,14 @@ git log --graph --pretty=oneline --abbrev-commit
   >
   > 但需要注意，里面的变量是基于线程而言的，如果服务A开了另外一个线程去透传信息的话，服务B是无法接收透传信息的。因为RpcContext.getContext()这段代码的含义就是获取当前线程所对应的RpcContext。而RpcContext.getContext().setAttachment(key, value);整段代码的含义就是将key和value放到当前线程对应的RpcContext中的map中去。这只是一个准备过程，后续在发起RPC调用之前，会拿到当前线程对应的RpcContext中的map信息填充到http中，然后在服务B中再从http中拿到对应的请求参数，完成透传。假设我们是在服务A中开了另外一个线程去透传信息的，那么RpcContext.getContext().setAttachment(key, value)的代码的作用就是将key和value放到另外线程对应的rpcContext中的map中去了。自然在执行rpc调用前获取不到透传信息，就无法将透传信息放到http中去了
 
+#### 2.13.3 Dubbo引入服务，若服务未注册到注册中心则报错
+
+*  Dubbo引入服务，若服务未注册到注册中心则报错（比如A服务需要引入B服务，但是A服务部署了，B服务没有部署，则会报错）。报错信息：
+
+  ```txt
+  No provider available from registry 127.0.0.1:2181 for service org.apache.dubbo.demo.DemoService on consumer 192.168.56.1 use dubbo version , please check status of providers(disabled, not registered or in blacklist).
+  ```
+
 ***
 
 ## 三. DevOps
