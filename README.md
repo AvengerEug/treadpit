@@ -3303,6 +3303,23 @@ git log --graph --pretty=oneline --abbrev-commit
   No provider available from registry 127.0.0.1:2181 for service org.apache.dubbo.demo.DemoService on consumer 192.168.56.1 use dubbo version , please check status of providers(disabled, not registered or in blacklist).
   ```
 
+### 2.14  MongoDB
+
+#### 2.14.1 索引的TTL机制
+
+* MongoDB支持为索引数据创建过期时间，具体[参考官方文档：TTL Indexes](https://docs.mongodb.com/manual/core/index-ttl/)
+* 其主要工作原理为：为索引的数据添加一个过期时间，从新数据被添加的那一刻开始算起，过了设置的时间后，数据会被清除。它的过期时间设置比redis更强大，redis的过期时间是把整个key给删除了。而MongoDB的过期时间机制可以精确到索引中的数据。
+
+#### 2.14.2 创建索引的异常
+
+* 在spring集成MongoDB开发是，我们可以在代码中为某个字段添加索引，其主要就是**@Indexed**注解的功效。但是mongodb在创建索引时，会定义索引。因此同一个创建索引的代码反复执行不会出现任何问题。但如果创建索引的代码中有变化，比如：我为字段a创建索引时，指定了过期时间。然后在第二次创建时没有指定过期时间，此时就会抛出如下异常：
+
+  ```txt
+  com.mongodb.MongoException: Index with name: code already exists with different options
+  ```
+
+  因此，在出现这个异常时，我们需要确定索引是否需要重新被定义？如果需要重新被定义则需要把原来的索引给删除，再重新创建。
+
 ***
 
 ## 三. DevOps
