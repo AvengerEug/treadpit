@@ -3320,6 +3320,57 @@ git log --graph --pretty=oneline --abbrev-commit
 
   因此，在出现这个异常时，我们需要确定索引是否需要重新被定义？如果需要重新被定义则需要把原来的索引给删除，再重新创建。
 
+#### 2.15.3 mongodb条件查询null的两种情况
+
+* mongodb是非关系型数据库，我们在实际开发时，经常会遇到为某个实体添加一些字段（eg：添加username字段）。这样的话就会导致：新保存的实体字段是存在的， 但是旧数据是灭有新增加的字段的。因此，我们在做查询时，为了兼容，可能会考虑到字段不存在的情况，需要判断这个字段是否存在，如下所示：
+
+  ```shell
+  # 判断这个字段是否存在
+  db.getCollection("user").find({"username": {"$exists": false}})
+  ```
+
+  有时候，我们需要查找年龄为18且(username为**avengerEug**或username为null)的用户，因此我们很容易写出这样的sql：
+
+  ```shell
+  # 查询年龄为18的用户，其中username为null或者为avengerEug的用户
+  db.getCollection("user").find({
+    "age": 18,
+    "$and": [
+    	{
+    	  "$or": [
+    	  	{"username": {"$exists": false}},
+    	  	{"username": null}
+    	  ]
+    	}
+    ]
+  })
+  ```
+
+  针对这种情况，其实有更好的解决方案.
+
+* 如下sql的两种含义：
+
+  ```shell
+  # 使用如下sql查询出来的数据会有两种情况
+  # 1、username字段不存在
+  # 2、username存在，但它的值为null
+  db.getCollection("user").find({"username": null})
+  ```
+
+  因此最开始的sql我们可以优化成如下表现形式：
+
+  ```shell
+  # 查询年龄为18的用户，其中username为null或者为avengerEug的用户
+  db.getCollection("user").find({
+    "age": 18,
+    "username": null
+  })
+  ```
+
+  使用此种方式，间接清晰了很多，也增加了sql的可读性。
+
+* 因此，在mongo中，若查询条件为is null的情况，筛选出来的数据可能**包含字段不存在和字段存在且值为null**的情况
+
 ***
 
 ## 三. DevOps
