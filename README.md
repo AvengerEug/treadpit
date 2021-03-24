@@ -2868,6 +2868,52 @@ ps: --default-character-set=xxx  编码格式具体根据导出的db时选择的
 
 * 参考链接：[高可用集群模式总结](https://github.com/AvengerEug/redis-study#52-哨兵模式)
 
+#### 2.7.12 redis中的lua脚本
+
+* 一个案例对应一个lua脚本
+
+  ```txt
+  案例：
+  
+  有一个负载均衡的轮询算法，我们使用redis来实现。正常情况下，同一个实例的节点只有3个，但可能出现动态扩容或缩减的情况，因此，实例可能增加或减少。
+  基于redis来实现这个功能的话，我们把所有的实例放到redis的list中，负载均衡一次，我们就从队列中取一个实例，然后将它返回，最后再把它放到队列末端去，其对应redis的操作就是：负载均衡一次 <=> rpop一次，将实例再次放入队列中 <=> lpush一次。因为我们得保证 lpush和rpop以及将rpop出队的元素返回 这三个操作是一个原子性操作。因此我们选择了lua脚本。但可能会出现扩容和缩容的情况，因此我们得动态的添加队列中的实例或减少队列中的实例，并且这一操作也是原子性的。
+  ```
+
+* 针对于初始化队列的lua脚本：
+
+  ```java
+  private static final String INITIALIZE_QUEUE_SCRIPT = "if (redis.call('exists', KEYS[1]) == 0 or redis.call('LLEN', KEYS[1]) ~= ARGV[1] ) then \n"
+              + " redis.call('DEL', KEYS[1]) \n" +
+              " table.remove(ARGV, 1) \n" +
+              "return redis.call('LPUSH', KEYS[1], unpack(ARGV))  \n" + " end ";
+  
+  // 调用处，其中keys是一个List<String>的list，args也是一个List<String>的list。keys的长度为1，args的长度为5（其中第一个参数为当前放入队列中的数量）
+  jedis.eval(INITIALIZE_QUEUE_SCRIPT, keys, args)
+  ```
+
+  上述的lua脚本主要是做一件事：初始化一个队列。其中会传入keys和args。keys中存储的是队列的**名称**，只有一个元素。args中包含要放入队列的数量，以及每个元素。eg：我要往队列中放入：**1,4,15**三个实例。那么，args的值为：**3,1,4,15**。第一个数字3表示接下来要往队列中塞3个元素。
+
+  其主要功能为：**当队列不存在或者 当前要放入队列的实例与redis中的队列长度不一致，那么则重新初始化队列（删除队列再初始化队列）**。其中一个特殊点就是：args中的第一个元素其实仅仅是用来判断当前要放入的实例与redis现存的实例个数是否一致，因此在实际初始化队列时，要把它给移除，即lua脚本中的**table.remove(ARGV, 1)**代码，它表示：移除ARGV数组中的第一个元素。
+
+* 针对于入队出队的lua脚本：
+
+  ```java
+  private static final String OBTAIN_ELEMENT_SCRIPT =
+      "local element = redis.call('RPOP', KEYS[1]) \n " +
+      "if (element) then \n " +
+      "    local lpushOperate = redis.call('LPUSH', KEYS[1], element) \n " +
+      "    if (lpushOperate) then \n " +
+      "        return element \n " +
+      "    else \n " +
+      "        return null \n " +
+      "    end \n " +
+      "else \n " +
+      "    return null \n " +
+      "end \n ";
+  ```
+
+  首先，先出队，然后把出队后的参数拿到手，再执行入队操作，最后再将出队后的参数返回。
+
 
 ### 2.8 Maven
 #### 2.8.1 install maven仓库找不到的jar包
