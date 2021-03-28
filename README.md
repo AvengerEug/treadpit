@@ -3349,6 +3349,24 @@ git log --graph --pretty=oneline --abbrev-commit
   No provider available from registry 127.0.0.1:2181 for service org.apache.dubbo.demo.DemoService on consumer 192.168.56.1 use dubbo version , please check status of providers(disabled, not registered or in blacklist).
   ```
 
+#### 2.13.4 为什么一定要在服务提供者中引用自己？
+
+* Dubbo的@Service注解做了两件事：
+
+  > 1、服务导出
+  >
+  > 2、将当前服务添加到spring容器中去
+
+  因此，在同一个服务提供者中，因为服务A要调用服务B（服务A和服务B在同一个服务提供者中），我们直接使用spring的@Autowired注解注入即可。那在这种情况下（两个服务都在同一个提供者中）会用@Reference注解引用服务呢？
+
+  ```txt
+  1、在做单元测试时，如果我们写的一些dubbo过滤器指定是在 服务提供者 侧生效时，而此时我们要测试过滤器的一些功能，这个时候我们就可以使用@Reference注解来引用同一个提供者的其他服务了。此时我们就是在模拟消费者请求服务提供者的逻辑
+  ```
+
+#### 2.13.5 Dubbo过滤器一定要使用配置@Activate注解中的order属性来控制顺序吗
+
+* 看情况，如果过滤器是我们自己编写的，我们可以修改spi文件中每个过滤器的配置顺序（默认：配在下面，优先被执行）。但如果我们要添加同一个类型的过滤器，已经有第三方框架（jar包）也提供了，此时我们无法保证第三方框架的spi文件和我们自己开发的spi文件哪个优先执行。因此，此时就要使用**order**属性来控制顺序了
+
 ### 2.14  MongoDB
 
 #### 2.14.1 索引的TTL机制
