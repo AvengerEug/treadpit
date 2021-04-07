@@ -2968,8 +2968,27 @@ git log --graph --pretty=oneline --abbrev-commit
 * 参考[此项目](https://github.com/AvengerEug/template-method)
 #### 2.10.4 观察者模式
 * 参考[此项目](https://github.com/AvengerEug/observer)
-
 * spring的事件驱动模型就是基于观察者设计模式来的
+
+#### 2.10.5 责任链模式
+
+* 参考[责任链模式的设计与实现](https://www.runoob.com/design-pattern/chain-of-responsibility-pattern.html)
+
+* 优点：
+
+  ```txt
+  1、降低耦合度
+  2、通过改变链上成员的顺序间接改变链路的执行顺序，允许动态的增加或减少链路的成员
+  3、增加新的请求处理类很方便
+  ```
+
+* 缺点：
+
+  ```txt
+  1、系统性能可能会受到影响，因为链路上的方法都是嵌套调用，每次调用需要对方法做入栈、出栈操作，会影响一点性能
+  2、若编码不清晰，容易出现循环调用的情况
+  3、需要一定的代码功能去理解链路中的一些执行逻辑细节
+  ```
 
 ### 2.11 jvm
 
