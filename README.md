@@ -2671,6 +2671,79 @@ ps: --default-character-set=xxx  编码格式具体根据导出的db时选择的
 
   首先，先出队，然后把出队后的参数拿到手，再执行入队操作，最后再将出队后的参数返回。
 
+#### 2.7.13 redis发布订阅功能
+
+* 官网对发布订阅配置的描述
+
+  ```c++
+  ############################# EVENT NOTIFICATION ##############################
+  
+  # Redis can notify Pub/Sub clients about events happening in the key space.
+  # This feature is documented at http://redis.io/topics/notifications
+  ==>  对于key发生的事件，redis能通知客户端
+  
+  #
+  # For instance if keyspace events notification is enabled, and a client
+  # performs a DEL operation on key "foo" stored in the Database 0, two
+  # messages will be published via Pub/Sub:
+  # PUBLISH __keyspace@0__:foo del
+  # PUBLISH __keyevent@0__:del foo
+  ==>  一个客户端在数据库0中对“foo” key 做了del操作，可以触发两种事件（key空间事件和key事件）。
+  ==>  1、PUBLISH __keyspace@0__:foo del  --> 触发键空间事件，触发的key为foo，触发的操作为del
+  ==>  2、PUBLISH __keyevent@0__:del foo  --> 触发key事件，是key为foo的del操作触发的
+  
+  
+  # It is possible to select the events that Redis will notify among a set
+  # of classes. Every class is identified by a single character:
+  #
+  #  K     Keyspace events, published with __keyspace@<db>__ prefix.
+  ==>  K字符表示订阅key空间事件，将发布 __keyspace@<db>__ 前缀的主题，因此我们需要订阅 __keyspace@<db>__ 格式的主题
+  #  E     Keyevent events, published with __keyevent@<db>__ prefix.
+  ==>  E字符表示订阅key事件，将发布 __keyevent@<db>__ 前缀的主题，因此我们需要订阅 __keyevent@<db>__ 格式的主题
+  #  g     Generic commands (non-type specific) like DEL, EXPIRE, RENAME, ...
+  ==>  g字符表示订阅一些基础命令，例如：del、expire、rename等等
+  #  $     String commands
+  #  l     List commands
+  ==>  l字符表示订阅跟list数据结构相关的命令
+  #  s     Set commands
+  ==>  s字符表示订阅跟set数据结构相关的命令
+  #  h     Hash commands
+  ==>  h字符表示订阅跟hash数据结构相关的命令
+  #  z     Sorted set commands
+  ==>  z字符表示订阅跟zset数据结构相关的命令
+  #  x     Expired events (events generated every time a key expires)
+  ==>  x字符表示订阅过期相关的事件
+  #  e     Evicted events (events generated when a key is evicted for maxmemory)
+  #  A     Alias for g$lshzxe, so that the "AKE" string means all the events.
+  #
+  #  The "notify-keyspace-events" takes as argument a string that is composed
+  #  of zero or multiple characters. The empty string means that notifications
+  #  are disabled.
+  ==>  notify-keyspace-events参数是一个字符串，可以是0或多个字符，空字符串意味着通知未生效
+      
+  #
+  #  Example: to enable list and generic events, from the point of view of the
+  #           event name, use:
+  #
+  #  notify-keyspace-events Elg
+  ==>  为了订阅list的基本事件，我们可以配置notify-keyspace-events为 Elg
+      
+  #
+  #  Example 2: to get the stream of the expired keys subscribing to channel
+  #             name __keyevent@0__:expired use:
+  #
+  #  notify-keyspace-events Ex
+  ==>  为了订阅跟过期相关的事件，我们可以配置notify-keyspace-events为 EX
+      
+  #  By default all notifications are disabled because most users don't need
+  #  this feature and the feature has some overhead. Note that if you don't
+  #  specify at least one of K or E, no events will be delivered.
+  notify-keyspace-events ''
+  ==>  redis默认是关闭通知功能的，因为此功能有一些额外的开销。
+  ```
+
+* 假设我们在database为0的数据库中执行了如下命令：**setex expire-key 10 value**  设置了10秒过期，我们要需要执行如下命令进行订阅，才能接收到对应的过期消息：**`psubscribe keyevent@0:expired expire-key`**，即执行了此命令就代表订阅了expire-key的过期主题
+
 
 ### 2.8 Maven
 #### 2.8.1 install maven仓库找不到的jar包
