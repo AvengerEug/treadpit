@@ -1539,6 +1539,10 @@ System.out.println(B.class.isAssignableFrom(A.class));
 
   万变不离其宗，唯一不同的地方可能就是signType（非对称加密的算法）和encryptType（非对称加密的算法）了，这两个字段主要是用来标识对随机秘钥加密的方式以及签名的方式而已。这相当于就是一个说明，告知对方我当前请求对随机秘钥的处理方式以及对加密数据的验签方法。
 
+#### 2.1.31 动态修改java注解中方法的值
+
+* 参考文章：https://www.cnblogs.com/wangnanhui/p/10334027.html
+
 ### 2.2 Spring Cloud
 
 #### 2.2.1 服务注册中心Eureka
