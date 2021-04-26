@@ -2076,6 +2076,16 @@ SpringBoot默认包扫描路径为入口类所在包及所有子包, 当依赖�
 * spring集成mongodb，只需要在接口中定义方法就可以进行数据查询了。如果方法的定义是一个list接收的话，会返回一个list。如果是一个单纯的po对象接收的话，假设插件条件可以查出来多条，但是最终获取到的是第一条数据
 * mongodb更新一条记录时，若字段不存在了，那在保存时，此字段也不会在mongo中保存了。即若id为1的记录保存在mongo时，它存在name个age的属性，假设下次存储id为1的记录时，它只提供了一个叫age的属性，那么在mongdo中存储的数据将会只包含id和age属性，name属性就会**消失**。
 
+#### 2.3.35 spring的spel表达式
+
+* spring的spel表达式还是很不错的。其中我在集成kafka消费者时，需要动态的指定groupId，来保证所有的消费者都能处理对应的消息。因此，最终使用了如下表达式实现了这个功能，其代码如下所示：
+
+  ```java
+  @KafkaListener(topics = "test.topic", groupId = "#{T(java.util.UUID).randomUUID().toString()}")
+  ```
+
+  spring在识别@KafkaListener注解时，会解析groupId的值，最终会执行UUID.randomUUID().toString()这段代码，在此处，主要用到了T(Type)的格式。关于更多的格式可以参考此文章：https://www.freebuf.com/vuls/197008.html
+
 ### 2.4 Mybatis
 
 #### 2.4.1 parameterType为int/long时, 参数为0的处理
