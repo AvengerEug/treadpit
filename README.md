@@ -3080,7 +3080,9 @@ git log --graph --pretty=oneline --abbrev-commit
   CursorColour=147,236,169
   
   # 第三步：执行如下命令, 在当前用户的home文件夹下创建.bash_profile 文件
-  echo export PS1="\"\[\e[37;40m\]\[\e[32;40m\]\u\[\e[37;40m\]@\W\[\e[33;40m\]\$(__git_ps1 ['%s'])\[\e[32;40m\]\$\[\e[0m\] \" " > ~/.bash_profile
+  echo export PS1="\"\[\e[37;40m\]\[\e[32;40m\]\u\[\e[37;40m\]@\W\[\e[33;40m\]\\\$(__git_ps1 ['%s'])\[\e[32;40m\]\$\[\e[0m\] \" " > ~/.bash_profile
+  
+  export PS1="\[\e[37;40m\]\[\e[32;40m\]\u\[\e[37;40m\]@\W\[\e[33;40m\]\$(__git_ps1 ['%s'])\[\e[32;40m\]\$\[\e[0m\] "
   ```
 
 ### 2.10 设计模式与应用
