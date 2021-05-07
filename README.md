@@ -2086,6 +2086,10 @@ SpringBoot默认包扫描路径为入口类所在包及所有子包, 当依赖�
 
   spring在识别@KafkaListener注解时，会解析groupId的值，最终会执行UUID.randomUUID().toString()这段代码，在此处，主要用到了T(Type)的格式。关于更多的格式可以参考此文章：https://www.freebuf.com/vuls/197008.html
 
+#### 2.3.36 spring集成多个kafka实例
+
+* 参考此仓库：[https://github.com/AvengerEug/springboot-study/tree/develop/springboot-multikafka](https://github.com/AvengerEug/springboot-study/tree/develop/springboot-multikafka)
+
 ### 2.4 Mybatis
 
 #### 2.4.1 parameterType为int/long时, 参数为0的处理
@@ -3044,6 +3048,39 @@ git log --graph --pretty=oneline --abbrev-commit
 
   ```shell
   git config --global credential.helper store
+  ```
+
+#### 2.9.13 git bash终端设置成自己喜欢的样子以及一些快捷键
+
+* 在gitbash中执行如下步骤：
+
+  ```shell
+  # 第一步：在当前用户的home路径下 创建.minttyrc文件
+  cd ~ && vim .minttyrc
+  
+  # 第二步：将如下内容填充到.minttyrc文件中，并保存
+  
+  BoldAsFont=-1
+  ThemeFile=dracula
+  Font=Consolas
+  FontHeight=14
+  Columns=191
+  Rows=49
+  ComposeKey=ctrl
+  CtrlShiftShortcuts=yes
+  Locale=zh_CN
+  Charset=UTF-8
+  Scrollbar=none
+  Language=@
+  CursorType=underscore
+  Transparency=low
+  AllowBlinking=yes
+  ScrollbackLines=100000
+  Term=xterm
+  CursorColour=147,236,169
+  
+  # 第三步：执行如下命令, 在当前用户的home文件夹下创建.bash_profile 文件
+  echo export PS1="\"\[\e[37;40m\]\[\e[32;40m\]\u\[\e[37;40m\]@\W\[\e[33;40m\]\$(__git_ps1 ['%s'])\[\e[32;40m\]\$\[\e[0m\] \" " > ~/.bash_profile
   ```
 
 ### 2.10 设计模式与应用
