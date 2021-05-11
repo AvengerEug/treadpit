@@ -3346,7 +3346,47 @@ git log --graph --pretty=oneline --abbrev-commit
   # 查询user文档中id中包含hh7的记录
   ```
 
-  
+
+#### 2.14.5 mongodb的oplog日志
+
+* 先看官方文档：[https://www.compose.com/articles/the-mongodb-oplog-and-node-js/](https://www.compose.com/articles/the-mongodb-oplog-and-node-js/)
+
+* 定位：它的定位就类似于MySQL的binlog日志，记录着每一个文档记录的新增、更新、删除记录
+
+* 是什么：它在mongodb中也是一个文档，只不过位于**System下面的Local库的名叫oplog.rs的文档**，另外，要开启mongodb的oplog功能，还需要一些其他的配置。具体可以参考上面指定的官方文档。
+
+* 数据结构：
+
+  * 其标准的数据结构如下所示（MongoDB 4.4.5版本）：
+
+    ```json
+    {
+        "ts" : Timestamp(1617683815, 7),
+        "t" : NumberLong(1495),
+        "h" : NumberLong(-7440592003835277789),
+        "v" : 2,
+        "op" : "i",
+        "ns" : "database.table",
+        "ui" : UUID("af98534b-8e2c-42fc-a1af-d4cca8701868"),
+        "wall" : ISODate("2021-04-06T04:36:55.804Z"),
+        "o" : {
+            "_id" : "4911208882829076957",
+            "createTime" : ISODate("2021-04-06T04:36:55.739Z"),
+            "updateTime" : ISODate("2021-04-06T04:36:55.804Z")
+        }
+    }
+    ```
+
+    其对应的key主要含义为：
+
+    ts(timestamp): 代表当前操作的执行时间
+    h: 每一个操作的唯一标识，类似于每一行数据的id
+    v：oplog的版本号，一般可以忽略它
+    op：i => insert;  u => update; d => delete
+    ns: 当前操作操作的数据库即表名
+    o：代表插入的数据，当op为u时，会出现o和o2两个key。o2内部存储的是当前更新时的主键，o存储的是更新后的数据
+
+  * 因此，通过oplog日志，我们可以定位到每一条记录的操作，包括新增、更新、删除
 
 ***
 
