@@ -4142,7 +4142,41 @@ systemctl start rc-local.service  => 开启rc-local服务
 在将/etc/rc.d/rc.local设置成可执行文件: chmod +x /etc/rc.d/rc.local
 ```
 
+### 4.7 curl命令使用-d参数的坑
+
+* 由于服务器没有开端口权限，也没有集成前端，因此需要用curl命令来调用api接口。因为要测试的接口一个post的插入请求，需要将参数放入请求体中，于是我在本机的命令行中发起了如下命令：
+
+  ```shell
+  curl -X POST http://localhost/user/save -H 'Content-Type: application/json' -d \ 
+  '
+    [
+      {"userName": "avengerEug"},
+      {"remark": "你真是个'小机灵鬼'"}
+    ]
+  '
+  ```
+
+  期望是在remark字段中的内容中，小机灵鬼是有单引号包含的。但是实际上请求到后端时，后端接收到remark的字段的值为：`你真是个小机灵鬼`。小机灵鬼四个字并没有单引号包裹，这有点不符合需求。
+
+* 解决方案：使用 curl + json文件的方式解决
+
+  ```shell
+  ## 第一步：构建user.json文件，其文件内容如下所示：
+    [
+      {"userName": "avengerEug"},
+      {"remark": "你真是个'小机灵鬼'"}
+    ]
+    
+  ## 第二步：使用curl + json文件的方式请求api接口
+  curl -X POST http://localhost/user/save -H 'Content-Type: application/json' -d '@user.json'
+  ```
+
+  使用curl + json文件的方式，最终后端接收到的remark字段的单引号还是保留着的。完美解决问题！
+
+* 更多curl相关文档参考：[http://www.ruanyifeng.com/blog/2019/09/curl-reference.html](http://www.ruanyifeng.com/blog/2019/09/curl-reference.html)
+
 ## 五. Http
+
 ### 5.1 ContentType
 * ContentType存在的意义:
   在互联网中有成百上千种不同的数据类型, 它用来定义数据类型的格式.
