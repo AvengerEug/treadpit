@@ -3269,6 +3269,34 @@ git log --graph --pretty=oneline --abbrev-commit
 
 * 看情况，如果过滤器是我们自己编写的，我们可以修改spi文件中每个过滤器的配置顺序（默认：配在下面，优先被执行）。但如果我们要添加同一个类型的过滤器，已经有第三方框架（jar包）也提供了，此时我们无法保证第三方框架的spi文件和我们自己开发的spi文件哪个优先执行。因此，此时就要使用**order**属性来控制顺序了
 
+#### 2.13.6 Dubbo如何根据环境不同走不通的负载均衡策略
+
+* Dubbo是RPC微服务框架，因此肯定有服务消费这么一说。当服务消费者，发现要消费的服务有多个时，这个时候就要做负载均衡策略了。而在平时的开发中，我们为了方便开发人员的开发，防止消费者发送请求时猛然间请求到了另外一个开发人员启动的服务上导致的各种问题。通常会自定义一种叫**开发环境的负载均衡策略**，其主要目的就是：保证我们本机消费者消费服务时，优先消费本机提供的服务。
+
+* 实现思路：其实现思路比较简单，就是在**ConsumerConfig**这个bean中指定好负载均衡策略。我们可以编写如下代码：
+
+  ```java
+  @Bean
+  public ConsumerConfig consumerConfig(Environment environment) {
+      ConsumerConfig consumerConfig = new ConsumerConfig();
+      consumerConfig.setCheck(false);
+      consumerConfig.setProxy("jdk");
+      consumerConfig.setRetries(0);
+      List<String> actives = Arrays.asList(environment.getActiveProfiles());
+      // 如果当前是test环境，则使用localFirst负载均衡策略
+      if (actives.contains("test")) {
+          // 需要实现一个叫localFirst的负载均衡策略, 内部判断当前消费者ip和服务提供者的ip是否一致，如果时，则表示是同一个ip，直接返回本地暴露出去的服务即可。否则，再使用默认负载均衡策略（可以指定随机、轮询等策略）
+      	consumerConfig.setLoadbalance("localFirst");        
+      } else {
+          // 否则使用随机的负载均衡策略
+          consumerConfig.setLoadbalance(RandomLoadBalance.NAME);
+      }
+      return consumerConfig;
+  }
+  ```
+
+  
+
 ### 2.14  MongoDB
 
 #### 2.14.1 索引的TTL机制
