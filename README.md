@@ -3416,6 +3416,16 @@ git log --graph --pretty=oneline --abbrev-commit
 
   * 因此，通过oplog日志，我们可以定位到每一条记录的操作，包括新增、更新、删除
 
+### 2.15 性能调优
+
+#### 2.15.1 kafka消费推送过来的大数据信息因concurrency设置为1导致的消息堆积问题调优
+
+* 在公司内部大数据部门需要采集每个事业部对应业务数据库表的一些变动，因为kafka的吞吐量比较高，因此最终会用它来集成MySQL的binlog以及MongoDB的oplog，完成数据的抽取。而目前组内部有一个需求，需要监听MySQL的表A的数据改动，由于大数据部门已经有了这么一套体系了，因此只需要和大数据部门集成就行了。大数据部门为库A表T创建了一个topic：**topic_with_tableA**，我们只需要消费这个topic的数据即可。而在集成spring时，此配置设置成了1:：**spring.kafka.listener.concurrency=1**，导致在生产环境中出现了消息堆积的情况。后来将配置改成**spring.kafka.listener.concurrency=3**以及消费topic数据的逻辑做了部分修改后，消息堆积的问题就消失了。其大致的原因分为两部分：**spring的配置和消费消息的逻辑是耗CPU**
+* Q：为什么这样配置**spring.kafka.listener.concurrency=3**就能缓解消息堆积的问题呢？
+* A：可以参考下spring对spring.kafka.listener.concurrency配置的描述：**`Number of threads to run in the listener containers.`** 这句话说明了会在消费者容器中运行指定数量的线程。换言之就是：在监听kafka的topic时，会启动指定数量的消费者来监听这个topic。在kafka中有一个分区的概念，其中，大数据部门为**topic_with_tableA**这个topic启动了10个分区，当我们将spring.kafka.listener.concurrency配置成1时，则表示仅有一个消费者线程来监听这10个分区，而kafka在进行数据推送时，可能会类似于redis-cluster一样，对key做一个hash，最终将消息推送到不同的分区中。因此，不管这个消息最终进入了哪个分区，都是由一个消费者线程来进行消费的，如果这个消费者线程的消费逻辑比较耗时的话，就会出现消息堆积的问题。而将spring.kafka.listener.concurrency修改成3的话，则表示会有3个消费者线程来消费这10个分区，最终这三个消费者可能会以**3:3:4**的比例来负责对应的分区，这样的话每个消费者负责的分区由之前的10变成了3（有一个消费者为4），这无疑比之前的一个消费者负责10个分区的数据要强上许多。因此，将spring.kafka.listener.concurrency修改成3就能缓解消息堆积的问题的原因就是：我们以多线程的方式去消费数据了，其核心思想还是**多线程工作效率大于单线程**。
+* Q：就算使用多个消费者来监听topic，但消费逻辑如果是很耗时的，依然会出现消息堆积的问题呀。
+* A：这是个好问题，确实是这样的。所以，下一个调优计划就是：调优消费者的逻辑。先说一下现有的消费逻辑：现有的消费逻辑比较简单，就是对推送过来的数据做一下**数据校验**，但是这个数据校验比较特殊，因此数据校验的逻辑是一串动态的字符串，因此最终使用了**GroovyShell**的技术来做数据校验，但由于GroovyShell的技术是很好CPU性能的，即它计算很慢，会涉及到很多IO操作，因此针对于每一份kafka推送过来的数据，都会使用GroovyShell做一次数据校验，这是很耗性能的。因此，我们希望把一部分可以明确标识不是自己想要的数据的数据校验放到java内存中去执行，比如在topic：**topic_with_tableA**中，大数据会将库A的所有表的改动都推送到此topic中，因此我们可以把这层校验放到java内存去校验提高处理消息的能力，而不是将所有的数据校验都放到GroovyShell去计算，只有符合大条件的数据才放到GroovyShell去计算，这样可以减少CPU的压力。**这样的调优思想也很简单，就是将一些重操作放到内存中去操作。**
+
 ***
 
 ## 三. DevOps
