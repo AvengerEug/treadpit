@@ -3848,19 +3848,50 @@ linux若分别以普通user启动jenkins.war, 那么会在/home/user/.jenkins/ �
   3. 将build后的包整个丢进expo文件夹内
   4. 重新reload ngxin, 再次访问即可
 
-#### 3.4.3 docker化basic auth(可配)
-1. 拉取准备好的镜像包
+#### 3.4.3 docker化basic auth(可配)  或 非docker化
 
-   ```powershell
-   git clone https://github.com/AvengerEug/docker-nginx-basic-auth.git
-   ```
-2. 执行命令
+* docker化
 
-   ```shell
-   TAG=auth USERNAME=eug PASSWORD=pwd123 ./build.sh docker_build
-   ```
+  1. 拉取准备好的镜像包
 
-   各细节可跟踪至该[repository](https://github.com/AvengerEug/docker-nginx-basic-auth.git)
+     ```shell
+     git clone https://github.com/AvengerEug/docker-nginx-basic-auth.git
+     ```
+
+  2. 执行命令
+
+     ```shell
+     TAG=auth USERNAME=eug PASSWORD=pwd123 ./build.sh docker_build
+     ```
+
+  各细节可跟踪至该[repository](https://github.com/AvengerEug/docker-nginx-basic-auth.git)
+
+* 非docker化
+
+  * 步骤如下：
+
+    ```shell
+    # 背景：ngx_http_auth_basic_module模块实现让访问着，只有输入正确的用户密码才允许访问web内容。web上的一些内容不想被其他人知道，但是又想让部分人看到。nginx的http auth模块以及Apache http auth都是很好的解决方案。
+    
+    # 假设我的ngin安装路径为：/usr/local/ngxin 
+    # 1、开启basic_auth功能
+    location / {
+    	root   html;
+    	index  index.html index.htm;
+    	auth_basic on; # 默认为off，关闭的（若无配置，也默认为off）
+        auth_basic_user_file ../auth/htpasswd;  # 指定认证用户名和密码的位置，路径一定要对，否则会一直403
+    }
+    
+    # 2、生成用户名和密码的文件，用户名为adminusername，密码为adminpassword
+    printf "adminusername:$(openssl passwd -crypt adminpassword)\n" >> /usr/local/nginx/auth/htpasswd
+    
+    # 3、重新加载配置文件
+    /usr/loca/nginx/sbin/nginx -s reload
+    
+    #访问nginx首页, 输入用户名密码：adminusername/adminpassword 接口访问
+    ```
+
+    
 
 #### 3.4.4 配置Https证书, 支持https访问.
 
