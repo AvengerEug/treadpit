@@ -1926,7 +1926,7 @@ System.out.println(B.class.isAssignableFrom(A.class));
   2. UTF-8编译环境
   3. 自身依赖了一些jar包, 比如log4f等等
   4. 可以支持resource目录下的文件使用pom文件中定义的一些属性
-    5. 内部依赖了内置三方包的版本
+        5. 内部依赖了内置三方包的版本
 
 #### 2.3.20 spring-boot-starter-actuator
   * 常用于生产环境, 可用于项目的监管和check
@@ -2870,6 +2870,7 @@ mvn install:install-file -Dfile=c\common-auth-0.0.1-SNAPSHOT-core.jar -DgroupId=
     2. 步骤:
         2.1. 参考此[教程](https://www.cnblogs.com/zishengY/p/7794923.html), 只需完成到`创建一个maven仓库`步骤既可, 需注意一点, Nexus开放的端口为`8081`, 第一次进入页面点击右上角的`Sign in`, 并按照页面的提示进行操作(这里会告诉我们用户名是什么, 密码存在服务器的哪个文件夹上, 并且会让你再次设置密码)
         2.2. 配置Maven配置文件**settings.xml**, 指定`servers`地址和`mirrors`
+        
         ```xml
         <servers>
             <server>
@@ -2877,8 +2878,8 @@ mvn install:install-file -Dfile=c\common-auth-0.0.1-SNAPSHOT-core.jar -DgroupId=
                 <username>admin</username>
                 <password>2.1步骤所说的再次设置的密码</password>
             </server>
-        </servers>
-    
+    </servers>
+        
         <mirrors>
             <mirror>
                 <id>tm_repository</id> <!-- 这里的id要和server的id对应上 -->
@@ -2887,7 +2888,7 @@ mvn install:install-file -Dfile=c\common-auth-0.0.1-SNAPSHOT-core.jar -DgroupId=
                 <url>http://nexus服务器ip:端口(默认8081,可以自己设置)/repository/创建的仓库地址/</url>
             </mirror>
         </mirrors>
-        ```
+       ```
        2.3. 使用idea使用该配置文件对应的maven
        
     3. 注意: 该仓库只是`hostd`类型, 并没有设置代理, 所以若此仓库中无jar包, 那么就下载不下来, 若想将该仓库作为中转方,
@@ -2950,7 +2951,19 @@ mvn install:install-file -Dfile=c\common-auth-0.0.1-SNAPSHOT-core.jar -DgroupId=
 </build>
 ```
 
+#### 2.8.10 使用maven命令上传jar包至私服
+
+```shell
+mvn deploy:deploy-file -DgroupId=com.bc.mcode -DartifactId=mcode.alipay -Dversion=0.0.13  -Dpackaging=jar -Dfile=D:\workdir-maven\alipay-sdk-java-0.0.13.jar -Durl=http://127.0.0.1:9000/repository/maven-releases/ -DrepositoryId=nexus-releases
+
+
+DgroupId   DartifactId    Dversion  Dpackaging   Dfile  Durl   
+
+DrepositoryId:  这个对应maven setting config 文件里面写的nexus私服账号密码的key
+```
+
 ### 2.9 Git
+
 #### 2.9.1 回退版本
 * git reset --hard HEAD~N  或  git reset --hard commitId~
 * git reset --soft HEAD~N  或  git reset --soft commitId~
