@@ -1541,6 +1541,34 @@ System.out.println(B.class.isAssignableFrom(A.class));
 
 * 参考文章：https://www.cnblogs.com/wangnanhui/p/10334027.html
 
+#### 2.1.32 list的sort方法排序原理
+
+* 在开发过程中，通常会对某些list进行排序。举个例子，拿下面例子来说：
+
+  ```java
+  List<String> list = new ArrayList<>();
+  list.add("avenger");
+  list.add("eug");
+  list.add("aaa");
+  
+  List list2 = list.stream().sorted((item1, item2) -> {
+      // 排序，值为eug的放在最后面
+  
+      if ("eug".equals(item1)) {
+          return 1;
+      }
+  
+      if ("eug".equals(item2)) {
+          return -1;
+      }
+  
+      return 0;
+  }).collect(Collectors.toList());
+  System.out.println(list2);
+  ```
+
+  在sorted方法内部，会返回0，-1，1。 这是什么意思呢？**这表示，对item1和item2进行排序时，如果返回值为1，则认为item1比item2大，因此item1要放在item2后面。**
+
 ### 2.2 Spring Cloud
 
 #### 2.2.1 服务注册中心Eureka
