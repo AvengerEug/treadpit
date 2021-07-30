@@ -3465,6 +3465,28 @@ git log --graph --pretty=oneline --abbrev-commit
 
   * 因此，通过oplog日志，我们可以定位到每一条记录的操作，包括新增、更新、删除
 
+#### 2.14.6 MongoDB如何导出excel
+
+* 有两种思路：第一种，使用mongodb自带的命令行操作。但是这种方式有弊端，就是我们作为开发人员其实是不能直接操作mongodb服务器的
+
+* 第二种思路：使用mongodb的sql语句，找出符合条件的数据，转化成json，再使用在线转excel的工具转化成excel
+
+  ```shell
+  var cursor = db.getCollection('payBill').find({
+  	createTime : {$gte: new Date(1624550400000), $lte: new Date(1627142400000)}
+  }, {_id: 1, payNo: 1, amount:1, createTime: 1, state: 1});
+  
+  while(cursor.hasNext()) {
+  print(tojson(cursor.next()) + ",")
+  }
+  
+  # 比如这个sql语句，我们在robo3t客户端查询后，是可以筛选出时间段在new Date(1624550400000)和new Date(1627142400000)的数据，同时指定了要展示_id、payNo、amount、createTime、state 6个字段。因此，最终会输出一些json格式，每个json里面包含_id、payNo、amount、createTime、state字段。最后，我们再使用在线转化excel的工具，将json转化成excel接口。在线转化工具地址：https://uutool.cn/json2excel/
+  ```
+
+  
+
+  
+
 ### 2.15 性能调优
 
 #### 2.15.1 kafka消费推送过来的大数据信息因concurrency设置为1导致的消息堆积问题调优
