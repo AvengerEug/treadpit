@@ -311,7 +311,7 @@ watch: {
 ```
 * 通常在pc端写table组件时会用到, 一般prop为数组时, 这个会常用。
 * 使用该方式对数组进行深度监听, 否则普通的监听数组内部数据进行改变时, 不会触发监听事件.
-注: 在深度监听方式中, 如果要在里面处理当前vue对象, 最好别使用箭头函数, 因为此时的this为undefined,
+  注: 在深度监听方式中, 如果要在里面处理当前vue对象, 最好别使用箭头函数, 因为此时的this为undefined,
     通常会添加self:this 属性来获取当前vue对象, 并在函数里面使用self来获取vue对象.
 
 #### 1.3.13 vue脚手架3.0版本之前的路由配置
@@ -350,7 +350,7 @@ watch: {
           element-loading-background="rgba(0, 0, 0, 0.3)"></el-main>
     </el-container>
   </template>
-
+  
   <script>
     export default {
       data: () => ({
@@ -553,7 +553,7 @@ npm 5.6之后是以package.lock.json的版本为主, 5.1之前package.lock.json�
         "dependencies": {
           "@npm-pr/hello-world": "git+ssh://git@host:npm-pr/hello-world.git#branchName"
         },
-
+       
         // 采用https的方式拉取指定branch的依赖
         "dependencies": {
           "@npm-pr/hello-world": "git+https://用户名:密码@host:npm-pr/hello-world.git#branchName"
@@ -562,7 +562,7 @@ npm 5.6之后是以package.lock.json的版本为主, 5.1之前package.lock.json�
     6. 安装依赖
        ```shell
        npm install @npm-pr/hello-world
-
+       
        # 安装后的包路径为node_modules/npm-pr/hello-world  所以在对应前端框架引用插件入口出要注意文件的位置
        ```
 
@@ -614,7 +614,7 @@ npm 5.6之后是以package.lock.json的版本为主, 5.1之前package.lock.json�
      export {
        a,
        f
-}
+     }
      ```
      
      使用时:
@@ -720,19 +720,19 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
   public class Thread9 {
       private static boolean ready;
       private static int number;
-
+  
       public static class ReaderThread extends Thread {
-
+  
           @Override
           public void run() {
               while(!ready);
-
+  
               System.out.println("死循环结束, number = " + number);
           }
       }
-
+  
       public static void main(String[] args) throws InterruptedException {
-
+  
           new ReaderThread().start();
           Thread.sleep(1000);
           number = 43;
@@ -741,7 +741,7 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
           Thread.sleep(3000);
       }
   }
-
+  
   /* 
       针对如上的理解, 我们可以得知, 开启ReaderThread线程时, 在主线程睡眠1秒时, ReaderThread线程一直处于死循环中,
       当主线程修改临界区number和ready的变量时, 由于ReaderThread线程一直处于死循环中, 压根没给jvm留出一丝的空闲
@@ -1634,7 +1634,7 @@ System.out.println(B.class.isAssignableFrom(A.class));
       <artifactId>springfox-swagger2</artifactId>
       <version>2.6.1</version>
   </dependency>
-
+  
   <dependency>
       <groupId>io.springfox</groupId>
       <artifactId>springfox-swagger-ui</artifactId>
@@ -1645,7 +1645,7 @@ System.out.println(B.class.isAssignableFrom(A.class));
     ```java
   @Configuration
   public class SwaggerResourcesConfiguration {
-
+  
       @Primary
       @Bean
       public SwaggerResourcesProvider swaggerResourcesProvider() {
@@ -1658,7 +1658,7 @@ System.out.println(B.class.isAssignableFrom(A.class));
               }
           };
       }
-
+  
       private SwaggerResource createResource(String name, String registeredEurekaServiceName, String version) {
           SwaggerResource swaggerResource = new SwaggerResource();
           swaggerResource.setName(name);
@@ -1797,7 +1797,7 @@ System.out.println(B.class.isAssignableFrom(A.class));
 
   ```txt
   @Autowired默认是根据byType的方式依赖注入, 若byType的类型的实例不止一个(内部把异常吃掉), 则会根据byName的方式来注入(也就是变成@Resource功能),此时是根据属性名来注入的, 它会将属性名首字母大写, 前面添加set关键字变成set方法, 然后利用反射调用set方法完成注入, 所以此时的 ***属性名*** 很重要,与自己添加的set方法无关. 所以此时的byName依赖注入方式与xml配置的byName又有差异, 因为xml配置依赖注入的byName方式是根据显示的set方法名决定的。
-
+  
   byName的几种情况:
   *   1. xml配置的byName, 会根据set方法来注入
   *   2. @Resource注解的byName, 会根据属性名(其实这个属性名就是bean的名字),
@@ -1805,7 +1805,7 @@ System.out.println(B.class.isAssignableFrom(A.class));
   *      name属性名还是要依赖注入的变量名, 在@Resource的byName方式下, 这个名字一定
   *      就是bean的名字
   *   3. @Autowired注解当注入的类型有多个时, 会退化成@Resource的功能
-
+  
   byType自动装配有多个相同类型bean时的处理方法:
   *   1. 将属性名设置成 要注入bean的名字(原理是会降级成@Resource注入模式, 即下述的第三点)
   *   2. 在一个bean中添加@Primary注解, 表示当遇到多个类型的时候, 使用此bean进行注入
@@ -1836,13 +1836,13 @@ System.out.println(B.class.isAssignableFrom(A.class));
       @Override
       public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**").allowedMethods("PUT", "GET", "POST", "DELETE").allowedOrigins("*");
-
+     
       }
      ```
   2. 引入spring security类库. 写一个过滤器继承WebSecurityConfigurerAdapter并重写configure方法, 配置允许自定义请求头的部分信息，以及将继承OncePerRequestFilter的过滤器添加到UsernamePasswordAuthenticationFilter过滤器前面. 如下
       ```java
       public class CorsConfigration extends WebSecurityConfigurerAdapter {
-
+      
           @Override
           protected void configure(HttpSecurity http) throws Exception {
               http.csrf()
@@ -1855,9 +1855,9 @@ System.out.println(B.class.isAssignableFrom(A.class));
               )
                   .permitAll()
                   .anyRequest().authenticated();
-
+      
               http.headers().cacheControl().disable();
-
+      
               // add jwt filter
               http.addFilterBefore(new JwtAuthFilter(), UsernamePasswordAuthenticationFilter.class);
           }
@@ -1866,35 +1866,35 @@ System.out.println(B.class.isAssignableFrom(A.class));
 
       ```java
       public class JwtAuthFilter extends OncePerRequestFilter {
-
+      
           @Override
           public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-
+      
               Boolean isFilter = !request.getRequestURI().equals("/user/login");
-
+      
               if (isFilter) {
-
+      
                   if (getJwtToken(request) == null) {
                       response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "无token");
                       return;
                   }
-
+      
                   String authToken = request.getHeader("jwt-token");
                   logger.info(authToken);
               }
-
+      
               chain.doFilter(request, response);
           }
-
+      
           @Override
           public void destroy() {
               // Nothing to do
           }
-
+      
           private String getJwtToken(HttpServletRequest request) {
               return request.getHeader(ContextUtil.JWT_TOKEN);
           }
-
+      
       }
       ```
 
@@ -1918,7 +1918,7 @@ System.out.println(B.class.isAssignableFrom(A.class));
              this.testDao = userDao;
          }
          ```
-        , 那么它会将id为userDao(bean中name没配置的话, id=name)的bean注入到testDao中, 若存在如下方法:
+          , 那么它会将id为userDao(bean中name没配置的话, id=name)的bean注入到testDao中, 若存在如下方法:
 
          ```java
          public void setUserDao1(UserDao userDao) {
@@ -2004,10 +2004,10 @@ System.out.println(B.class.isAssignableFrom(A.class));
          ```java
          @Component
          public abstract class PrototypeUtils {
-
+         
              @Lookup
              public abstract BasicService getBasicService();
-
+         
              @Lookup
              public abstract BasicService getBasicService(String name);
          }
@@ -2017,21 +2017,21 @@ System.out.println(B.class.isAssignableFrom(A.class));
          @Component
          @Scope("prototype")
          public class BasicService {
-
+         
              private String userName;
-
+         
              public String getUserName() {
                  return userName;
              }
-
+         
              public void setUserName(String userName) {
                  this.userName = userName;
              }
-
+         
              public BasicService(String userName) {
                  this.userName = userName;
              }
-
+         
              public BasicService() {}
          }
          ```
@@ -2145,7 +2145,7 @@ SpringBoot默认包扫描路径为入口类所在包及所有子包, 当依赖�
   * 所以通常在模糊模糊查找时会添加bind标签将需要模糊查找的key预先编译好, 再直接用#将bind定义的变量keywordWrapper进行筛选即可,。
     ```XML
     <bind name="keywordWrapper" value="keyword + '%'"/>
-
+    
     <![CDATA[
         SELECT * FROM user WHERE name LIKE #{keywordWrapper}
     ]]>
@@ -2334,17 +2334,17 @@ ps: --default-character-set=xxx  编码格式具体根据导出的db时选择的
 
 #### 2.5.7 mysql连接数不够
 * 背景: 当整个团队集体开发某个需求时, 通常会选择一个人的db作为服务器db, 此时容易造成数据库连接池不够
-解决方案:
+  解决方案:
   ```mysql
     -- 查看数据库最大连接数
     SHOW variables LIKE '%max_connections%';
-
+  
     * 方案1:
     -- 重新设置全局最大链接数变量
     SET GLOBAL max_connections=1024;
-
+  
     但，这种方式在重启mysql服务时就会失效
-
+  
     * 方案2:
     修改mysql配置文件my.cnf，在[mysqld]段中添加或修改max_connections值：
     max_connections=1024
@@ -2798,6 +2798,10 @@ ps: --default-character-set=xxx  编码格式具体根据导出的db时选择的
 
 * 假设我们在database为0的数据库中执行了如下命令：**setex expire-key 10 value**  设置了10秒过期，我们要需要执行如下命令进行订阅，才能接收到对应的过期消息：**`psubscribe keyevent@0:expired expire-key`**，即执行了此命令就代表订阅了expire-key的过期主题
 
+#### 2.7.14 setGet方法
+
+* redis的getset命令作用：设置新值并返回之前的旧值。通常可以用来后端的防抖功能的实现
+
 
 ### 2.8 Maven
 #### 2.8.1 install maven仓库找不到的jar包
@@ -2906,7 +2910,7 @@ mvn install:install-file -Dfile=c\common-auth-0.0.1-SNAPSHOT-core.jar -DgroupId=
                 <username>admin</username>
                 <password>2.1步骤所说的再次设置的密码</password>
             </server>
-    </servers>
+       </servers>
         
         <mirrors>
             <mirror>
@@ -3054,7 +3058,7 @@ git log --graph --pretty=oneline --abbrev-commit
       5. 重新设置author信息: git commit --amend --author="AvengerEug <eugenesumarry@163.com>"  
          包括用户名和邮箱
       6. 执行: git rebase --continue 完成当前commit信息的修改.  
-      Notes:
+         Notes:
          若commitId和HEAD指针包含的commit较多  
          则需要重复执行 3-6步  
   * 若想支持以后的提交都能生效, 则需要全局配置git的用户名和密码  
@@ -3863,20 +3867,20 @@ linux若分别以普通user启动jenkins.war, 那么会在/home/user/.jenkins/ �
     location / {
       try_files $uri $uri/ /index.html;
     }
-
+  
     if (!-e $request_filename) {
       rewrite ^/expo/.* /expo/index.html last;
     }
-
+  
     ----------------------------------------------
     含义: 
       第一个配置为常见的vue.js单页面配置, 只需要添加这行配置, 并将打好的包放入ngxin访问的根目录下即可完成部署
-
+  
       第二个配置为配置多个vue.js单页面的配置:
       解析:
         条件: 若请求的资源不是一个文件
         条件内语句块: 若请求uri中以expo为前缀, 则重定向到 uri为/expo/index.html
-
+  
         注: 1. 要保证build后的所有文件放在ngxin根目录下的expo文件夹下.
             1. 静态资源要以expo文件夹为基准
   ```
@@ -4605,7 +4609,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >    
+  >       
   >    -- 第二步：执行SQL
   >    SELECT
   >        COUNT(p.pay_id)
@@ -4613,17 +4617,17 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        (SELECT pay_id FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c') tmp
   >    INNER JOIN pay p ON tmp.pay_id = p.pay_id
   >    WHERE state IN (0, 1);
-  >    
+  >       
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >    
+  >       
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
   >      "rows": 996970,
   >      "cost": 203657
   >    },
-  >    
+  >       
   >    -- 走index_accountId_createTime索引的分析，评分为1.21
   >    "analyzing_range_alternatives": {
   >      "range_scan_alternatives": [
@@ -4646,7 +4650,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        "cause": "too_few_roworder_scans"
   >      }
   >    },
-  >    
+  >       
   >    -- 最终选择走index_accountId_createTime索引，因为评分最低，只有1.21
   >    "chosen_range_access_summary": {
   >      "range_access_plan": {
@@ -4661,9 +4665,9 @@ systemctl start rc-local.service  => 开启rc-local服务
   >      "cost_for_plan": 1.21,
   >      "chosen": true
   >    }
-  >    
+  >       
   >    综上所述，针对于INNER JOIN，在MySQL处理后，它最终选择走index_accountId_createTime索引，而且评分为1.21
-  >    
+  >       
   >    ```
   >
   >    * 执行另外一条SQL
@@ -4671,13 +4675,13 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >    
+  >       
   >    -- 第二步：执行SQL
   >    SELECT COUNT(pay_id) FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c' AND state IN (0, 1);
-  >    
+  >       
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >    
+  >       
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
