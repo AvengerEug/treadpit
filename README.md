@@ -1553,7 +1553,6 @@ System.out.println(B.class.isAssignableFrom(A.class));
   
   List list2 = list.stream().sorted((item1, item2) -> {
       // 排序，值为eug的放在最后面
-  
       if ("eug".equals(item1)) {
           return 1;
       }
@@ -1566,8 +1565,19 @@ System.out.println(B.class.isAssignableFrom(A.class));
   }).collect(Collectors.toList());
   System.out.println(list2);
   ```
+  
 
-  在sorted方法内部，会返回0，-1，1。 这是什么意思呢？**这表示，对item1和item2进行排序时，如果返回值为1，则认为item1比item2大，因此item1要放在item2后面。**
+在sorted方法中，需要传入一个compare对象，compare对象返回的是一个int类型的值，同时也会传入两个对象：item1和item2。compare内部的逻辑有如下的标准：
+
+1. return 0 ==> 不交换位置、不排序
+2. return 1 ==> 交换位置
+3. return -1 ==> 不交换位置
+4. return item1 - item2 ==> 升序排列
+5. return item2 - item1 ==> 降序排列
+
+#### 2.1.33 bigDecimal构造方法
+
+* 若在bigDecimal的构造方法中传入null进去，会抛出NPE的异常，在使用之前要保证传入的值不为null才行
 
 ### 2.2 Spring Cloud
 
@@ -4609,7 +4619,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >       
+  >             
   >    -- 第二步：执行SQL
   >    SELECT
   >        COUNT(p.pay_id)
@@ -4617,17 +4627,17 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        (SELECT pay_id FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c') tmp
   >    INNER JOIN pay p ON tmp.pay_id = p.pay_id
   >    WHERE state IN (0, 1);
-  >       
+  >             
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >       
+  >             
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
   >      "rows": 996970,
   >      "cost": 203657
   >    },
-  >       
+  >             
   >    -- 走index_accountId_createTime索引的分析，评分为1.21
   >    "analyzing_range_alternatives": {
   >      "range_scan_alternatives": [
@@ -4650,7 +4660,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        "cause": "too_few_roworder_scans"
   >      }
   >    },
-  >       
+  >             
   >    -- 最终选择走index_accountId_createTime索引，因为评分最低，只有1.21
   >    "chosen_range_access_summary": {
   >      "range_access_plan": {
@@ -4665,9 +4675,9 @@ systemctl start rc-local.service  => 开启rc-local服务
   >      "cost_for_plan": 1.21,
   >      "chosen": true
   >    }
-  >       
+  >             
   >    综上所述，针对于INNER JOIN，在MySQL处理后，它最终选择走index_accountId_createTime索引，而且评分为1.21
-  >       
+  >             
   >    ```
   >
   >    * 执行另外一条SQL
@@ -4675,13 +4685,13 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >       
+  >             
   >    -- 第二步：执行SQL
   >    SELECT COUNT(pay_id) FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c' AND state IN (0, 1);
-  >       
+  >             
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >       
+  >             
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
