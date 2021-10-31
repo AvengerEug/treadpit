@@ -2812,6 +2812,13 @@ ps: --default-character-set=xxx  编码格式具体根据导出的db时选择的
 
 * redis的getset命令作用：设置新值并返回之前的旧值。通常可以用来后端的防抖功能的实现
 
+#### 2.7.15 redis cluster集群下到底能不能使用mget命令
+
+* 看redis的版本，在redis3.\*版本中，完全不支持，有些版本可能不会报错，会正常返回值，这种情况一般是只返回了某个slot下的值。二在redis4.\*版本中，如果多个key都位于同一个slot下，则支持mget命令，否则也会报错。
+
+* 在redis cluster集群中，只能限制用户mget命令在同一slot中的key，举个例子：mget key1 key2  ==> 如果key1和key2都位于同一个slot中（eg: slot1）此时能够正常执行。但如果key1位于slot1，key2位于slot2，此时执行mget命令就会报错。如果我们一定要在redis cluster集群中使用mget命令的话，一定要保证多个key位于同一个slot中，可以使用hashtag来告诉redis 接下来的mget命令中的key都位于同一个slot（参考地址：https://redis.io/topics/cluster-spec#keys-hash-tags）。
+* 如果一定要在redis cluster集群中使用mget命令，怎么办？---> 做二次开发，在redis服务端新增一个模块A，专门来接收mget命令，然后在模块A中再使用多线程来并发的去获取每一个key。这种方式对于客户端而言就是一个io操作，也仅仅执行了一次mget命令，对于客户端而言，是非常友好的。
+
 
 ### 2.8 Maven
 #### 2.8.1 install maven仓库找不到的jar包
@@ -4619,7 +4626,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >             
+  >                
   >    -- 第二步：执行SQL
   >    SELECT
   >        COUNT(p.pay_id)
@@ -4627,17 +4634,17 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        (SELECT pay_id FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c') tmp
   >    INNER JOIN pay p ON tmp.pay_id = p.pay_id
   >    WHERE state IN (0, 1);
-  >             
+  >                
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >             
+  >                
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
   >      "rows": 996970,
   >      "cost": 203657
   >    },
-  >             
+  >                
   >    -- 走index_accountId_createTime索引的分析，评分为1.21
   >    "analyzing_range_alternatives": {
   >      "range_scan_alternatives": [
@@ -4660,7 +4667,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        "cause": "too_few_roworder_scans"
   >      }
   >    },
-  >             
+  >                
   >    -- 最终选择走index_accountId_createTime索引，因为评分最低，只有1.21
   >    "chosen_range_access_summary": {
   >      "range_access_plan": {
@@ -4675,9 +4682,9 @@ systemctl start rc-local.service  => 开启rc-local服务
   >      "cost_for_plan": 1.21,
   >      "chosen": true
   >    }
-  >             
+  >                
   >    综上所述，针对于INNER JOIN，在MySQL处理后，它最终选择走index_accountId_createTime索引，而且评分为1.21
-  >             
+  >                
   >    ```
   >
   >    * 执行另外一条SQL
@@ -4685,13 +4692,13 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >             
+  >                
   >    -- 第二步：执行SQL
   >    SELECT COUNT(pay_id) FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c' AND state IN (0, 1);
-  >             
+  >                
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >             
+  >                
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
