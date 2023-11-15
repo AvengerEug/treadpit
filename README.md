@@ -4078,7 +4078,7 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
 
 #### 4.1.15 Linux文件权限查看及无权限解决方案
 * 如下图
-![文件权限解读图](http://images.tangzzz.com/treadpit/linux_file_permission.jpg)
+![文件权限解读图](./linux_file_permission.jpg)
 
 #### 4.1.16 基于linux和nginx搭建内网本地yum源
   1. 背景: 内网无法上网, linux yum无法安装软件, 原因就是找不到yum源, 此时我们需要有一个公共的yum源
@@ -4165,6 +4165,15 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
   # 意思就是将服务器中的/root/aaa.txt文件下载到本地
   ```
 
+#### 4.1.19 查看大文件
+
+* 使用场景：在线上服务器进行磁盘利用率报警时，此时需要定位出大文件的位置，再分析如何处理这些大文件。
+  * 方式：
+    * 第一步：执行`du -sh /home/admin/* | grep G` 命令，找出/home/admin用户下大于等于1G的文件夹。此命令会返回出一些文件夹路径，然后对返回的文件夹路径挨个执行相同的命令（需要修改查找路径）
+    * 第二步：执行
+    * 找到大文件了怎么办？得分析这个文件的特性，
+      * 如果这个文件(假设为application.lo)是应用程序的主日志（应用服务器会一直往这个日志文件写日志），此时就不能删除这个文件，而是要执行`echo 1 > application.log`命令，来缩小application.log日志的大小
+      * 如果这个文件没有被应用程序使用，则可以执行`rm -f xxx.log`日志把文件删除即可。
 
 ### 4.2 keepalived实现主备部署
 
@@ -4357,7 +4366,13 @@ systemctl start rc-local.service  => 开启rc-local服务
 
 * 更多curl相关文档参考：[http://www.ruanyifeng.com/blog/2019/09/curl-reference.html](http://www.ruanyifeng.com/blog/2019/09/curl-reference.html)
 
-## 五. Http
+### 4.8 如何动态的添加jvm参数
+
+* 第一步：使用 `jps`命令先找到jvm的进程
+* 第二步：使用`jinfo -flag +HeapDumpBeforeFullGC 进程ID` 为jvm进程添加HeapDumpBeforeFullGC参数，表示在fullgc之前把堆栈信息打印出来
+* 第三步：使用`jinfo -flags 进程ID`， 查看java的启动命令中是否包含了刚刚添加的jvm参数
+
+## 五. TCP & HTTP
 
 ### 5.1 ContentType
 * ContentType存在的意义:
@@ -4374,7 +4389,29 @@ systemctl start rc-local.service  => 开启rc-local服务
        式解析数据（约定好的情况下）get请求下会将key-value解析出来，放到URL的参数里面
   ```
 
+### 5.2 Keepalive
+
+* keepalive属性介绍：keepalive是一个基础的协议，它定义了一种标准：客户端和服务端建立了连接，只要有一端没有发起fin请求，则不会断开连接。但这仅仅是一个协议，作为http协议中，client可以是浏览器，也可以是后端的http client。那client是否要遵循这个协议，这个取决于client。因此在不同的client中，可能会有不同的表现。
+  * 举例：假设keepalive_timeout设置为60s
+    * 当client为浏览器时：
+      * 如果是串行的发起http请求（第一个请求结束后再发起第二个请求），用抓包工具查看网络情况，发现第二个请求是不用重新建立连接的。当在第60s的时候，服务端会主动断开连接，即主动发起fin请求。**结论：浏览器是遵循http的keepalive协议的**
+      * 如果是并行的发起http请求（假设http请求服务端需要处理3s后才能返回结果，在发起第一个请求后，重新刷新页面即实现了并行请求），用抓包工具查看网络情况，发现第一个、第二个、第三个请求都会进行握手建联和挥手断链。并且在第60s的时候服务器主动断开了连接。**结论：并行情况下是无法复用连接的，因为第一个请求还没回来，就发起了第二个请求，没法复用连接。**
+    * 当client为后端http client时:
+      * 如果是串行的发起http请求（用代码for循环3次请求同一个链接，每个请求服务端需要处理3s后才能返回结果），用抓包工具查看网络情况，发现：第一次请求做了握手连接，第二、第三次请求复用了连接，但是第三次请求结束后，就立马断开的链接。**结论：client为后端http client时，它并没有遵循http中keepalive的协议，在60s还没到的情况下，http client就主动发起了fin请求，示意要断开连接。**
+      * 如果是并行的发起http请求（用代码for循环3次请求同一个链接，服务端需要处理3s后才能返回结果）,用抓包工具查看网络情况，发现每个请求都会重新建联。**结论：并行情况下，上一个请求还没有返回连接，那这期间的请求都会进行握手操作**
+* 有什么作用：
+  * keepalive就是复用链接的功能。既然他可以复用连接，就杜绝了每次tcp链接的三次握手和四次挥手的耗时。同时，也减少了服务器和客户端的链接负载（减少了双方的tcp连接数，可以支撑更多的请求）
+  * 在http1.1（现在默认的都是http1.1）中，请求头的协议中是默认开启keepalive的。但仅仅是表示当前请求是支持这个功能，具体有没有开启，还是取决于服务器是否开启了此功能。
+* 常用的nginx服务器中如何配置keepalive功能？
+  * 在nginx中配置：`keepalive_timeout 60;` 此配置表示连接的存货时间。如果空闲了60s，nginx则会主动断开。
+
+### 5.3 tcp链接
+
+* tcp协议属于4层协议，而http属于5层协议。一个http的连接底层使用tcp来支持的，那一个tcp链接长什么样子呢？它一共有四要素：分别为客户端的ip和端口 以及 服务端的ip 和端口 来唯一组成一个tcp链接。
+* todo：图片
+
 ## 六. IDEA
+
 ### 6.1 快捷键(修改成eclipse后)
 #### 6.1.1 查看接口的实现类
 * Ctrl + t
@@ -4626,7 +4663,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                
+  >                   
   >    -- 第二步：执行SQL
   >    SELECT
   >        COUNT(p.pay_id)
@@ -4634,17 +4671,17 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        (SELECT pay_id FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c') tmp
   >    INNER JOIN pay p ON tmp.pay_id = p.pay_id
   >    WHERE state IN (0, 1);
-  >                
+  >                   
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                
+  >                   
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
   >      "rows": 996970,
   >      "cost": 203657
   >    },
-  >                
+  >                   
   >    -- 走index_accountId_createTime索引的分析，评分为1.21
   >    "analyzing_range_alternatives": {
   >      "range_scan_alternatives": [
@@ -4667,7 +4704,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        "cause": "too_few_roworder_scans"
   >      }
   >    },
-  >                
+  >                   
   >    -- 最终选择走index_accountId_createTime索引，因为评分最低，只有1.21
   >    "chosen_range_access_summary": {
   >      "range_access_plan": {
@@ -4682,9 +4719,9 @@ systemctl start rc-local.service  => 开启rc-local服务
   >      "cost_for_plan": 1.21,
   >      "chosen": true
   >    }
-  >                
+  >                   
   >    综上所述，针对于INNER JOIN，在MySQL处理后，它最终选择走index_accountId_createTime索引，而且评分为1.21
-  >                
+  >                   
   >    ```
   >
   >    * 执行另外一条SQL
@@ -4692,13 +4729,13 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                
+  >                   
   >    -- 第二步：执行SQL
   >    SELECT COUNT(pay_id) FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c' AND state IN (0, 1);
-  >                
+  >                   
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                
+  >                   
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
@@ -4799,3 +4836,16 @@ systemctl start rc-local.service  => 开启rc-local服务
 * 下图为网络层ip地址寻址的过程：
 
   ![ip协议的寻址操作流程.png](ip协议的寻址操作流程.png)
+
+## 十、经验总结
+
+### 10.1 如何查看一台机器的重启时间？
+
+* 一共有几种方式：
+  * 查看服务器内部的容器启动日志，比如tomcat或springboot的启动日志
+  * 如果服务器的数量比较多，此时可以利用公司的监控大盘，一般一台服务器有重启的话，那它的jvm内存肯定会有个尖刺，从某个值跌到0并且又恢复到之前差不多的位置。
+
+
+
+
+
