@@ -4009,17 +4009,21 @@ linux若分别以普通user启动jenkins.war, 那么会在/home/user/.jenkins/ �
     6. SSLEnabled: 是否开启ssl验证在https访问时需要开启
     7. enabledLookups: 如果为true则可以通过调用request.getRemoteHost进行DNS查询来的带远程客户端的实际主机名, 否则只返回远程客户端的ip地址
         *. Engine: tomcat中的service和engine是一对一的
-    1. name: 对应的engine名
-    2. defaultHost: 默认主机名, 当输入localhost:8080时  会走到name为localhost的Host节点
+    8. name: 对应的engine名
+    9. defaultHost: 默认主机名, 当输入localhost:8080时  会走到name为localhost的Host节点
         *. Host: 一个Engine有多个Host
-    1. name: 对应的一个主机
-    2. appBase: host的根目录(用作于解析web项目的目录(自动解压war包)). 
-        表示这个主机工作的根目录, 相对于bin目录所处的目录而言.
-    3. unpackWARs: 设置为true, 表示默认解压war包
-    4. autoDeploy: 设置为true, 设置自动部署
-        *. Context: 上下文路径
-    1. docBase: 相对于Host标签下的appBase而言, 
+    10. name: 对应的一个主机
+    11. appBase: host的根目录(用作于解析web项目的目录(自动解压war包)). 
+         表示这个主机工作的根目录, 相对于bin目录所处的目录而言.
+    12. unpackWARs: 设置为true, 表示默认解压war包
+    13. autoDeploy: 设置为true, 设置自动部署
+         *. Context: 上下文路径
+    14. docBase: 相对于Host标签下的appBase而言, 
     15. path: 访问上下文路径. eg: Host的appBase为webapps, name为localhost; Context的docBase为eugene, Context的path为'/test', 那么访问localhost:8080/test 则会默认访问到webapps/eugene文件夹去
+
+#### 3.4.7 nginx没配置301，但是请求时会301？
+
+* nginx配置的每一项location都应该是正确的URL，如果配置的 **/xxxx/** 路径下已经没有子路径，那么访问 **~~~~/xxxx** 这个路径时会报301错误。
 
 ***
 
@@ -4174,6 +4178,20 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
     * 找到大文件了怎么办？得分析这个文件的特性，
       * 如果这个文件(假设为application.lo)是应用程序的主日志（应用服务器会一直往这个日志文件写日志），此时就不能删除这个文件，而是要执行`echo 1 > application.log`命令，来缩小application.log日志的大小
       * 如果这个文件没有被应用程序使用，则可以执行`rm -f xxx.log`日志把文件删除即可。
+
+#### 4.1.20 curl命令
+
+* curl命令是发起一个http请求，eg: `curl www.baidu.com`
+* 但有时候，有些域名可能会配置重定向，此时直接curl的话会失败。这个使用可以添加`-l`参数，即`curl -l www.taobao.com`, 则会请求到重定向的服务去
+* 有时候，我们需要看请求的详细信息，比如返回的请求头有哪些信息。则可以使用`-v`参数，即`curl -v www.taobao.com`
+* 再有时候，我们可能想用dns的ipv4或ipv6地址，则可以指定如下参数：
+  * `-4`表示使用ipv4地址。示例：`curl -v -l -4 www.taobao.com`
+  * `-6`表示使用ipv4地址。示例：`curl -v -l -6 www.taobao.com`。但这有个前提，就是对方的dns能解析出ipv6的地址
+
+#### 4.1.21 dig和nslookup命令
+
+* dig和nslookup命令是dns解析的命令，我们可以解析出域名最终解析出来的ip地址是什么。与ping命令不同的是，dig命令可以看到整个dns解析过程。
+* 在使用dig命令中，我们可以使用`@`语法指定要使用的dns服务器（有时候有些dns服务器有定制逻辑，所以需要切换dns服务器排除这方面的判断）。eg: `dig @8.8.8.8 www.taobao.com`. 这表示使用阿里云公网的dns进行解析，也可以使用谷歌的`114.114.114.114`dns服务器进行解析。
 
 ### 4.2 keepalived实现主备部署
 
@@ -4667,7 +4685,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                   
+  >                      
   >    -- 第二步：执行SQL
   >    SELECT
   >        COUNT(p.pay_id)
@@ -4675,17 +4693,17 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        (SELECT pay_id FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c') tmp
   >    INNER JOIN pay p ON tmp.pay_id = p.pay_id
   >    WHERE state IN (0, 1);
-  >                   
+  >                      
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                   
+  >                      
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
   >      "rows": 996970,
   >      "cost": 203657
   >    },
-  >                   
+  >                      
   >    -- 走index_accountId_createTime索引的分析，评分为1.21
   >    "analyzing_range_alternatives": {
   >      "range_scan_alternatives": [
@@ -4708,7 +4726,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        "cause": "too_few_roworder_scans"
   >      }
   >    },
-  >                   
+  >                      
   >    -- 最终选择走index_accountId_createTime索引，因为评分最低，只有1.21
   >    "chosen_range_access_summary": {
   >      "range_access_plan": {
@@ -4723,9 +4741,9 @@ systemctl start rc-local.service  => 开启rc-local服务
   >      "cost_for_plan": 1.21,
   >      "chosen": true
   >    }
-  >                   
+  >                      
   >    综上所述，针对于INNER JOIN，在MySQL处理后，它最终选择走index_accountId_createTime索引，而且评分为1.21
-  >                   
+  >                      
   >    ```
   >
   >    * 执行另外一条SQL
@@ -4733,13 +4751,13 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                   
+  >                      
   >    -- 第二步：执行SQL
   >    SELECT COUNT(pay_id) FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c' AND state IN (0, 1);
-  >                   
+  >                      
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                   
+  >                      
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
@@ -4849,7 +4867,28 @@ systemctl start rc-local.service  => 开启rc-local服务
   * 查看服务器内部的容器启动日志，比如tomcat或springboot的启动日志
   * 如果服务器的数量比较多，此时可以利用公司的监控大盘，一般一台服务器有重启的话，那它的jvm内存肯定会有个尖刺，从某个值跌到0并且又恢复到之前差不多的位置。
 
+### 10.2 url上的query参数不宜太多，会超过1024的限制？
 
+* 这其实是浏览器的一个限制，当query参数的字符串长度超过1024时，会限制请求。但这仅仅是浏览器的一个协议而言，如果使用curl命令或者postman来发起请求时，是没有这方面限制的。
+
+### 10.3 网络故障如何定位
+
+* 最常见的网络问题为：dns域名解析异常、ip地址ping不通、服务端口未对外开启、网络丢包等。
+* 假设我现在是`www.taobao.com`网站的运维人员，有用户反馈访问域名不通，此时可以做如下操作来判断不通的范围：
+  * 第一步：首先确定用户的ip运营商是什么，以及服务器部署的区域。然后再根据要访问的目的地域名，比如为`www.taobao.com`，对此域名进行[拔测]([阿里云网站运维检测平台 (aliyun.com)](https://boce.aliyun.com/detect/http))测试，根据拔测结果和用户ip所属区域作对比，看是否出现某个区域的网络问题。
+  * 第二步：在做连通性测试，比如ping一个域名，或curl一下具体的服务。以`www.taobao.com`为例，就是执行如下两个命令：`curl www.taobao.com`和`ping www.taobao.com`，并查看结果。如果有时候通有时候不通，此时可以修改本地hosts文件，将www.taobao.com域名显示指定到`192.168.4.1(这个ip是有随意写的，具体还是要改成能实际访问www.taobao.com域名的ip地址)`，以此来判断是否是dns解析环节有问题。
+  * 第三步：再让用户执行`dig www.taobao.com 和 dig @8.8.8.8 www.taobao.com 和 dig @114.114.144.144 www.taobao.com`三个命令，分别查看使用不同的dns服务器，解析出来的ip是否都是www.taobao.com域名对应的ip
+  * 第四步：如果域名没有问题，而是部分ip有问题，则使用`traceroute @8.8.8.8 www.taobao.com`命令，并对出现的每一个ip地址做`ping`命令操作，可以确定是中间哪个ip出了问题
+
+### 10.4 为什么要使用阿里云sls的sdk往sls写日志，而不用tair采集日志的方式？
+
+* 在大流量的情况下，应用日志写到服务器，在使用服务器部署的tair服务将日志采集到sls中。这个过程是一个正则匹配的过程，是非常耗费cpu的。如果应用特性是cpu密集型的（计算非常多，比如网关），那这个时候可以不采取此方式，而是直接采取sdk的方式直接使用api的方式将数据采集到sls中。
+
+### 10.5 rpc框架的接口超时，会有哪几种情况？
+
+* 通常rpc框架的接口会配置两个超时，一个是服务端的超时，用来保护自己。另外一个是客户端的超时（根据自己的系统水位配置）。
+  * 服务端超时：此时服务端会阻断当前请求，抛出异常给客户端
+  * 客户端超时：这种是客户端主动断开连接，但实际上服务端还是在执行逻辑。这个在支付领域中很重要，如果客户端超时没有处理好，认为服务端执行失败而重试的话，如果对方没有做幂等操作，则会支付两次费用。
 
 
 
