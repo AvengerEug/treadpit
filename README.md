@@ -4178,6 +4178,14 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
     * 找到大文件了怎么办？得分析这个文件的特性，
       * 如果这个文件(假设为application.lo)是应用程序的主日志（应用服务器会一直往这个日志文件写日志），此时就不能删除这个文件，而是要执行`echo 1 > application.log`命令，来缩小application.log日志的大小
       * 如果这个文件没有被应用程序使用，则可以执行`rm -f xxx.log`日志把文件删除即可。
+  
+* 或者，我们可以使用如下命令，找出某个文件夹下最大的5个文件：
+  
+  ```shell
+  du -h ~ | sort -rn | head -n 5
+  ```
+  
+  
 
 #### 4.1.20 curl命令
 
@@ -4192,6 +4200,17 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
 
 * dig和nslookup命令是dns解析的命令，我们可以解析出域名最终解析出来的ip地址是什么。与ping命令不同的是，dig命令可以看到整个dns解析过程。
 * 在使用dig命令中，我们可以使用`@`语法指定要使用的dns服务器（有时候有些dns服务器有定制逻辑，所以需要切换dns服务器排除这方面的判断）。eg: `dig @8.8.8.8 www.taobao.com`. 这表示使用阿里云公网的dns进行解析，也可以使用谷歌的`114.114.114.114`dns服务器进行解析。
+
+#### 4.1.22 tail -n命令
+
+* 通常，我们在高并发的项目中，日志文件可能输入的非常快，如果用less命令或cat命令从头开始搜索某个关键字日志时，可能要从头到位的搜索。但是也许我们仅仅是做了一个测试请求，这个请求一般都是在文件的尾部，我们希望从后面往前搜索。此时我们可以执行这个命令：
+
+  ```shell
+  # 从后往前数，最新的100w行的日志中搜索key为：『avengerEug』的日志
+  tail -n 1000000 /home/admin/application.log | grep "avengerEug"
+  ```
+
+  
 
 ### 4.2 keepalived实现主备部署
 
@@ -4685,7 +4704,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                      
+  >                         
   >    -- 第二步：执行SQL
   >    SELECT
   >        COUNT(p.pay_id)
@@ -4693,17 +4712,17 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        (SELECT pay_id FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c') tmp
   >    INNER JOIN pay p ON tmp.pay_id = p.pay_id
   >    WHERE state IN (0, 1);
-  >                      
+  >                         
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                      
+  >                         
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
   >      "rows": 996970,
   >      "cost": 203657
   >    },
-  >                      
+  >                         
   >    -- 走index_accountId_createTime索引的分析，评分为1.21
   >    "analyzing_range_alternatives": {
   >      "range_scan_alternatives": [
@@ -4726,7 +4745,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        "cause": "too_few_roworder_scans"
   >      }
   >    },
-  >                      
+  >                         
   >    -- 最终选择走index_accountId_createTime索引，因为评分最低，只有1.21
   >    "chosen_range_access_summary": {
   >      "range_access_plan": {
@@ -4741,9 +4760,9 @@ systemctl start rc-local.service  => 开启rc-local服务
   >      "cost_for_plan": 1.21,
   >      "chosen": true
   >    }
-  >                      
+  >                         
   >    综上所述，针对于INNER JOIN，在MySQL处理后，它最终选择走index_accountId_createTime索引，而且评分为1.21
-  >                      
+  >                         
   >    ```
   >
   >    * 执行另外一条SQL
@@ -4751,13 +4770,13 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                      
+  >                         
   >    -- 第二步：执行SQL
   >    SELECT COUNT(pay_id) FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c' AND state IN (0, 1);
-  >                      
+  >                         
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                      
+  >                         
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
@@ -4829,7 +4848,9 @@ systemctl start rc-local.service  => 开启rc-local服务
 
 ### 9.2、172.20.0.0/16 ，后面的16是什么意思？
 
-* 后面的16表示172.20.0.0这个网络的子网掩码（**掩码的意思就是掩盖掉主机号，剩余的就是⽹络号**）。我们知道，一个ip地址是由32个bit来组成的，而这里的16就是将32个bit的前面16个置为1（同时也表示前面16为为网络号），即：二进制为：**11111111.11111111.00000000.0000000**，对应的十进制为：**255.255.0.0**
+* 后面的16表示172.20.0.0这个网络的子网掩码（**掩码的意思就是掩盖掉主机号，剩余的就是⽹络号**）。我们知道，一个ip地址是由32个bit来组成的，而这里的16就是将32个bit的前面16个置为1（同时也表示前面16为为网络号），即：二进制为：**11111111.11111111.00000000.0000000**，对应的十进制为：**255.255.0.0**。
+
+* 我们也能知道这个ip端可以有`2的（32-16）次方 -2`台主机使用对应的ip数据。计算规则：![ip地址规律.png](ip地址规律.png)
 
 * 同时，我们也能知道这个ip对应的广播地址是什么。因为这个ip地址是172打头的，是属于B类IP地址。因此，我们只需要将B类的主机号部分全部置为1就能知道广播地址了，因此它的广播地址的二进制为：**10101100.00010100.`11111111.11111111`**，十进制为：**172.20.`255.255`**
 
