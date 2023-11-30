@@ -3225,6 +3225,24 @@ git log --graph --pretty=oneline --abbrev-commit
 
 * 远程连接时，要注意远程服务器是否开放了对应的端口
 
+#### 2.11.2 OmitStackTraceInFastThrow参数
+
+* 含义：省略异常栈信息，快速抛出异常。 当异常抛出2w+的时候，就会触发fast throw机制。此时异常堆栈会被忽略
+
+  > 默认情况下: OmitStackTraceInFastThrow和StackTraceInThrowable都为true
+  > 当满足条件：( **!StackTraceInThrowable | |OmitStackTraceInFastThrow** )时才会开启fastthrow
+  > 因为OmitStackTraceInFastThrow默认为true，默认符合条件（即异常堆栈会被忽略）。
+  > 如果想关闭，jvm需要添加此参数:-XX:-OmitStackTraceInFastThrow
+  > 如果想打开，jvm添加此参数：-XX:+OmitStackTraceInFastThrow或者不加，默认开启
+
+* 只会对如下的异常生效：
+
+  * NullPointerException
+  * ArithmeticException
+  * ArrayIndexOutOfBoundsException
+  * ArrayStoreException
+  * ClassCastException
+
 ### 2.12 消息中间件
 
 #### 2.12.1 在与第三方交互时消息中间件的使用
@@ -4708,7 +4726,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                         
+  >                            
   >    -- 第二步：执行SQL
   >    SELECT
   >        COUNT(p.pay_id)
@@ -4716,17 +4734,17 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        (SELECT pay_id FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c') tmp
   >    INNER JOIN pay p ON tmp.pay_id = p.pay_id
   >    WHERE state IN (0, 1);
-  >                         
+  >                            
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                         
+  >                            
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
   >      "rows": 996970,
   >      "cost": 203657
   >    },
-  >                         
+  >                            
   >    -- 走index_accountId_createTime索引的分析，评分为1.21
   >    "analyzing_range_alternatives": {
   >      "range_scan_alternatives": [
@@ -4749,7 +4767,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        "cause": "too_few_roworder_scans"
   >      }
   >    },
-  >                         
+  >                            
   >    -- 最终选择走index_accountId_createTime索引，因为评分最低，只有1.21
   >    "chosen_range_access_summary": {
   >      "range_access_plan": {
@@ -4764,9 +4782,9 @@ systemctl start rc-local.service  => 开启rc-local服务
   >      "cost_for_plan": 1.21,
   >      "chosen": true
   >    }
-  >                         
+  >                            
   >    综上所述，针对于INNER JOIN，在MySQL处理后，它最终选择走index_accountId_createTime索引，而且评分为1.21
-  >                         
+  >                            
   >    ```
   >
   >    * 执行另外一条SQL
@@ -4774,13 +4792,13 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                         
+  >                            
   >    -- 第二步：执行SQL
   >    SELECT COUNT(pay_id) FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c' AND state IN (0, 1);
-  >                         
+  >                            
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                         
+  >                            
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
