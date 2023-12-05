@@ -2140,6 +2140,69 @@ SpringBoot默认包扫描路径为入口类所在包及所有子包, 当依赖�
 * 二方库的maven依赖的scope全部设置成provider，不做依赖传递，与集成方的依赖解耦。
 * 二方库提供的服务应该要尽量简单、合理，方便集成方集成
 
+#### 2.3.38 springboot使用maven打包，并使用java -jar启动项目，提示无主清单
+
+* 这种情况是因为springboot项目缺少依赖了一些maven插件。但具体要怎么处理还是要参考当前springboot的依赖逻辑。
+
+* 模式一：如果是以parent的方式依赖了springboot的整体依赖。如下所示：
+
+  ```xml
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.0.4.RELEASE</version>
+    <relativePath/> <!-- lookup parent from repository -->
+  </parent>
+  ```
+
+  有显示的指定parent为springboot项目，这种情况下，只需要找pom文件中添加build插件即可解决此问题
+
+  ```xml
+  <build>
+  	<plugins>
+  		<plugin>
+  			<groupId>org.springframework.boot</groupId>
+  			<artifactId>spring-boot-maven-plugin</artifactId>
+  		</plugin>
+  	</plugins>
+  </build>
+  ```
+
+  这里可以不用指定版本号，因为相关依赖在spring-boot-starter-parent中已经定义好了
+
+* 模式二：以dependencyManager的方式依赖
+
+  ```xml
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <!-- Import dependency management from Spring Boot -->
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>2.0.4.RELEASE</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  ```
+
+  这种情况下，也是需要添加spring-boot-maven-plugin插件，只不过要指定版本号。因此，需要添加如下配置：
+
+  ```xml
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <version>2.0.4.RELEASE</version>
+      </plugin>
+    </plugins>
+  </build>
+  ```
+
+  这里有个细节，就是spring-boot-maven-plugin插件中指定了版本号。 并且需要跟dependencyManagement中依赖的spring-boot版本号一致才行（防止有冲突问题）
+
 ### 2.4 Mybatis
 
 #### 2.4.1 parameterType为int/long时, 参数为0的处理
