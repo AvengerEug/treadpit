@@ -1968,7 +1968,7 @@ System.out.println(B.class.isAssignableFrom(A.class));
   2. UTF-8编译环境
   3. 自身依赖了一些jar包, 比如log4f等等
   4. 可以支持resource目录下的文件使用pom文件中定义的一些属性
-        5. 内部依赖了内置三方包的版本
+  5. 内部依赖了内置三方包的版本
 
 #### 2.3.20 spring-boot-starter-actuator
   * 常用于生产环境, 可用于项目的监管和check
@@ -2218,7 +2218,7 @@ SpringBoot默认包扫描路径为入口类所在包及所有子包, 当依赖�
     ```
 
 #### 2.4.2 $和#区别
-  * $会存在sql注入的风险, #不会。 因为$是将数据和sql语句一起编译的 而#是先编译sql语句再将数据绑定上去, 即跟原生jdbc的问号占位符一样(?, ?, ?....)
+  * $会存在sql注入的风险, 但#不会。 因为 $是将数据和sql语句一起编译的 而#是先编译sql语句再将数据绑定上去, 即跟原生jdbc的问号占位符一样(?, ?, ?....)
   * 所以通常在模糊模糊查找时会添加bind标签将需要模糊查找的key预先编译好, 再直接用#将bind定义的变量keywordWrapper进行筛选即可,。
     ```XML
     <bind name="keywordWrapper" value="keyword + '%'"/>
@@ -4536,6 +4536,15 @@ systemctl start rc-local.service  => 开启rc-local服务
 
 * 在线连接数监控原理：就是监听了tcp协议的连接，根据四要素统计出来的数量。在网络传输协议中，tcp是属于传输层协议，是所有应用层协议的基础。我们熟悉的http、http是、websocket协议底层用的都是tcp协议，都离不开三次握手和四次挥手。对于http协议而言（服务器未开启keepalive），如果http的请求耗时10s，而qps有7000，那会发生什么问题呢？即：客户端会跟服务端建立70000个tcp链接，（**即客户端的ip+端口与对方的ip+提供http服务的端口只能建立70000个tcp链接，`在这个交互过程中，会变的只有客户端的端口` **），但linux服务器最大连接数为65563（客户端ip不变 且 对方ip和端口不变的情况下），这就会导致有些请求无法建立个tcp链接，进而导致请求失败。
 
+### 5.5 OSI 5层协议
+
+* 5层协议：
+  * 应用层
+  * 传输层
+  * 网络层
+  * 数据链路层
+  * 物理层
+
 ## 六. IDEA
 
 ### 6.1 快捷键(修改成eclipse后)
@@ -4789,7 +4798,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                            
+  >                               
   >    -- 第二步：执行SQL
   >    SELECT
   >        COUNT(p.pay_id)
@@ -4797,17 +4806,17 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        (SELECT pay_id FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c') tmp
   >    INNER JOIN pay p ON tmp.pay_id = p.pay_id
   >    WHERE state IN (0, 1);
-  >                            
+  >                               
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                            
+  >                               
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
   >      "rows": 996970,
   >      "cost": 203657
   >    },
-  >                            
+  >                               
   >    -- 走index_accountId_createTime索引的分析，评分为1.21
   >    "analyzing_range_alternatives": {
   >      "range_scan_alternatives": [
@@ -4830,7 +4839,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        "cause": "too_few_roworder_scans"
   >      }
   >    },
-  >                            
+  >                               
   >    -- 最终选择走index_accountId_createTime索引，因为评分最低，只有1.21
   >    "chosen_range_access_summary": {
   >      "range_access_plan": {
@@ -4845,9 +4854,9 @@ systemctl start rc-local.service  => 开启rc-local服务
   >      "cost_for_plan": 1.21,
   >      "chosen": true
   >    }
-  >                            
+  >                               
   >    综上所述，针对于INNER JOIN，在MySQL处理后，它最终选择走index_accountId_createTime索引，而且评分为1.21
-  >                            
+  >                               
   >    ```
   >
   >    * 执行另外一条SQL
@@ -4855,13 +4864,13 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                            
+  >                               
   >    -- 第二步：执行SQL
   >    SELECT COUNT(pay_id) FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c' AND state IN (0, 1);
-  >                            
+  >                               
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                            
+  >                               
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
