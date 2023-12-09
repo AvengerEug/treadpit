@@ -2203,6 +2203,11 @@ SpringBoot默认包扫描路径为入口类所在包及所有子包, 当依赖�
 
   这里有个细节，就是spring-boot-maven-plugin插件中指定了版本号。 并且需要跟dependencyManagement中依赖的spring-boot版本号一致才行（防止有冲突问题）
 
+#### 2.3.39 spring 5.2版本扫描注解的坑
+
+* spring有一个扫描包的类，比如叫：ClassPathScanningCandidateComponentProvider。内部有个scan的方法，可以利用includeFilter扫描出包含指定注解的bean定义。但这里有个关键点：就是在调用includeFilter方法传入指定注解时，注解中必须包含**@Retention(RetentionPolicy.RUNTIME)**才能被扫描出来。
+  * 举个例子：我要扫描出带有@TestAvegerEug注解的类，并封装成一个bean的定义文件。但如果@TestAvegerEug注解中没有指明**@Retention(RetentionPolicy.RUNTIME)**的话，则所有被@TestAvegerEug注解标识的类无法被扫描成一个bean的定义文件
+
 ### 2.4 Mybatis
 
 #### 2.4.1 parameterType为int/long时, 参数为0的处理
