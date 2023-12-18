@@ -2222,6 +2222,146 @@ SpringBoot默认包扫描路径为入口类所在包及所有子包, 当依赖�
 * spring有一个扫描包的类，比如叫：ClassPathScanningCandidateComponentProvider。内部有个scan的方法，可以利用includeFilter扫描出包含指定注解的bean定义。但这里有个关键点：就是在调用includeFilter方法传入指定注解时，注解中必须包含**@Retention(RetentionPolicy.RUNTIME)**才能被扫描出来。
   * 举个例子：我要扫描出带有@TestAvegerEug注解的类，并封装成一个bean的定义文件。但如果@TestAvegerEug注解中没有指明**@Retention(RetentionPolicy.RUNTIME)**的话，则所有被@TestAvegerEug注解标识的类无法被扫描成一个bean的定义文件
 
+#### 2.3.40 springboot 2.0.4.RELEASE版本如何集成log4j2
+
+* 参考文档：https://docs.spring.io/spring-boot/docs/2.0.4.RELEASE/reference/htmlsingle/#howto-configure-log4j-for-logging
+
+* 步骤：
+
+  1. 添加依赖（前提用parent和dependenciesManager引入了springboot的依赖）：
+
+  ```xml
+  <dependency>
+  	<groupId>org.springframework.boot</groupId>
+  	<artifactId>spring-boot-starter-web</artifactId>
+  </dependency>
+  <dependency>
+  	<groupId>org.springframework.boot</groupId>
+  	<artifactId>spring-boot-starter</artifactId>
+  	<exclusions>
+  		<exclusion>
+  			<groupId>org.springframework.boot</groupId>
+  			<artifactId>spring-boot-starter-logging</artifactId>
+  		</exclusion>
+  	</exclusions>
+  </dependency>
+  <dependency>
+  	<groupId>org.springframework.boot</groupId>
+  	<artifactId>spring-boot-starter-log4j2</artifactId>
+  </dependency>
+  ```
+
+  2. 在classpath下添加log4j2.xml文件(也可参考官方文档中的demo。官方文档的demo比较简单，仅仅是把日志输出到控制台上。)
+
+     ```xml
+     <?xml version="1.0" encoding="UTF-8"?>
+     <!--日志级别以及优先级排序: OFF > FATAL > ERROR > WARN > INFO > DEBUG > TRACE > ALL -->
+     <!--Configuration后面的status，这个用于设置log4j2自身内部的信息输出，可以不设置，当设置成trace时，你会看到log4j2内部各种详细输出-->
+     <!--monitorInterval：Log4j能够自动检测修改配置 文件和重新配置本身，设置间隔秒数。如果配置没改动的话，这个参数相当于没有用-->
+     <configuration status="WARN" monitorInterval="30">
+     
+         <!--先定义所有的appender-->
+         <appenders>
+             <!--这个输出到控制台的配置-->
+             <console name="Console" target="SYSTEM_OUT">
+                 <!--输出日志的格式 输出到毫秒时间：%d{HH:mm:ss:SSS}-->
+                 <!-- %p: 输出当前日志等级 -->
+                 <!-- %t: 输出当前线程名称。如果是异步打印日志，则此参数可以很容易判别出来 -->
+                 <!-- %l: 输出打印日志的行号 -->
+                 <!-- %m: 输出打印日志的方法名 -->
+                 <!-- %n: 需要换行 -->
+                 <PatternLayout pattern="[%d{HH:mm:ss:SSS}] [%p] [%t] - %l - %m%n"/>
+             </console>
+     
+             <!-- ${sys:user.home} 对应linux ~ 的路径。可以执行echo ~ 命令查看路径是什么 -->
+             <!-- 
+     					name: 表示当前appender的名称，
+               fileName: 表示当前append对应的日志文件
+               filePattern: 文件规则
+               append: 重启后，是否把新日志追加到日志文件中
+     				-->
+             <RollingFile name="biz.log" fileName="${sys:user.home}/jst-application/logs/biz.log"
+                          filePattern="${sys:user.home}/jst-application/logs/$${date:yyyy-MM}/biz-%d{yyyy-MM-dd}-%i.log"
+                          append="true">
+                 <!-- 
+                   level：表示只针对此级别
+     							onMatch="ACCEPT" 表示匹配该级别即以上
+     							onMatch="DENY"   表示不匹配该级别即以上
+     
+                   onMismatch="ACCEPT" 表示匹配该级别即以下
+                   onMismatch="DENY" 表示不匹配该级别即以下
+       						通常我们都是用level指定级别，因此onMatch和onMismatch都可以不填
+     						-->
+                 <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
+                 <!-- 表示当前append打印日志的格式 -->
+                 <PatternLayout pattern="[%d{HH:mm:ss:SSS}] [%p] [%t] - %l - %m%n"/>
+                 <!-- 表示日志分隔政策
+      							TimeBasedTriggeringPolicy：
+       							interval:单位是分钟，表示每隔这么多分钟完成日志的分隔（拆分）
+                     modulate: 如果设置为 true，则表示滚动时间间隔是基于上一次滚动的时间来计算的，而不是固定的时间间隔。例如，如果设置为 true 并且 interval 设置为 60，则表示每隔一小时就会滚动一次日志文件，但是如果上一次滚动是在 59 分钟前进行的，则下一次滚动将在 1 分钟后进行。
+                    
+     
+     							这个配置表示的业务语义：每隔1分钟触发一次业务日志滚动。或者当日志达到10MB后，完成一次日志拆分操作。
+                 -->
+                 <Policies>
+                     <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                     <SizeBasedTriggeringPolicy size="10 MB"/>
+                 </Policies>
+                 <!-- 拆分后的文件，最多只能保持20个 -->
+                 <DefaultRolloverStrategy max="20"/>
+             </RollingFile>
+     
+             <RollingFile name="application.log" fileName="${sys:user.home}/jst-application/logs/application.log"
+                          filePattern="${sys:user.home}/jst-application/logs/$${date:yyyy-MM}/application-%d{yyyy-MM-dd}-%i.log"
+                          append="true">
+                 <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+                 <PatternLayout pattern="[%d{HH:mm:ss:SSS}] [%p] [%t] - %l - %m%n"/>
+                 <Policies>
+                     <TimeBasedTriggeringPolicy/>
+                     <SizeBasedTriggeringPolicy size="2 MB"/>
+                 </Policies>
+             </RollingFile>
+         </appenders>
+     
+         <!--定义logger，只有定义了logger并引入的appender，才能开始打印日志-->
+         <loggers>
+             <!-- biz 业务日志打印位置 -->
+             <!-- additivity="false" 是否将当前日志传递给祖先，如果设置为true，则也会触发root的日志规则 -->
+             <logger name="bizInfo" level="error" additivity="false">
+                 <appender-ref ref="biz.log"/>
+             </logger>
+     
+             <root level="info">
+                 <appender-ref ref="Console" />
+                 <appender-ref ref="application.log"/>
+             </root>
+         </loggers>
+     
+     </configuration>
+     
+     ```
+
+  3. 如何使用？
+
+     ```java
+     // 引入slf4j的日志包
+     import org.slf4j.Logger;
+     import org.slf4j.LoggerFactory;
+     
+     // 为什么传入的是bizInfo？因为logger中定义了bizInfo
+     private static Logger BIZ_LOG = LoggerFactory.getLogger("bizInfo");
+     // 只有打印error级别的日志，日志才会进入到biz.log文件中（因为logger定义的日志级别为error）
+     BIZ_LOG.error("asdfsadf: " + "asdfsdfgg");
+     
+     // 为什么传入的是test？这个其实可以随便传，最终都会命中root的规则
+     private static Logger BIZ_LOG = LoggerFactory.getLogger("test");
+     // 打印error级别以上的日志，日志才会进入到打印到控制台和application文件中（命中了名称为Console和application.log的append）
+     BIZ_LOG.info("asdfsadf: " + "asdfsdfgg");
+     
+     ```
+
+     
+
 ### 2.4 Mybatis
 
 #### 2.4.1 parameterType为int/long时, 参数为0的处理
