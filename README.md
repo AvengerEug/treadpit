@@ -4291,6 +4291,7 @@ linux若分别以普通user启动jenkins.war, 那么会在/home/user/.jenkins/ �
 #### 4.1.8 查找某个端口被占用
 * ps -ef | grep 80
 * netstat  -anp | grep 80
+* lsof -i:80   --> lsof(list open file): 在linux中一切皆是文件，一个握手链接也是文件
 #### 4.1.9 查看linux各进程内存使用情况
 * top
 * 指定某个线程: top | grep 进程名
@@ -4454,6 +4455,15 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
   tail -n 1000000 /home/admin/application.log | grep "avengerEug"
   ```
 
+
+#### 4.1.23 lsof命令
+
+* 在linux中一切皆是文件，大到一个真实的linux文件，小到一个tcp连接，在linux中都是用文件来表示的。我们通常可以使用它来看哪个进程占用了8080端口。执行如下命令接口：
+
+  ```shell
+  lsof -i:8080
+  ```
+
   
 
 ### 4.2 keepalived实现主备部署
@@ -4462,7 +4472,7 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
 
   1. 搭建keepalived服务
 
-~~~shell
+~~~markdown
 * 设备A: centos7 64位操作系统
   1. 安装keepalived服务
      yum install keepalived
@@ -4957,7 +4967,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                     
+  >                                        
   >    -- 第二步：执行SQL
   >    SELECT
   >        COUNT(p.pay_id)
@@ -4965,17 +4975,17 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        (SELECT pay_id FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c') tmp
   >    INNER JOIN pay p ON tmp.pay_id = p.pay_id
   >    WHERE state IN (0, 1);
-  >                                     
+  >                                        
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                     
+  >                                        
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
   >      "rows": 996970,
   >      "cost": 203657
   >    },
-  >                                     
+  >                                        
   >    -- 走index_accountId_createTime索引的分析，评分为1.21
   >    "analyzing_range_alternatives": {
   >      "range_scan_alternatives": [
@@ -4998,7 +5008,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        "cause": "too_few_roworder_scans"
   >      }
   >    },
-  >                                     
+  >                                        
   >    -- 最终选择走index_accountId_createTime索引，因为评分最低，只有1.21
   >    "chosen_range_access_summary": {
   >      "range_access_plan": {
@@ -5013,9 +5023,9 @@ systemctl start rc-local.service  => 开启rc-local服务
   >      "cost_for_plan": 1.21,
   >      "chosen": true
   >    }
-  >                                     
+  >                                        
   >    综上所述，针对于INNER JOIN，在MySQL处理后，它最终选择走index_accountId_createTime索引，而且评分为1.21
-  >                                     
+  >                                        
   >    ```
   >
   >    * 执行另外一条SQL
@@ -5023,13 +5033,13 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                     
+  >                                        
   >    -- 第二步：执行SQL
   >    SELECT COUNT(pay_id) FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c' AND state IN (0, 1);
-  >                                     
+  >                                        
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                     
+  >                                        
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
@@ -5190,7 +5200,3 @@ systemctl start rc-local.service  => 开启rc-local服务
 ### 10.9 网络上的丢包问题如何解决？
 
 * 由于互联网的物理线路可靠性不是100%，两台服务器之间的通信存在数据丢失的情况。因此需要一种手段来告知对方是否存在丢包的情况。我们可以在response中添加一个请求头：biz-bodylength。 它表示的是http body的string字符长度（中英文都算做一个长度）。这样，对方在接收到响应后，可以先从请求头中获取这个key，再跟响应的结果做一下匹配，就能知道有没有丢包了。如果丢包了，则可以忽略这次请求。
-
-### 10.10 如何根据ip反向查找域名？
-
-* dig -x 8.8.8.8 @8.8.4.4 表示在8.8.4.4dns服务器中查找ip 8.8.8.8对应的域名
