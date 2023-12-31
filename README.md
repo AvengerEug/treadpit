@@ -711,7 +711,7 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
 * 使用字节限制每次读取的长度, 使用while循环保证能读取整个流
 
 #### 2.1.8 动态代理抛出实际真实异常
-* 因为动态代理对象抛出的异常对象为顶级对象Throwable, 所以要获取真实对象的话, 需要调用异常的e.getCause()方法
+* 因为动态代理对象抛出的异常对象为顶级对象Throwable, 所以要获取真实对象的话, 需要调用异常的e.getCause()方法。或者使用common.lang3的工具方法：`Throwable cause = Throwables.getRootCause(e);`
 
 #### 2.1.9 多线程基础
 ##### 2.1.9.1 volatile关键字与System.out.print的欢喜冤家
@@ -1340,7 +1340,7 @@ List list = Arrays.asList(strArr);
       在程序中拿不到它的引用，但是它实际存在，由c++编写, 根加载器一般加载比较重要的类. 比如jdk安装目录下的jre/lib/rt.jar类库(里面存放着jdk类库的字节码文件, 这就是我们能使用jdk api的原因)
       ```
   * 具体java应用程序class加载时间调用顺序如下图所示:
-    ![JDK_Classloader](http://images.tangzzz.com/treadpit/jvm_classloader.jpg)
+    ![JDK_Classloader](./jvm_classloader.jpg)
 
 #### 2.1.18 Map put进去的默认类型
   * Map<String, Object>格式的map, 若put进去的类型时int类型, 那么get出来时虽然时object类型, 但是此时如果long类型来接收的话, 会抛出转型异常, 因为get出来的是int类型, int类型不能直接强转成long类型
@@ -1582,6 +1582,30 @@ System.out.println(B.class.isAssignableFrom(A.class));
 #### 2.1.33 bigDecimal构造方法
 
 * 若在bigDecimal的构造方法中传入null进去，会抛出NPE的异常，在使用之前要保证传入的值不为null才行
+
+#### 2.1.34 为什么本地缓存要设计成SolfReference类型？
+
+* 代码示例：
+
+  ```java
+  // 创建了一个concurrentHashMap，value类型为：SoftReference
+  private final Map<String, SoftReference<AvengerEug>> concurrentLocalCache = new ConcurrentHashMap<>();
+  ```
+
+* 为什么value要设计成软引用？
+
+  * 因为本地缓存是利用jvm的堆来存储对象的。value使用软引用可以有效的解决内存管理问题。**当系统内存不足时，垃圾回收器会优先回收SoftReference引用的对象**，从而释放这部分内存空间，保证其它更重要的任务能够正常运行。同时，**当系统内存充足时，软引用对象仍然会被保留下来**，从而避免频繁的从数据库或其他外部源读取数据，提高了数据访问速度。
+  * 总而言之就是：在jvm fullgc的时候能够把这些软引用的数据也清除。保证其他更重要的业务线程能正常工作。
+
+* 那SolfReference内部引用的对象什么时候会被清理呢？由于SoftReference对象只是弱引用，所以在一般情况下，垃圾回收器不会立即回收它所指向的对象。只有在满足上述条件之一时，才会触发SoftReference内部引用对象的回收。
+
+  * 当jvm发生Full GC时，会回收所有SoftReference软链接内部引用的对象。此例子则会清理AvengerEug对象。
+  * 当系统内存不足时，为了防止oom异常，垃圾回收器会优先回收SoftReference内部引用的对象
+  * 当SolfReference对象本身不再被任何可达对应引用时，垃圾回收器也会回收此对象。
+
+* 适合什么场景下使用？
+
+  * 不频繁fullgc的应用。同时，针对SoftReference软应用的特征，当触发fullgc后，内部引用的对象会被清理，需要在代码中对此部分做兼容。如果key对应的SoftReference内部引用的对象被清除了，要有机制去拉取新数据并缓存到相同key对应的value中
 
 ### 2.2 Spring Cloud
 
@@ -3599,7 +3623,7 @@ Heap after GC invocations=43 (full 0):
 | -Xms256m -Xmx256m                                            | 设置jvm堆内存初始大小和最大大小为256m                        |
 | -XX:MetaspaceSize=64m -XX:MaxMetaspaceSize=64m               | 设置元空间的初始内存和最大内存为64m                          |
 | -Xmn64m                                                      | 设置年轻代的内存大小为64m                                    |
-| -XX:+DisableExplicitGC                                       | 禁止手动触发fullgc(执行System.gc)                            |
+| -XX:+DisableExplicitGC                                       | 禁止手动执行System.gc触发垃圾回收                            |
 | -XX:CMSInitiatingOccupancyFraction=80  -XX:+UseCMSInitiatingOccupancyOnly | 设置cms收集器启动的阈值为80%，当老年代的占用率达到80%时，会触发cms垃圾回收。-XX:+UseCMSInitiatingOccupancyOnly 表示开启此功能 |
 | -XX:+UseConcMarkSweepGC                                      | 使用cms垃圾回收器                                            |
 | -XX:+DoEscapeAnalysis                                        | 开启逃逸分析，是一种优化技术，可以帮助减少对象分配的开销     |
@@ -3609,7 +3633,9 @@ Heap after GC invocations=43 (full 0):
 | -Xloggc:/Users/avengereug/java-backend/gc.log                | 将垃圾回收日志输出到指定文件中。                             |
 | -XX:+PrintGCDetails                                          | 打印更详细的垃圾回收信息。                                   |
 | -XX:+PrintGCDateStamps                                       | 在垃圾回收日志中打印日期。                                   |
+| -XX:+HeapDumpBeforeFullGC                                    | 在fullgc前打印堆栈信息                                       |
 | -XX:+HeapDumpOnOutOfMemoryError                              | 当发生内存溢出错误时，生成堆转储文件。                       |
+| -XX:HeapDumpPath=/Users/avengereug/java-backend/heapdump-%t.hprof | 当发生内存溢出错误时，堆文件存储的路径。也适用于-XX:+HeapDumpBeforeFullGC |
 | -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000 -XX:+PrintTenuringDistribution | 设置远程调试端口为8000，调试服务器等待客户端连接并立即开始运行程序。 |
 | -XX:+PrintHeapAtGC                                           | 在垃圾回收时输出堆的快照信息。                               |
 | -XX:ReservedCodeCacheSize=256m                               | 预留代码缓存大小为256MB。                                    |
@@ -3634,12 +3660,72 @@ Heap after GC invocations=43 (full 0):
   * 内存碎片：cms收集器不会对内存进行压缩整理，长时间运行后，可能产生较多的内存碎片，影响大对象分配，有时可能需要Full GC来整理内存碎片
   * CMS回退到Serial Old收集器：当老年代空间不足无法完成垃圾回收时，会回退到使用Serial Old收集器的fullgc，会停顿较长时间。
 
-#### 2.11.8 jvm日志的几个关键字
+#### 2.11.8 jvm日志的几个日志报错关键字
 
-* allocate failed：指的是在尝试分配对象时，jvm没有足够的空间来容纳新对象，导致一次young gc。这通常发生在年轻代（Young Generation）空间不足以容纳新的分配对象请求时。为了给新对象腾出空间，jvm触发了一次young gc
-* promotion failed：是指对象晋升到老年代时失败。在垃圾收集过程中，当年轻代中的对象达到一定年龄时（默认15，可以配置），他们会被晋升到老年代。如果老年代空间不足以容纳即将晋升的对象，晋升操作会失败。这通常会触发一次fullgc，以清理老年代并尝试为这些对象腾出空间。
-* oncurrent mode failed：是指在使用cms垃圾收集器过程中，由于老年代空间不足，导致并发模式无法成功完成。"在cms的并发收集周期中，应用程序的线程会和垃圾收集线程通知运行。如果在这个周期内老年代空间变得满溢，CMS无法继续并发地收集垃圾，因此会退回到Serial Old收集器的fullgc，即会停止所有的应用线程，直到垃圾收集完成。这会导致较长的停顿时间，并可能影响应用程序的性能"
+* allocate failed（**young gc的相关关键字**）：指的是在尝试分配对象时，jvm没有足够的空间来容纳新对象，导致一次young gc。这通常发生在年轻代（Young Generation）空间不足以容纳新的分配对象请求时。为了给新对象腾出空间，jvm触发了一次young gc
+* promotion failed（**full gc的相关关键字**）：是指对象晋升到老年代时失败。在垃圾收集过程中，当年轻代中的对象达到一定年龄时（默认15，可以配置），他们会被晋升到老年代。如果老年代空间不足以容纳即将晋升的对象，晋升操作会失败。这通常会触发一次fullgc，以清理老年代并尝试为这些对象腾出空间。
+* oncurrent mode failed（**full gc的相关关键字**）：是指在使用cms垃圾收集器过程中，由于老年代空间不足，导致并发模式无法成功完成。"在cms的并发收集周期中，应用程序的线程会和垃圾收集线程通知运行。如果在这个周期内老年代空间变得满溢，CMS无法继续并发地收集垃圾，因此会退回到Serial Old收集器的fullgc，即会停止所有的应用线程，直到垃圾收集完成。这会导致较长的停顿时间，并可能影响应用程序的性能"
 * 为了避免这些失败的情况，我们可以增加堆的大小、优化垃圾收集器的配置参数或者使用更现在的垃圾收集器，如G1或ZGC，它们提供了更先进的堆管理技术和更高效的垃圾回收机制。
+
+#### 2.11.9 java启动命令的一些参数前缀
+
+* -D：用于设置系统属性，可以通过System.getProperty(String key) 方法在java代码中获取。
+* -X 或 -XX：是jvm层面的参数，比如-Xms256m和-Xmx256m 设置堆的最小内存和最大内存。
+
+#### 2.11.10 如何动态的添加jvm参数
+
+* 第一步：使用 `jps`命令先找到jvm的进程
+* 第二步：使用`jinfo -flag +HeapDumpBeforeFullGC 进程ID` 为jvm进程添加HeapDumpBeforeFullGC参数，表示在fullgc之前把堆栈信息打印出来
+* 第三步：使用`jinfo -flags 进程ID`， 查看java的启动命令中是否包含了刚刚添加的jvm参数
+* 适用场景：大流量的项目，通常不会频繁在fullgc前打印fullgc前的堆栈信息（占用磁盘空间，打印快照也会影响性能），如果频繁系统突然某天频繁出现fullgc的话，则需要使用此方式为某些机器添加此参数，让这几台灰度的机器在fullgc前打印堆栈信息，方便分析问题。
+
+#### 2.11.11 配置了fullgc前打印dump文件并且配置了内存溢出时打印dump文件的案例
+
+* jvm参数
+
+  ```
+  -Xms256m
+  -Xmx256m
+  -XX:MetaspaceSize=64m
+  -XX:MaxMetaspaceSize=64m
+  -Xmn64m
+  -XX:+HeapDumpBeforeFullGC
+  -XX:CMSInitiatingOccupancyFraction=80
+  -XX:+UseCMSInitiatingOccupancyOnly
+  -XX:+UseConcMarkSweepGC
+  -XX:+DoEscapeAnalysis
+  -XX:-UseCompressedOops
+  -XX:MaxTenuringThreshold=10
+  -Xloggc:/Users/avengereug/java-backend/gc.log
+  -XX:+PrintGCDetails
+  -XX:+PrintGCDateStamps
+  -XX:+HeapDumpOnOutOfMemoryError
+  -XX:HeapDumpPath=/Users/avengereug/java-backend/heapdump.hprof
+  -Xdebug
+  -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000
+  -XX:+PrintTenuringDistribution
+  -XX:+PrintHeapAtGC
+  -XX:ReservedCodeCacheSize=256m
+  -XX:+ExplicitGCInvokesConcurrentAndUnloadsClasses
+  ```
+
+![jvm-dump-demo.png](./jvm-dump-demo.png)
+
+* 如上图片是本地程序中一直往list中添加对象的代码逻辑。在这里可以看到，但添加对象到一定程度后，触发了4次fullgc(对应的是heapdump.hprof、heapdump.hprof.1、heapdump.hprof.2、heapdump.hprof.3文件)，当第四次fullgc触发后，发现老年代的内存还是不足，最终触发了outOfMemory的错误，并且因为我们配置了发生内存溢出后创建dump文件的配置，因此生成了heapdump.hprof.4文件。
+
+#### 2.11.12 解析dump文件案例
+
+* 使用jvisualvm工具分析dump文件
+
+* ![dump文件分析.png](./dump文件分析.png)
+
+* 可以在右侧查找出最大的对象，如上为：ArrayList，点击ArrayList后可以看到ArrayList内部的对象![dump-top1-arrayList](./dump-top1-arrayList.png)
+
+  从这可以判断出，基本上就是频繁创建HeadMemory对象，并添加到list中导致内存溢出了。
+
+#### 2.11.13 System.gc()会触发fullgc嘛？
+
+* 不一定，System.gc()是触发一个全局的垃圾回收动作（包括young gc和full gc），但并不意味着一定执行fullgc。具体情况取决于当前堆内存的情况，如果符合young gc条件，则触发young gc。如果符合full gc条件，则触发full gc。
 
 ### 2.12 消息中间件
 
@@ -4832,12 +4918,6 @@ systemctl start rc-local.service  => 开启rc-local服务
   使用curl + json文件的方式，最终后端接收到的remark字段的单引号还是保留着的。完美解决问题！
 
 * 更多curl相关文档参考：[http://www.ruanyifeng.com/blog/2019/09/curl-reference.html](http://www.ruanyifeng.com/blog/2019/09/curl-reference.html)
-
-### 4.8 如何动态的添加jvm参数
-
-* 第一步：使用 `jps`命令先找到jvm的进程
-* 第二步：使用`jinfo -flag +HeapDumpBeforeFullGC 进程ID` 为jvm进程添加HeapDumpBeforeFullGC参数，表示在fullgc之前把堆栈信息打印出来
-* 第三步：使用`jinfo -flags 进程ID`， 查看java的启动命令中是否包含了刚刚添加的jvm参数
 
 ## 五. TCP & HTTP
 
