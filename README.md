@@ -1606,6 +1606,70 @@ System.out.println(B.class.isAssignableFrom(A.class));
 * 适合什么场景下使用？
 
   * 不频繁fullgc的应用。同时，针对SoftReference软应用的特征，当触发fullgc后，内部引用的对象会被清理，需要在代码中对此部分做兼容。如果key对应的SoftReference内部引用的对象被清除了，要有机制去拉取新数据并缓存到相同key对应的value中
+  * 如果此本地缓存的缺失对当前业务的影响不大（qps也能抗住），则可以考虑这种方式。
+
+#### 2.1.35 java agent
+
+* 是什么？
+
+  * Java Agent是一个特殊类型的工具，它可以在java程序的运行时通过java虚拟机提供的Instrumentation API修改字节码。它可以在启动java程序命令中，动态加载一个jar包。
+
+* 有什么用？
+
+  * 我们之前引入一个jar包都是需要通过maven的gav引入，但有时候有些jar包可能不是我们自己开发的，我们需要针对这些jar包引入自己的agent包，来达到一些目的；比如：监控代码的覆盖率、监控方法的执行时间等。本质上还是引入了一个jar包，至于可以做哪些事情，我们完全可以自由发挥。
+
+* 怎么用？
+
+  * 以引入一个springboot项目为例，这个springboot jar包是一个暴露了10083端口的http服务。里面有一个controller接口的path为：`/hello`
+
+  * 第一步：先把springboot打成一个可执行的jar包，并把它放在服务器的某个位置，比如：`/home/admin/tmp/my-springboot.jar`
+
+  * 第二步：创建一个Java Agent项目，并编写如下类：
+
+    ```java
+    package com.eugenesumarru.agent
+    import java.lang.instrument.Instrumentation;
+    
+    public class MyAgent {
+    
+        public static void agentmain(String agentArgs, Instrumentation inst) {
+            // 假设你已经有了一个包含 Spring Boot 应用的 JAR 文件的路径
+            String springBootJarPath = "/home/admin/tmp/my-springboot.jar";
+            
+            // 使用 URLClassLoader 加载 JAR 文件(未指定父 类加载器，目的是让此agent与原jar包的累加载器隔离，这样才不会冲突)
+            URLClassLoader classLoader = new URLClassLoader(new URL[]{ new URL("file://" + springBootJarPath) }, null);
+            Thread.currentThread().setContextClassLoader(classLoader);
+    
+            try {
+                // 加载主类并调用 main 方法启动 Spring Boot 应用
+                Class<?> cls = Class.forName("com.example.Application", true, classLoader);
+                Method main = cls.getMethod("main", String[].class);
+                main.invoke(null, (Object) new String[]{});
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    ```
+
+  * 第三步：打包Java Agent。把MyAgent打成jar文件，并在清单文件中指定Agent-Class。在MANIFEST.MF文件中添加
+
+    ```properties
+    Agent-Class: com.eugenesumarru.agent.MyAgent
+    Can-Retransform-Classes: true
+    Can-Redefine-Classes: true
+    ```
+
+    使用Maven将Agent打包成Jar文件，如my-agent.jar。并放在了`/home/admin/tmp/my-agent.jar`路径。
+
+  * 第四步：在主应用中启动Agent。假设现在有一个springboot-a.jar包，要在启动 springboot-a.jar包的前提下，加载my-agent.jar包，由my-agent.jar包来触发my-springboot.jar包的程序，并在10083端口中暴露/hello服务。执行命令如下所示：
+
+    ```java
+    java -javaagent:/home/admin/tmp/my-agent.jar -jar springboot-a.jar
+    ```
+
+    
 
 ### 2.2 Spring Cloud
 
@@ -3726,6 +3790,25 @@ Heap after GC invocations=43 (full 0):
 #### 2.11.13 System.gc()会触发fullgc嘛？
 
 * 不一定，System.gc()是触发一个全局的垃圾回收动作（包括young gc和full gc），但并不意味着一定执行fullgc。具体情况取决于当前堆内存的情况，如果符合young gc条件，则触发young gc。如果符合full gc条件，则触发full gc。
+
+#### 2.11.14 jvm几个gc名词的理解d
+
+| 名词               | 解释                             | 备注 |
+| ------------------ | -------------------------------- | ---- |
+| Young gc(Minor gc) | 年轻代的垃圾回收                 |      |
+| Major gc           | 老年代的垃圾回收                 |      |
+| Full gc            | 整个堆的回收，包含年轻代和老年带 |      |
+
+* 具体参考R大的分析：https://www.zhihu.com/question/41922036/answer/93079526
+
+#### 2.11.15 Java中强引用、弱引用、虚引用、软引用在GC的过程中都会怎么处理它们
+
+| 名词   | 解释                                                     |
+| ------ | -------------------------------------------------------- |
+| 强引用 | 显示的设置为null，才会被垃圾回收器回收                   |
+| 软应用 | 触发老年代gc时才会被回收（内存不够时才会被回收）         |
+| 弱引用 | 触发gc时，无论内存是否充足，都会被回收                   |
+| 虚引用 | 触发gc时，无论内存是否充足，都会被回收，最先被清除的对象 |
 
 ### 2.12 消息中间件
 
