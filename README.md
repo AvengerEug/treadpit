@@ -1630,9 +1630,12 @@ System.out.println(B.class.isAssignableFrom(A.class));
     package com.eugenesumarru.agent
     import java.lang.instrument.Instrumentation;
     
-    public class MyAgent {
+    public class MyPremainAgent {
     
-        public static void agentmain(String agentArgs, Instrumentation inst) {
+        /**
+         * 一个java agent中，premain是必须的。表示jvm在加载过程中就会回调此方法
+         */
+        public static void premain(String agentArgs, Instrumentation inst) {
             // 假设你已经有了一个包含 Spring Boot 应用的 JAR 文件的路径
             String springBootJarPath = "/home/admin/tmp/my-springboot.jar";
             
@@ -1656,7 +1659,8 @@ System.out.println(B.class.isAssignableFrom(A.class));
   * 第三步：打包Java Agent。把MyAgent打成jar文件，并在清单文件中指定Agent-Class。在MANIFEST.MF文件中添加
 
     ```properties
-    Agent-Class: com.eugenesumarru.agent.MyAgent
+    # 一定是叫Premain-Class的key，此key是必须的，对应的是拥有premain的全限定名
+    Premain-Class: com.eugenesumarru.agent.MyPremainAgent
     Can-Retransform-Classes: true
     Can-Redefine-Classes: true
     ```
@@ -1669,7 +1673,11 @@ System.out.println(B.class.isAssignableFrom(A.class));
     java -javaagent:/home/admin/tmp/my-agent.jar -jar springboot-a.jar
     ```
 
-    
+* MANIFEST.MF文件常用内容介绍：
+
+  * Premain-Class：**这个属性是必须的**，用于指定一个premain方法的类。jvm会在程序主方法(eg：main)运行之前，回调此类的premain方法。
+  * Agent-Class：如果你的agent是被设计为可以在应用程序启动后的任意时间点动态加载，那么需要指定此属性，并执行一个拥有agentmain方法的全限定名。在启动时，需要使用jvm的attach api来触发agent-class
+  * Can-Redefine-Classes：这个属性是可选的，用于告诉jvm此agent是否支持在运行时重新定义类。如果设置成true，那agent则可以重新定义类
 
 ### 2.2 Spring Cloud
 
