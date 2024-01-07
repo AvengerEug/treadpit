@@ -1637,16 +1637,19 @@ System.out.println(B.class.isAssignableFrom(A.class));
          */
         public static void premain(String agentArgs, Instrumentation inst) {
             // 假设你已经有了一个包含 Spring Boot 应用的 JAR 文件的路径
-            String springBootJarPath = "/home/admin/tmp/my-springboot.jar";
+            String springBootJarPath = "file:/home/admin/tmp/my-springboot.jar";
             
             // 使用 URLClassLoader 加载 JAR 文件(未指定父 类加载器，目的是让此agent与原jar包的累加载器隔离，这样才不会冲突)
-            URLClassLoader classLoader = new URLClassLoader(new URL[]{ new URL("file://" + springBootJarPath) }, null);
+    				URLClassLoader classLoader = new URLClassLoader(new URL[]{ new URL(springBootJarPath) }, null);
             Thread.currentThread().setContextClassLoader(classLoader);
     
             try {
-                // 加载主类并调用 main 方法启动 Spring Boot 应用
-                Class<?> cls = Class.forName("com.example.Application", true, classLoader);
+                // 核心：加载jar包中springboot的JarLauncher类，用JarLauncher类启动springboot应用
+                // 在springboot中，我们使用java -jar的方式启动jar包，底层也是用的JarLauncher类启动springboot应用。具体配置可以参考springboot jar包内部的MANIFEST.MF文件。也可以搜索下java -jar的原理
+                // 用Class.forName的方式，并指定了classloader做隔离
+                Class<?> cls = Class.forName("org.springframework.boot.loader.JarLauncher", true, classLoader);
                 Method main = cls.getMethod("main", String[].class);
+                // 调用的JarLauncher main方法(静态的). 传递一个空字符串数组进去
                 main.invoke(null, (Object) new String[]{});
             } catch (Exception e) {
                 e.printStackTrace();
