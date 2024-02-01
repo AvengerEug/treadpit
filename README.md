@@ -5381,7 +5381,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                              
+  >                                                 
   >    -- 第二步：执行SQL
   >    SELECT
   >        COUNT(p.pay_id)
@@ -5389,17 +5389,17 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        (SELECT pay_id FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c') tmp
   >    INNER JOIN pay p ON tmp.pay_id = p.pay_id
   >    WHERE state IN (0, 1);
-  >                                              
+  >                                                 
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                              
+  >                                                 
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
   >      "rows": 996970,
   >      "cost": 203657
   >    },
-  >                                              
+  >                                                 
   >    -- 走index_accountId_createTime索引的分析，评分为1.21
   >    "analyzing_range_alternatives": {
   >      "range_scan_alternatives": [
@@ -5422,7 +5422,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        "cause": "too_few_roworder_scans"
   >      }
   >    },
-  >                                              
+  >                                                 
   >    -- 最终选择走index_accountId_createTime索引，因为评分最低，只有1.21
   >    "chosen_range_access_summary": {
   >      "range_access_plan": {
@@ -5437,9 +5437,9 @@ systemctl start rc-local.service  => 开启rc-local服务
   >      "cost_for_plan": 1.21,
   >      "chosen": true
   >    }
-  >                                              
+  >                                                 
   >    综上所述，针对于INNER JOIN，在MySQL处理后，它最终选择走index_accountId_createTime索引，而且评分为1.21
-  >                                              
+  >                                                 
   >    ```
   >
   >    * 执行另外一条SQL
@@ -5447,13 +5447,13 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                              
+  >                                                 
   >    -- 第二步：执行SQL
   >    SELECT COUNT(pay_id) FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c' AND state IN (0, 1);
-  >                                              
+  >                                                 
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                              
+  >                                                 
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
@@ -5625,4 +5625,29 @@ systemctl start rc-local.service  => 开启rc-local服务
 * 如果我们要做验签操作：
   * 场景1：参数都放在query中，则不会有问题。因为**Hello%2BWorld**会解码成**Hello+World**。
   * 场景2：以表单方式提交，则会导致验签失败，因为**Hello+World**会变成**Hello World**（表单提交时+号代表的是空格），加签时用的是**Hello+World**，验签时用的是**Hello World**。
+
+### 基于百分比的灰度工具方法
+
+```java
+/**
+ * 判断对象是否在灰度名单内
+ * @param ratio 第1个参数模数，第2个参数余数。例如 10000,100 。代表1%
+ * @param target 目标id
+ * @return 当前对象是否需要灰度
+ */
+public static boolean isTargetInGray(String ratio, long target) {
+    if (ratio == null) {
+        return false;
+    }
+
+    String[] ratioArr = StringUtils.split(ratio, ",");
+    int modValue = Integer.parseInt(ratioArr[0]);
+    int leftValue = Integer.parseInt(ratioArr[1]);
+
+    return (target % modValue) < leftValue;
+}
+```
+
+* 此方法有一个局限，就是target必须为int类型。比较适用于用户id的百分比灰度。
+* 如果灰度对象是一个字符串或者是一个对象呢？那我们就得提供一个一致性hash算法，把他们转化成一个int类型的hash散列值，就可以适用这套逻辑了。
 
