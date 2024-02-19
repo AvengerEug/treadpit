@@ -1622,55 +1622,141 @@ System.out.println(B.class.isAssignableFrom(A.class));
 
   * 以引入一个springboot项目为例，这个springboot jar包是一个暴露了10083端口的http服务。里面有一个controller接口的path为：`/hello`
 
-  * 第一步：先把springboot打成一个可执行的jar包，并把它放在服务器的某个位置，比如：`/home/admin/tmp/my-springboot.jar`
+  * 第一步：先把springboot打成一个可执行的jar包，并把它放在服务器的某个位置，比如：`/home/admin/tmp/my-springboot.jar`。后续将由java agent来启动这个jar包
 
-  * 第二步：创建一个Java Agent项目，并编写如下类：
+  * 第二步：创建一个名为my-agent的Java maven项目，并编写如下类（如下类的作用就是定义了一个java agent，最终会调用到premain方法中）：
 
     ```java
-    package com.eugenesumarru.agent
+    package com.eugene.sumarry;
+    
     import java.lang.instrument.Instrumentation;
+    import java.lang.reflect.Method;
+    import java.net.MalformedURLException;
+    import java.net.URL;
+    import java.net.URLClassLoader;
+    import java.util.concurrent.ThreadFactory;
+    import java.util.concurrent.ThreadPoolExecutor;
+    import java.util.concurrent.atomic.AtomicInteger;
     
-    public class MyPremainAgent {
+    /**
+     * Hello world!
+     *
+     */
+    public class MuyangSpringBootPremainAgent
+    {
     
-        /**
-         * 一个java agent中，premain是必须的。表示jvm在加载过程中就会回调此方法
-         */
-        public static void premain(String agentArgs, Instrumentation inst) {
-            // 假设你已经有了一个包含 Spring Boot 应用的 JAR 文件的路径
-            String springBootJarPath = "file:/home/admin/tmp/my-springboot.jar";
-            
-            // 使用 URLClassLoader 加载 JAR 文件(未指定父 类加载器，目的是让此agent与原jar包的累加载器隔离，这样才不会冲突)
-    				URLClassLoader classLoader = new URLClassLoader(new URL[]{ new URL(springBootJarPath) }, null);
-            Thread.currentThread().setContextClassLoader(classLoader);
+        public static final ThreadPoolExecutor singleton = new ThreadPoolExecutor(
+                1,
+                1,
+                0L,
+                java.util.concurrent.TimeUnit.MILLISECONDS,
+                new java.util.concurrent.LinkedBlockingQueue<Runnable>(),
+                new MuyangSpringBootThreadFactory("muyang-springboot-agent"),
+                new ThreadPoolExecutor.DiscardPolicy()
+        );
     
-            try {
-                // 核心：加载jar包中springboot的JarLauncher类，用JarLauncher类启动springboot应用
-                // 在springboot中，我们使用java -jar的方式启动jar包，底层也是用的JarLauncher类启动springboot应用。具体配置可以参考springboot jar包内部的MANIFEST.MF文件。也可以搜索下java -jar的原理
-                // 用Class.forName的方式，并指定了classloader做隔离
-                Class<?> cls = Class.forName("org.springframework.boot.loader.JarLauncher", true, classLoader);
-                Method main = cls.getMethod("main", String[].class);
-                // 调用的JarLauncher main方法(静态的). 传递一个空字符串数组进去
-                main.invoke(null, (Object) new String[]{});
-            } catch (Exception e) {
-                e.printStackTrace();
+        public static void premain(String agentArgs, Instrumentation inst) throws MalformedURLException {
+            // 使用异步的方式启动springboot，防止影响主程序。
+            singleton.submit(() -> {
+                try {
+                    // 假设你已经有了一个包含 Spring Boot 应用的 JAR 文件的路径（就是我们要用java agent启动的jar包）
+                    String springBootJarPath = "file:/home/admin/tmp/my-springboot.jar";
+                    // 使用 URLClassLoader 加载 JAR 文件(未指定父 类加载器，目的是让此agent与原jar包的累加载器隔离，这样才不会冲突)
+                    URLClassLoader classLoader = new URLClassLoader(new URL[]{ new URL(springBootJarPath) }, null);
+                    Thread.currentThread().setContextClassLoader(classLoader);
+                    // 加载jar包中springboot的JarLauncher类，用JarLauncher类启动springboot应用
+                    // 用Class.forName的方式，并指定了classloader做隔离
+                    Class<?> cls = Class.forName("org.springframework.boot.loader.JarLauncher", true, classLoader);
+                    Method main = cls.getMethod("main", String[].class);
+                    // 调用的JarLauncher main方法(静态的)
+                    main.invoke(null, (Object) new String[]{});
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    System.err.println("springboot agent 启动失败");
+                }
+            });
+        }
+        
+        
+        public static class MuyangSpringBootThreadFactory implements ThreadFactory {
+            private final AtomicInteger threadNumber = new AtomicInteger(1);
+            private final String namePrefix;
+        
+            public MuyangSpringBootThreadFactory(String namePrefix) {
+                this.namePrefix = namePrefix;
+            }
+        
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread t = new Thread(r, namePrefix + "-thread-" + threadNumber.getAndIncrement());
+                // 这里还可以设置其他线程参数，例如守护线程、优先级等
+                if (t.isDaemon()) {
+                    t.setDaemon(false);
+                }
+                if (t.getPriority() != Thread.NORM_PRIORITY) {
+                    t.setPriority(Thread.NORM_PRIORITY);
+                }
+                return t;
             }
         }
+    
     }
     
     ```
 
-  * 第三步：打包Java Agent。把MyAgent打成jar文件，并在清单文件中指定Agent-Class。在MANIFEST.MF文件中添加
+  * 第三步：在my-agent项目的pom文件依赖如下配置
 
-    ```properties
-    # 一定是叫Premain-Class的key，此key是必须的，对应的是拥有premain的全限定名
-    Premain-Class: com.eugenesumarru.agent.MyPremainAgent
-    Can-Retransform-Classes: true
-    Can-Redefine-Classes: true
+    ```xml
+    <dependencies>
+      <!-- agent需要依赖的springboot依赖 -->
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-loader</artifactId>
+        <version>2.0.4.RELEASE</version>
+        <scope>compile</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-loader</artifactId>
+        <version>2.0.4.RELEASE</version>
+        <scope>compile</scope>
+      </dependency>
+    </dependencies>
+    
+    <!-- java agent的打包配置 -->
+    <build>
+      <plugins>
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.2.0</version> <!-- 确认使用最新版本 -->
+          <configuration>
+            <archive>
+              <manifestEntries>
+                <!-- 入口类 -->
+                <!--                            <Agent-Class>com.eugene.sumarry.MuyangSpringBootPremainAgent</Agent-Class>-->
+                <Premain-Class>com.eugene.sumarry.MuyangSpringBootPremainAgent</Premain-Class>
+                <Can-Redefine-Classes>true</Can-Redefine-Classes>
+                <Can-Retransform-Classes>true</Can-Retransform-Classes>
+                <Can-Set-Native-Method-Prefix>true</Can-Set-Native-Method-Prefix>
+              </manifestEntries>
+            </archive>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <configuration>
+            <source>8</source>
+            <target>8</target>
+          </configuration>
+        </plugin>
+      </plugins>
+    </build>
     ```
 
-    使用Maven将Agent打包成Jar文件，如my-agent.jar。并放在了`/home/admin/tmp/my-agent.jar`路径。
+  * 第四步：使用maven clean package命令把my-agent项目打包成一个jar包。并放在`/home/admin/tmp/my-agent.jar`路径。
 
-  * 第四步：在主应用中启动Agent。假设现在有一个springboot-a.jar包，要在启动 springboot-a.jar包的前提下，加载my-agent.jar包，由my-agent.jar包来触发my-springboot.jar包的程序，并在10083端口中暴露/hello服务。执行命令如下所示：
+  * 第四步：在主应用中启动Agent。假设现在有一个springboot-a.jar包（也可以随便启动一个java程序），要在启动 springboot-a.jar包的前提下，加载my-agent.jar包，由my-agent.jar包来触发my-springboot.jar包的程序，并在10083端口中暴露/hello服务。执行命令如下即可：
 
     ```java
     java -javaagent:/home/admin/tmp/my-agent.jar -jar springboot-a.jar
