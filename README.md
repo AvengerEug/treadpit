@@ -5467,7 +5467,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                 
+  >                                                    
   >    -- 第二步：执行SQL
   >    SELECT
   >        COUNT(p.pay_id)
@@ -5475,17 +5475,17 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        (SELECT pay_id FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c') tmp
   >    INNER JOIN pay p ON tmp.pay_id = p.pay_id
   >    WHERE state IN (0, 1);
-  >                                                 
+  >                                                    
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                 
+  >                                                    
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
   >      "rows": 996970,
   >      "cost": 203657
   >    },
-  >                                                 
+  >                                                    
   >    -- 走index_accountId_createTime索引的分析，评分为1.21
   >    "analyzing_range_alternatives": {
   >      "range_scan_alternatives": [
@@ -5508,7 +5508,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        "cause": "too_few_roworder_scans"
   >      }
   >    },
-  >                                                 
+  >                                                    
   >    -- 最终选择走index_accountId_createTime索引，因为评分最低，只有1.21
   >    "chosen_range_access_summary": {
   >      "range_access_plan": {
@@ -5523,9 +5523,9 @@ systemctl start rc-local.service  => 开启rc-local服务
   >      "cost_for_plan": 1.21,
   >      "chosen": true
   >    }
-  >                                                 
+  >                                                    
   >    综上所述，针对于INNER JOIN，在MySQL处理后，它最终选择走index_accountId_createTime索引，而且评分为1.21
-  >                                                 
+  >                                                    
   >    ```
   >
   >    * 执行另外一条SQL
@@ -5533,13 +5533,13 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                 
+  >                                                    
   >    -- 第二步：执行SQL
   >    SELECT COUNT(pay_id) FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c' AND state IN (0, 1);
-  >                                                 
+  >                                                    
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                 
+  >                                                    
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
@@ -5727,9 +5727,26 @@ public static boolean isTargetInGray(String ratio, long target) {
     }
 
     String[] ratioArr = StringUtils.split(ratio, ",");
+
     int modValue = Integer.parseInt(ratioArr[0]);
     int leftValue = Integer.parseInt(ratioArr[1]);
 
+    // 为什么是对10000取模。因为我们的需求是1%的用户能走灰度逻辑。
+    // 这里的核心是：我们要把流量分成x份。主要是多少份流量的定义。
+    // 相当于全网的用户，在抢这个x份的1%。 
+    // 我们假设：当前用户id：119878234，走了灰度逻辑，如果判断他是否命中x份的百分之1呢？
+    //  ===>  假设x为10，那一共有10份流量。那我们可以添加一个规则：抢到第一份流量的用户，就是命中了我们的灰度逻辑
+    //  相当于要有一个逻辑：用户119878234如何取这10份流量中某一个流量。那我们自然而然可以想到的就是对10取模咯。
+    //  119878234 % 10 = 4；那相当于这个用户取到了第4份流量(0,1,2,3,4,5,6,7,8,9)。此时我们还要确定第四份流量是否为我们的灰度流量。
+    //  因此，我们需要一个规则：就是对余数做判断，如何判断余数是我们的灰度流量?
+    //  我们可以定义余数等于4的流量才是灰度流量。那对应的就是全网十分之一(因为把流量分成了10份)的用户可以命中灰度逻辑
+    //  我们也可以定义余数小于4的流量才是灰度流量。那对应的就是全网十分之四的用户可以命中灰度逻辑
+    //  整个流程分析下来，我们一共有三个变量：用户id、流量总份数、灰度流量份数。
+    //  其中，用户id是我们的目标对象，要基于userId做灰度逻辑，这个是系统变量，无法配置。那最后就剩余两个规则了：
+    //  规则1：要把流量分成多少份  规则2：这些流量中的哪些流量是灰度流量。
+    //  如果我们的需求是：让2%的用户走灰度逻辑。那规则1可以配置成10，规则2可以配置成2,5  表示余数为2或5的用户才命中灰度逻辑
+    //  如果我们的需求是：让3%的用户走灰度逻辑。那规则1可以配置成10，规则2可以配置成1,6,7 表示余数为1或6或7的用户才命中灰度逻辑
+    //  我们继续推演后会发现，规则1在确定为10的情况下，规则2无非就是根据我们的规则选择一些余数作为灰度值，并且这些余数可以是0-9（因为userId对10取模，只可能是0-9）的任意值。那我们为什么不能简单点？百分之一的流量就是余数小于1（即0），对应的配置可能就是10,1。百分之5的流量，就是余数小于5（即0，1，2，3，4）,对应的配置可能就是10,5。 进而出现了当前isTargetInGray方法的ratio配置。
     return (target % modValue) < leftValue;
 }
 ```
