@@ -4250,12 +4250,15 @@ Heap after GC invocations=43 (full 0):
 | 基础名词 | 概念解释                                                     | 备注                                                     |
 | -------- | ------------------------------------------------------------ | -------------------------------------------------------- |
 | 限流保护 | 上游（http、rpc服务）调用应用A，调用太频繁，被拒绝调用       | 限制上游服务调用。</br>如何定义过于频繁？</br>1、qps过高 |
-| 降级保护 | 应用A调用下游服务（http、rpc服务），下游服务rt太高或频繁抛异常。为了保护应用A不被下游服务拖垮，可以对下游服务做降级操作 | 降级操作可以是快速失败或者快速响应mock数据               |
+| 熔断保护 | 应用A调用下游服务（http、rpc服务），下游服务rt太高或频繁抛异常。为了保护应用A不被下游服务拖垮，可以对下游服务做熔断操作 | 熔断操作可以是快速失败或者快速响应mock数据               |
+| 降级保护 | 主动放弃一些**非核心**功能，以保证核心业务的持续运行         |                                                          |
 | 热点保护 | 限流保护的一种补充。可以针对某种频繁调用的case（比如参数A的值为"test"的情况），做针对性的限流 | 针对参数级别的限流                                       |
 | 系统保护 | 针对应用A的系统指标（load、全局RT、总线程数、总QPS）综合计算，如何系统指标超过阈值，则拒绝入口流量。 | 针对系统指标做限流                                       |
 | 簇点     | 簇点在sentinel中像是一个检查站或者收费站。每次车辆请求通过时，它都会被检查。在程序中，我们通过sentinel api创建一个簇点来代表请求进入资源的入口。这个簇点可以用来统计请求的数量、频率以及执行相关的流量控制策略。 |                                                          |
 | 资源名   | 在sentinel中，资源名就像是一条特定的道路或者街道。每次车辆(请求)通过时，我们可以监控和控制它以避免拥堵。在编程的情况下，资源可以是一个方法、一段代码块或者是一类特殊的操作（数据库的查询或者rpc调用） |                                                          |
 | 簇点链路 | 簇点链路可以被视为整个交通系统。在这个系统中，有很多道路（资源），每条道路都有自己的检查站（簇点）。在sentinel中，簇点链路是指一系列资源的调用链。一个请求可能会影响多个资源，例如：一个网页请求可能需要查询数据库、调用远程服务等。这些资源的集合就构成了一个链路。sentinel允许对整个链路进行监控和控制，以便在系统整体上应用流量控制策略。 |                                                          |
+
+
 
 * 整体来说，sentinel的资源名、簇点和簇点链路是流量控制的抽象概念，它们允许你定义哪些代码应该被监控和控制，以及如何控制。**资源名**就是**你想要监控的实际代码**部分，**簇点**是你创建的**用于监控和执行流量控制**的**逻辑入口点**，而**簇点链路**是指**跨多个资源**的整体**调用路径**，使你能在更广泛的范围内进行流量控制。
 
@@ -5467,7 +5470,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                    
+  >                                                       
   >    -- 第二步：执行SQL
   >    SELECT
   >        COUNT(p.pay_id)
@@ -5475,17 +5478,17 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        (SELECT pay_id FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c') tmp
   >    INNER JOIN pay p ON tmp.pay_id = p.pay_id
   >    WHERE state IN (0, 1);
-  >                                                    
+  >                                                       
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                    
+  >                                                       
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
   >      "rows": 996970,
   >      "cost": 203657
   >    },
-  >                                                    
+  >                                                       
   >    -- 走index_accountId_createTime索引的分析，评分为1.21
   >    "analyzing_range_alternatives": {
   >      "range_scan_alternatives": [
@@ -5508,7 +5511,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        "cause": "too_few_roworder_scans"
   >      }
   >    },
-  >                                                    
+  >                                                       
   >    -- 最终选择走index_accountId_createTime索引，因为评分最低，只有1.21
   >    "chosen_range_access_summary": {
   >      "range_access_plan": {
@@ -5523,9 +5526,9 @@ systemctl start rc-local.service  => 开启rc-local服务
   >      "cost_for_plan": 1.21,
   >      "chosen": true
   >    }
-  >                                                    
+  >                                                       
   >    综上所述，针对于INNER JOIN，在MySQL处理后，它最终选择走index_accountId_createTime索引，而且评分为1.21
-  >                                                    
+  >                                                       
   >    ```
   >
   >    * 执行另外一条SQL
@@ -5533,13 +5536,13 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                    
+  >                                                       
   >    -- 第二步：执行SQL
   >    SELECT COUNT(pay_id) FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c' AND state IN (0, 1);
-  >                                                    
+  >                                                       
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                    
+  >                                                       
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
@@ -5754,7 +5757,7 @@ public static boolean isTargetInGray(String ratio, long target) {
 * 此方法有一个局限，就是target必须为int类型。比较适用于用户id的百分比灰度。
 * 如果灰度对象是一个字符串或者是一个对象呢？那我们就得提供一个一致性hash算法，把他们转化成一个int类型的hash散列值，就可以适用这套逻辑了。
 
-### 几种流控的对比
+### 10.12 几种流控的对比
 
 | 流控类别   | 定义                                                         | 备注                                                         |
 | ---------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
