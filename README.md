@@ -1561,7 +1561,8 @@ System.out.println(B.class.isAssignableFrom(A.class));
           return 1;
       }
   
-      if ("eug".equals(item2)) {
+      // 返回 -1 不交换位置
+      if ("aaa".equals(item2)) {
           return -1;
       }
   
@@ -3678,7 +3679,7 @@ git log --graph --pretty=oneline --abbrev-commit
 
 ![jvm基础知识](https://img-blog.csdnimg.cn/20200618162017530.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2F2ZW5nZXJFdWc=,size_16,color_FFFFFF,t_70)
 
-#### 2.11.4 jvm young gc日志分析
+#### 2.11.4 jvm young gc日志分析（cms收集器）
 
 * 对应的jvm参数：
   * -XX:MaxTenuringThreshold=10  表示新生代的年龄为10（默认为15）
@@ -3688,112 +3689,30 @@ git log --graph --pretty=oneline --abbrev-commit
   * -XX:+UseConcMarkSweepGC  表示使用cms垃圾回收器来管理老年代的区域
 
 ```text
-# 触发gc之后的堆内存信息
-Heap after GC invocations=486 (full 0):
- par new generation   total 2304000K, used 37244K [0x00007f4cbc000000, 0x00007f4d58400000, 0x00007f4d58400000)
-  eden space 2048000K,   0% used [0x00007f4cbc000000, 0x00007f4cbc000000, 0x00007f4d39000000)
-  from space 256000K,  14% used [0x00007f4d39000000, 0x00007f4d3b45f238, 0x00007f4d48a00000)
-  to   space 256000K,   0% used [0x00007f4d48a00000, 0x00007f4d48a00000, 0x00007f4d58400000)
- concurrent mark-sweep generation total 5828608K, used 815025K [0x00007f4d58400000, 0x00007f4ebc000000, 0x00007f4ebc000000)
- Metaspace       used 197234K, capacity 201681K, committed 201728K, reserved 202752K
-}
-# 触发gc之前的堆内存信息
-{Heap before GC invocations=486 (full 0):
- par new generation   total 2304000K, used 2085244K [0x00007f4cbc000000, 0x00007f4d58400000, 0x00007f4d58400000)
-  eden space 2048000K, 100% used [0x00007f4cbc000000, 0x00007f4d39000000, 0x00007f4d39000000)
-  from space 256000K,  14% used [0x00007f4d39000000, 0x00007f4d3b45f238, 0x00007f4d48a00000)
-  to   space 256000K,   0% used [0x00007f4d48a00000, 0x00007f4d48a00000, 0x00007f4d58400000)
- concurrent mark-sweep generation total 5828608K, used 815025K [0x00007f4d58400000, 0x00007f4ebc000000, 0x00007f4ebc000000)
- Metaspace       used 197234K, capacity 201681K, committed 201728K, reserved 202752K
- # gc事件：jvm运行了14677.104长时间（单位暂定），其中因Allocation Failure原因触发了GC，并使用ParNew回收器来回收垃圾
- # -XX:+PrintGCTimeStamps 参数导致了2023-12-28T14:50:13.120+0800的输出，表示本次GC的发生时间
- # 
-2023-12-28T14:50:13.120+0800: 14677.104: [GC (Allocation Failure) 2023-12-28T14:50:13.121+0800: 14677.104: [ParNew
-Desired survivor size 131072000 bytes, new threshold 10 (max 10)
-- age   1:    9617944 bytes,    9617944 total
-- age   2:    2442280 bytes,   12060224 total
-- age   3:    1311800 bytes,   13372024 total
-- age   4:     467648 bytes,   13839672 total
-- age   5:     124832 bytes,   13964504 total
-- age   6:     132136 bytes,   14096640 total
-- age   7:     586952 bytes,   14683592 total
-- age   8:     158424 bytes,   14842016 total
-- age   9:   13173936 bytes,   28015952 total
-- age  10:     112592 bytes,   28128544 total
-# -XX:+PrintGCDateStamps 参数导致了0.0231661 secs的输出，表示本次gc耗时0.023秒
-: 2085244K->44512K(2304000K), 0.0231661 secs] 2900270K->860121K(8132608K), 0.0238462 secs] [Times: user=0.14 sys=0.00, real=0.03 secs]
+2018-04-29T10:15:39.810-0200: [GC (Allocation Failure) [ParNew: 65536K->10752K(76288K), 0.0057800 secs] 65536K->21184K(251392K), 0.0058300 secs] [Times: user=0.02 sys=0.00, real=0.01 secs]
 
+GC：表示这是一次年轻代的垃圾挥手
+Allocation Failure：触发GC的原因，通常是因为年轻代没有足够空间分配新对象
+[ParNew: 65536K->10752K(76288K), 0.0057800 secs]：回收前对象占用65536K，回收后占用10752K，总大小76288K，本次清理耗时0.0057800秒
+65536K->21184K(251392K)：回收前整个堆为65536K大小，回收后21184K大小，总共堆的大小为：251392K
+[Times: user=0.02 sys=0.00, real=0.01 secs]：GC操作中的cpu时间
 
-
-这是一个Java虚拟机（JVM）的垃圾回收（Garbage Collection, GC）日志，显示了两次垃圾回收前后的堆内存状态。
-第一次垃圾回收前的状态显示新生代（Young Generation）总共有2304000K的容量，已经使用了2085244K的空间，其中包括eden空间2048000K已全部使用，from空间256000K使用了14%，to空间256000K未使用。老年代（Old Generation）总共有5828608K的容量，已经使用了815025K的空间。Metaspace区域使用了197234K的空间，最大容量为201681K，已承诺分配了201728K的空间，预留了202752K的空间。
-第二次垃圾回收后，新生代的总容量仍为2304000K，但使用的空间减少到了37244K，eden空间2048000K未使用，from空间256000K使用了14%，to空间256000K未使用。老年代的总容量仍为5828608K，但使用的空间增加到了860121K。Metaspace区域使用了197234K的空间，最大容量为201681K，已承诺分配了201728K的空间，预留了202752K的空间。
-
-这次垃圾回收是由“Allocation Failure”引发的，并使用了ParNew收集器。ParNew收集器是一种并行的新生代垃圾回收器，它与CMS（Concurrent Mark-Sweep）收集器配合工作。这次垃圾回收耗时0.023秒，新生代从2085244K减少到了44512K，释放了1640132K的空间，老年代从815025K增加到了860121K，增加了45096K的空间。
-新生代的最大年龄阈值设为了10，即对象在新生代中经过10次垃圾回收后才会晋升到老年代。这次垃圾回收中，新生代中有9个年龄层的对象被晋升到了老年代，它们总共占用了28015952K的空间。
 ```
 
-#### 2.11.5 jvm full gc日志分析
+#### 2.11.5 jvm full gc日志分析（cms收集器）
 
 ```text
-====================================== younggc部分
+2018-04-29T10:16:39.810-0200: [Full GC (CMS Final Remark) [CMS: 10432K->16896K(175104K), 0.0183673 secs] 21184K->16896K(251392K), [Metaspace: 6745K->6745K(1056768K)], 0.0184773 secs] [Times: user=0.05 sys=0.00, real=0.02 secs]
 
-Heap after GC invocations=42 (full 0):
- par new generation   total 2949120K, used 49170K [0x00007fe5c4000000, 0x00007fe68c000000, 0x00007fe68c000000)
-  eden space 2621440K,   0% used [0x00007fe5c4000000, 0x00007fe5c4000000, 0x00007fe664000000)
-  from space 327680K,  15% used [0x00007fe664000000, 0x00007fe667004930, 0x00007fe678000000)
-  to   space 327680K,   0% used [0x00007fe678000000, 0x00007fe678000000, 0x00007fe68c000000)
- concurrent mark-sweep generation total 5111808K, used 263833K [0x00007fe68c000000, 0x00007fe7c4000000, 0x00007fe7c4000000)
- Metaspace       used 187814K, capacity 191739K, committed 191744K, reserved 192512K
-}
-{Heap before GC invocations=42 (full 0):
- par new generation   total 2949120K, used 549583K [0x00007fe5c4000000, 0x00007fe68c000000, 0x00007fe68c000000)
-  eden space 2621440K,  19% used [0x00007fe5c4000000, 0x00007fe5e28af548, 0x00007fe664000000)
-  from space 327680K,  15% used [0x00007fe664000000, 0x00007fe667004930, 0x00007fe678000000)
-  to   space 327680K,   0% used [0x00007fe678000000, 0x00007fe678000000, 0x00007fe68c000000)
- concurrent mark-sweep generation total 5111808K, used 263833K [0x00007fe68c000000, 0x00007fe7c4000000, 0x00007fe7c4000000)
- Metaspace       used 187823K, capacity 191747K, committed 192000K, reserved 192512K
-2023-12-28T20:06:18.589+0800: 1227.121: [GC (System.gc()) 2023-12-28T20:06:18.589+0800: 1227.121: [ParNew
-Desired survivor size 167772160 bytes, new threshold 10 (max 10)
-- age   1:    4524488 bytes,    4524488 total
-- age   2:    5407432 bytes,    9931920 total
-- age   3:     449048 bytes,   10380968 total
-- age   4:    1804576 bytes,   12185544 total
-- age   5:     430816 bytes,   12616360 total
-- age   6:     655272 bytes,   13271632 total
-- age   7:     123112 bytes,   13394744 total
-- age   8:    1420664 bytes,   14815408 total
-- age   9:   14250176 bytes,   29065584 total
-- age  10:    1229760 bytes,   30295344 total
-: 549583K->45214K(2949120K), 0.0215146 secs] 813416K->311147K(8060928K), 0.0221031 secs] [Times: user=0.14 sys=0.00, real=0.02 secs]
-Heap after GC invocations=43 (full 0):
- par new generation   total 2949120K, used 45214K [0x00007fe5c4000000, 0x00007fe68c000000, 0x00007fe68c000000)
-  eden space 2621440K,   0% used [0x00007fe5c4000000, 0x00007fe5c4000000, 0x00007fe664000000)
-  from space 327680K,  13% used [0x00007fe678000000, 0x00007fe67ac27938, 0x00007fe68c000000)
-  to   space 327680K,   0% used [0x00007fe664000000, 0x00007fe664000000, 0x00007fe678000000)
- concurrent mark-sweep generation total 5111808K, used 265933K [0x00007fe68c000000, 0x00007fe7c4000000, 0x00007fe7c4000000)
- Metaspace       used 187823K, capacity 191747K, committed 192000K, reserved 192512K
-}
-============================================================= oldgc部分
-2023-12-28T20:06:18.614+0800: 1227.146: [GC (CMS Initial Mark) [1 CMS-initial-mark: 265933K(5111808K)] 311176K(8060928K), 0.0079867 secs] [Times: user=0.03 sys=0.01, real=0.00 secs]
-2023-12-28T20:06:18.623+0800: 1227.155: [CMS-concurrent-mark-start]
-2023-12-28T20:06:18.824+0800: 1227.356: [CMS-concurrent-mark: 0.201/0.201 secs] [Times: user=0.36 sys=0.11, real=0.20 secs]
-2023-12-28T20:06:18.824+0800: 1227.356: [CMS-concurrent-preclean-start]
-2023-12-28T20:06:18.843+0800: 1227.374: [CMS-concurrent-preclean: 0.018/0.019 secs] [Times: user=0.02 sys=0.00, real=0.02 secs]
-2023-12-28T20:06:18.843+0800: 1227.375: [CMS-concurrent-abortable-preclean-start]
- CMS: abort preclean due to time 2023-12-28T20:06:23.948+0800: 1232.479: [CMS-concurrent-abortable-preclean: 5.087/5.105 secs] [Times: user=6.16 sys=0.64, real=5.10 secs]
-2023-12-28T20:06:23.951+0800: 1232.482: [GC (CMS Final Remark) [YG occupancy: 298294 K (2949120 K)]2023-12-28T20:06:23.951+0800: 1232.483: [Rescan (parallel) , 0.0310267 secs]2023-12-28T20:06:23.982+0800:1232.514: [weak refs processing, 0.0011882 secs]2023-12-28T20:06:23.983+0800: 1232.515: [class unloading, 0.0938828 secs]2023-12-28T20:06:24.077+0800: 1232.609: [scrub symbol table, 0.0507978 secs]2023-12-28T20:06:24.128+0800: 1232.660: [scrub string table, 0.0030083 secs][1 CMS-remark: 265933K(5111808K)] 564228K(8060928K), 0.1871708 secs] [Times: user=0.31 sys=0.09, real=0.19 secs]
-2023-12-28T20:06:24.139+0800: 1232.671: [CMS-concurrent-sweep-start]
-2023-12-28T20:06:24.221+0800: 1232.753: [CMS-concurrent-sweep: 0.083/0.083 secs] [Times: user=0.11 sys=0.04, real=0.08 secs]
-2023-12-28T20:06:24.222+0800: 1232.754: [CMS-concurrent-reset-start]
-2023-12-28T20:06:24.273+0800: 1232.805: [CMS-concurrent-reset: 0.052/0.052 secs] [Times: user=0.09 sys=0.04, real=0.06 secs]
+Full GC：表示这是一次老年代的完全垃圾回收。
+CMS Final Remark：触发Full GC的原因，这里是CMS收集器的最终标记阶段。
+[CMS: 10432K->16896K(175104K), 0.0183673 secs]：回收前老年代的使用量和回收后的使用量，以及老年代的总大小，以及GC耗时。
+21184K->16896K(251392K)：回收前整个堆的使用量和回收后的使用量，以及堆的总大小。
+[Metaspace: 6745K->6745K(1056768K)]：回收前和回收后元空间的使用量，以及元空间的总大小。
+[Times: user=0.05 sys=0.00, real=0.02 secs]：GC操作中的CPU时间。
+
+
 ```
-
-* 这是执行System.gc()方法后触发的fullgc日志，可以看到，它包含了一次younggc和一次oldgc。
-* youngc日志：在经历了42次垃圾回收之后，新生代的大小为2949120KB，已经使用了49170KB的空间，其中eden空间占用了大部分，为2621440KB，且尚未被使用；from空间占用较小，为327680KB，已经使用了其中的15%，即4912KB；to空间未被使用。
-  而老年代的大小为5111808KB，已经使用了263833KB的空间。
-* oldgc日志：经过一次垃圾回收后，新生代的大小仍然为2949120KB，但已经被使用了549583KB的空间，eden空间占用了其中的19%，即53036KB；from空间占用仍然较小，为327680KB，已经使用了其中的15%，即4912KB；to空间未被使用。而老年代的大小为5111808KB，已经使用了263833KB的空间，与上一次相比无明显变化。
-  在第三个日志中，进行了一次系统调用引发的垃圾回收。垃圾回收的结果是新生代剩余空间增加到了2621440KB，仅使用了45214KB的空间；而老年代则增加了到5111808KB，共使用了265933KB的空间。整个堆内存共使用了311147KB，比上一次垃圾回收减少了约102KB。
 
 #### 2.11.6 jvm常见参数分析
 
@@ -3802,6 +3721,7 @@ Heap after GC invocations=43 (full 0):
 | -Xms256m -Xmx256m                                            | 设置jvm堆内存初始大小和最大大小为256m                        |
 | -XX:MetaspaceSize=64m -XX:MaxMetaspaceSize=64m               | 设置元空间的初始内存和最大内存为64m                          |
 | -Xmn64m                                                      | 设置年轻代的内存大小为64m                                    |
+| -XX:ArrayAllocationWarningSize=15m                           | 数组分配的大小超过15M时，会输出在控制台。用于调试看是否有创建大对象（超过15m） |
 | -XX:+DisableExplicitGC                                       | 禁止手动执行System.gc触发垃圾回收                            |
 | -XX:CMSInitiatingOccupancyFraction=80  -XX:+UseCMSInitiatingOccupancyOnly | 设置cms收集器启动的阈值为80%，当老年代的占用率达到80%时，会触发cms垃圾回收。-XX:+UseCMSInitiatingOccupancyOnly 表示开启此功能 |
 | -XX:+UseConcMarkSweepGC                                      | 使用cms垃圾回收器                                            |
@@ -3825,7 +3745,13 @@ Heap after GC invocations=43 (full 0):
 
 #### 2.11.7 jvm cms垃圾收集器总结
 
-* CMS(Concurrent Mark Sweep)收集器是jvm的一种以获取最短回收停顿时间为目标的垃圾收集器。
+* CMS(Concurrent Mark Sweep)收集器是jvm的一种以获取最短回收停顿时间为目标的垃圾收集器，主要是用来清理老年代的堆数据。老年的垃圾回收操作一共有两种：major gc（清理老年代） 和 full gc（年轻代和老年代都清理）
+* 工作过程：
+  * 初始标记(Initial Mark)：先标记一些root对象
+  * 并发标记(Concurrent Mark)：遍历堆中的所有对象，并且标记所有可达对象
+  * 重新标记(Remark)：重新标记因为程序运行而产生的变动，是并发标记的一种补偿机制
+  * 并发清除(Concurrent Sweep)：并发的清除未被标记的对象，释放内存
+
 * 使用场景：
   * 对延迟比较敏感的应用（不能接受jvm太大的延迟）：CMS收集器适用于那些对停顿时间有严格要求，需要更加平滑的响应时间的应用程序，如Web服务器、应用服务器等。
   * 多核服务器环境：CMS收集器可以利用多核处理器的优势（多线程清理，可以充分利用cpu资源），在并发阶段利用额外的处理器核心来减少停顿时间
@@ -3837,13 +3763,13 @@ Heap after GC invocations=43 (full 0):
 * 缺点：
   * 较高的处理器资源占用：由于是并发执行，会占用cpu资源，可能会影响应用程序的吞吐量
   * 内存碎片：cms收集器不会对内存进行压缩整理，长时间运行后，可能产生较多的内存碎片，影响大对象分配，有时可能需要Full GC来整理内存碎片
-  * CMS回退到Serial Old收集器：当老年代空间不足无法完成垃圾回收时，会回退到使用Serial Old收集器的fullgc，会停顿较长时间。
+  * CMS回退到Serial Old收集器(oncurrent mode failed和promotion failed关键字)：当老年代空间不足无法完成垃圾回收时，会回退到使用Serial Old收集器的fullgc，会停顿较长时间。
 
-#### 2.11.8 jvm日志的几个日志报错关键字
+#### 2.11.8 jvm gc日志的几个日志报错关键字（cms收集器）
 
 * allocate failed（**young gc的相关关键字**）：指的是在尝试分配对象时，jvm没有足够的空间来容纳新对象，导致一次young gc。这通常发生在年轻代（Young Generation）空间不足以容纳新的分配对象请求时。为了给新对象腾出空间，jvm触发了一次young gc
-* promotion failed（**full gc的相关关键字**）：是指对象晋升到老年代时失败。在垃圾收集过程中，当年轻代中的对象达到一定年龄时（默认15，可以配置），他们会被晋升到老年代。如果老年代空间不足以容纳即将晋升的对象，晋升操作会失败。这通常会触发一次fullgc，以清理老年代并尝试为这些对象腾出空间。
-* oncurrent mode failed（**full gc的相关关键字**）：是指在使用cms垃圾收集器过程中，由于老年代空间不足，导致并发模式无法成功完成。"在cms的并发收集周期中，应用程序的线程会和垃圾收集线程通知运行。如果在这个周期内老年代空间变得满溢，CMS无法继续并发地收集垃圾，因此会退回到Serial Old收集器的fullgc，即会停止所有的应用线程，直到垃圾收集完成。这会导致较长的停顿时间，并可能影响应用程序的性能"
+* promotion failed（**full gc的相关关键字**）：**是指对象晋升到老年代时失败**。在垃圾收集过程中，当年轻代中的对象达到一定年龄时（默认15，可以配置），他们会被晋升到老年代。如果老年代空间不足以容纳即将晋升的对象，晋升操作会失败。这通常会触发一次fullgc(退化成Serial Old收集器的fullgc，非常耗时)，以清理老年代并尝试为这些对象腾出空间。
+* oncurrent mode failed（**full gc的相关关键字**）：是指在使用cms垃圾收集器过程中，由于**老年代空间不足**，导致并发模式无法成功完成。"在cms的并发收集周期中，应用程序的线程会和垃圾收集线程通知运行。如果在这个周期内老年代空间变得满溢，CMS无法继续并发地收集垃圾，因此会退回到Serial Old收集器的fullgc，即会停止所有的应用线程，直到垃圾收集完成。这会导致较长的停顿时间，并可能影响应用程序的性能"
 * 为了避免这些失败的情况，我们可以增加堆的大小、优化垃圾收集器的配置参数或者使用更现在的垃圾收集器，如G1或ZGC，它们提供了更先进的堆管理技术和更高效的垃圾回收机制。
 
 #### 2.11.9 java启动命令的一些参数前缀
@@ -3867,6 +3793,7 @@ Heap after GC invocations=43 (full 0):
   -Xmx256m
   -XX:MetaspaceSize=64m
   -XX:MaxMetaspaceSize=64m
+  -XX:ArrayAllocationWarningSize=15m
   -Xmn64m
   -XX:+HeapDumpBeforeFullGC
   -XX:CMSInitiatingOccupancyFraction=80
