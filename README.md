@@ -778,7 +778,7 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
   ```
 
 ##### 2.1.9.2 JDK线程状态及转换图
-![JDK线程状态及转换图](http://images.tangzzz.com/treadpit/jdk_thread_status.jpg)
+![JDK线程状态及转换图](./jdk_thread_status.jpg)
 
 #### 2.1.10 抽象类和接口的区别
 * 抽象类
@@ -965,7 +965,7 @@ amount += 123;  --> Null pointer exception , 底层后调用 amount.valueOf() + 
 
     1.7在高并发下会变成环的示意图:
 
-    ![1.7变成环](http://images.tangzzz.com/treadpit/hashMap1.7%E9%AB%98%E5%B9%B6%E5%8F%91%E5%8F%98%E6%88%90%E7%8E%AF.png)
+    ![1.7变成环](./hashMap1.7%E9%AB%98%E5%B9%B6%E5%8F%91%E5%8F%98%E6%88%90%E7%8E%AF.png)
 
   * 有什么线程安全的类可以代替吗？
 
@@ -1551,7 +1551,7 @@ System.out.println(B.class.isAssignableFrom(A.class));
 
 * 如下图所示：
 
-  ![https通用交互流程.png](http://images.tangzzz.com/treadpit/https通用交互流程.png)
+  ![https通用交互流程.png](./https通用交互流程.png)
 
   万变不离其宗，唯一不同的地方可能就是signType（非对称加密的算法）和encryptType（非对称加密的算法）了，这两个字段主要是用来标识对随机秘钥加密的方式以及签名的方式而已。这相当于就是一个说明，告知对方我当前请求对随机秘钥的处理方式以及对加密数据的验签方法。
 
@@ -5418,7 +5418,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                             
+  >                                                                   
   >    -- 第二步：执行SQL
   >    SELECT
   >        COUNT(p.pay_id)
@@ -5426,17 +5426,17 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        (SELECT pay_id FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c') tmp
   >    INNER JOIN pay p ON tmp.pay_id = p.pay_id
   >    WHERE state IN (0, 1);
-  >                                                             
+  >                                                                   
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                             
+  >                                                                   
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
   >      "rows": 996970,
   >      "cost": 203657
   >    },
-  >                                                             
+  >                                                                   
   >    -- 走index_accountId_createTime索引的分析，评分为1.21
   >    "analyzing_range_alternatives": {
   >      "range_scan_alternatives": [
@@ -5459,7 +5459,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        "cause": "too_few_roworder_scans"
   >      }
   >    },
-  >                                                             
+  >                                                                   
   >    -- 最终选择走index_accountId_createTime索引，因为评分最低，只有1.21
   >    "chosen_range_access_summary": {
   >      "range_access_plan": {
@@ -5474,9 +5474,9 @@ systemctl start rc-local.service  => 开启rc-local服务
   >      "cost_for_plan": 1.21,
   >      "chosen": true
   >    }
-  >                                                             
+  >                                                                   
   >    综上所述，针对于INNER JOIN，在MySQL处理后，它最终选择走index_accountId_createTime索引，而且评分为1.21
-  >                                                             
+  >                                                                   
   >    ```
   >
   >    * 执行另外一条SQL
@@ -5484,13 +5484,13 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                             
+  >                                                                   
   >    -- 第二步：执行SQL
   >    SELECT COUNT(pay_id) FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c' AND state IN (0, 1);
-  >                                                             
+  >                                                                   
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                             
+  >                                                                   
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
