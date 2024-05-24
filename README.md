@@ -3750,7 +3750,7 @@ CMS Final Remark：触发Full GC的原因，这里是CMS收集器的最终标记
 | -Xmn64m                                                      | 设置年轻代的内存大小为64m                                    |
 | -XX:ArrayAllocationWarningSize=15m                           | 数组分配的大小超过15M时，会输出在控制台。用于调试看是否有创建大对象（超过15m） |
 | -XX:+DisableExplicitGC                                       | 禁止手动执行System.gc触发垃圾回收                            |
-| -XX:CMSInitiatingOccupancyFraction=80  -XX:+UseCMSInitiatingOccupancyOnly | 设置cms收集器启动的阈值为80%，当老年代的占用率达到80%时，会触发cms垃圾回收。-XX:+UseCMSInitiatingOccupancyOnly 表示开启此功能 |
+| -XX:CMSInitiatingOccupancyFraction=80  -XX:+UseCMSInitiatingOccupancyOnly | 设置cms收集器启动的阈值为80%，当老年代的占用率达到80%时（默认92%），会触发cms垃圾回收。-XX:+UseCMSInitiatingOccupancyOnly 表示开启此功能 |
 | -XX:+UseConcMarkSweepGC                                      | 使用cms垃圾回收器                                            |
 | -XX:+DoEscapeAnalysis                                        | 开启逃逸分析，是一种优化技术，可以帮助减少对象分配的开销     |
 | -XX:-UseCompressedOops                                       | 关闭压缩引用，这是因为该选项对于某些场景下可能导致性能下降   |
@@ -5214,6 +5214,7 @@ systemctl start rc-local.service  => 开启rc-local服务
 ### 5.4 在线连接数监控
 
 * 在线连接数监控原理：就是监听了tcp协议的连接，根据四要素统计出来的数量。在网络传输协议中，tcp是属于传输层协议，是所有应用层协议的基础。我们熟悉的http、http是、websocket协议底层用的都是tcp协议，都离不开三次握手和四次挥手。对于http协议而言（服务器未开启keepalive），如果http的请求耗时10s，而qps有7000，那会发生什么问题呢？即：客户端会跟服务端建立70000个tcp链接，（**即客户端的ip+端口与对方的ip+提供http服务的端口只能建立70000个tcp链接，`在这个交互过程中，会变的只有客户端的端口` **），但linux服务器最大连接数为65563（客户端ip不变 且 对方ip和端口不变的情况下），这就会导致有些请求无法建立个tcp链接，进而导致请求失败。
+* 
 
 ### 5.5 OSI 5层协议
 
@@ -5544,7 +5545,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                                      
+  >                                                                         
   >    -- 第二步：执行SQL
   >    SELECT
   >        COUNT(p.pay_id)
@@ -5552,17 +5553,17 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        (SELECT pay_id FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c') tmp
   >    INNER JOIN pay p ON tmp.pay_id = p.pay_id
   >    WHERE state IN (0, 1);
-  >                                                                      
+  >                                                                         
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                                      
+  >                                                                         
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
   >      "rows": 996970,
   >      "cost": 203657
   >    },
-  >                                                                      
+  >                                                                         
   >    -- 走index_accountId_createTime索引的分析，评分为1.21
   >    "analyzing_range_alternatives": {
   >      "range_scan_alternatives": [
@@ -5585,7 +5586,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        "cause": "too_few_roworder_scans"
   >      }
   >    },
-  >                                                                      
+  >                                                                         
   >    -- 最终选择走index_accountId_createTime索引，因为评分最低，只有1.21
   >    "chosen_range_access_summary": {
   >      "range_access_plan": {
@@ -5600,9 +5601,9 @@ systemctl start rc-local.service  => 开启rc-local服务
   >      "cost_for_plan": 1.21,
   >      "chosen": true
   >    }
-  >                                                                      
+  >                                                                         
   >    综上所述，针对于INNER JOIN，在MySQL处理后，它最终选择走index_accountId_createTime索引，而且评分为1.21
-  >                                                                      
+  >                                                                         
   >    ```
   >
   >    * 执行另外一条SQL
@@ -5610,13 +5611,13 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                                      
+  >                                                                         
   >    -- 第二步：执行SQL
   >    SELECT COUNT(pay_id) FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c' AND state IN (0, 1);
-  >                                                                      
+  >                                                                         
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                                      
+  >                                                                         
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
