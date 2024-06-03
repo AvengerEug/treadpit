@@ -4771,7 +4771,7 @@ http {
 
 ```
 
-proxy_max_temp_file_size指令设置在 location 上下文中，其限制了 Nginx 缓存从代理服务器获取的响应内容到临时文件中的最大大小。proxy_max_temp_file_size 默认为 1024m（1GB），将此值设置为 0 将禁用临时文件的写入，即所有响应都将在内存中处理。
+proxy_max_temp_file_size指令设置在 location 上下文中，其限制了 Nginx 缓存从代理服务器获取的响应内容到临时文件中的最大大小。proxy_max_temp_file_size 默认为 1024m（1GB），将此值设置为 0 将禁用临时文件的写入，即所有响应都将在内存中处理。如果后端响应数据超过1GB，会影响nginx处理缓存的逻辑，但nginx不会返回具体的错误码。如果需要具体的错误码，则可以在后端应用中处理
 
 ### 3.5 arthas
 
