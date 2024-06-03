@@ -4739,6 +4739,40 @@ linux若分别以普通user启动jenkins.war, 那么会在/home/user/.jenkins/ �
 
 * nginx配置的每一项location都应该是正确的URL，如果配置的 **/xxxx/** 路径下已经没有子路径，那么访问 **~~~~/xxxx** 这个路径时会报301错误。
 
+#### 3.4.8 nginx限制客户端请求的body大小
+
+```json
+http {
+    client_max_body_size 3M;
+
+    # ...
+}
+
+```
+
+* 如果客户端上传的body超过3M，nginx就会返回413 (Request Entity Too Large)
+
+#### 3.4.9 nginx限制服务端返回
+
+```
+http {
+    # ...
+
+    server {
+        # ...
+
+        location / {
+            proxy_pass http://backend_server;
+            proxy_max_temp_file_size 3M;
+            # ...
+        }
+    }
+}
+
+```
+
+proxy_max_temp_file_size指令设置在 location 上下文中，其限制了 Nginx 缓存从代理服务器获取的响应内容到临时文件中的最大大小。proxy_max_temp_file_size 默认为 1024m（1GB），将此值设置为 0 将禁用临时文件的写入，即所有响应都将在内存中处理。
+
 ### 3.5 arthas
 
 #### 3.5.1 如何启动arthas
