@@ -5421,9 +5421,9 @@ systemctl start rc-local.service  => 开启rc-local服务
 
 ### 7.1 oss
 
-#### 7.1 上传图片
+#### 7.1.1 上传图片
 
-##### 7.1.1 私密上传base64格式图片 
+##### 7.1.1.1 私密上传base64格式图片 
 
 ```java
   OSSClient ossClient = new OSSClient(endpoint, accessId, accessKey);
@@ -5434,37 +5434,80 @@ systemctl start rc-local.service  => 开启rc-local服务
   ossClient.putObject(bucket, fileName, new ByteArrayInputStream(Base64.getDecoder().decode(imgBase64)), objectMetadata);
 
 ```
-#### 7.2 下载图片
+#### 7.1.2 下载图片
 
-##### 7.2.1 前端访问私密图片
+##### 7.1.2.1 前端访问私密图片
 
 * 原理: 根据需要请求的资源, 由后端对此资源进行临时授权(新增签名以及请求过期时间, 返回对该资源访问的完整url), 具体参考[oss临时授权文档, ```使用签名URL进行临时授权部分```](https://help.aliyun.com/document_detail/32016.html?spm=a2c4g.11186623.2.13.4de27e31juVYXF)
 
-#### 7.3 ECS
+### 7.2 ECS
 
-##### 7.3.1 镜像
+#### 7.2.1 镜像
 
 * 可以在创建ecs或更换操作系统的时候，选择镜像来创建指定的ecs环境（比如已经有一个带有java环境的ecs镜像，选择它来构建ecs后，创建出来的镜像就可以运行java代码了）
 
-##### 7.3.2 安全组
+#### 7.2.2 安全组
 
 * 每个ecs需要关联一个安全组。一个安全组可以指定入方向和出方向的规则。
   * 入方向：表示外部要访问ecs的规则（需要对ecs的某个端口（比如80），对某个对象(ip地址)授权）
   * 出方向：表示ecs要访问外部服务的规则
 
-##### 7.3.3 块存储（云盘）
+#### 7.2.3 块存储（云盘）
 
 * ecs需要存储数据，则需要关联一个云盘，默认40个G。对比自己组装电脑的一个硬盘。
 * 最好是创建在ecs所在的可用区。如果放在其他可用区的话，还得拉通网线，中间还有网络耗时，因此不建议这么做（在阿里云内部也只支持创建的云盘跟ecs在同一个可用区）。
 
-##### 7.3.4 SLB
+### 7.3 SLB
 
-* 负载均衡：阿里云分为ALB、NLB和CLB三种负载均衡产品
-* ALB：应用级的负载均衡，面向于7层协议
-* NLB：
-* CLB：
+- Server Load Balancer(SLB)是一种对流量进行按需分发的服务（像集团的VIP），通过将流量分发到不通的后端服务器来扩展应用系统的吞吐能力，并且可以消除系统中的单点故障（心跳检测），提升系统的可用性
+- 分类：
 
+- - 公网SLB实例
+  - 私网SLB实例
 
+- 特点：
+
+- - **SLB与弹性伸缩服务实现了无缝衔接，可自动根据流量波峰波谷调节后端服务器数量，实现弹性伸缩。**
+  - **安全保障，可抵御SYN Flood供给和DDos攻击**
+  - **多种负载均衡策略**
+  - **多可用区部署，可跨区容灾**
+  - **支持IPV6**
+  - **按需使用，按量付费**
+
+- 负载均衡类别：
+
+- - ALB(Application Load Balancer)：面向7层的负载均衡，提供超强的业务处理性能，例如HTTPS卸载能力。当实例的qps可达100万次。更多信息，请参见[什么是应用型负载均衡ALB](https://help.aliyun.com/zh/slb/application-load-balancer/product-overview/what-is-alb#concept-2011635)。
+  - NLB(Network Load Balancer)：面向4层的负载均衡，单实例可达1亿的并发连接。更多信息，请参见[什么是网络型负载均衡NLB](https://help.aliyun.com/zh/slb/network-load-balancer/product-overview/what-is-nlb#concept-2223473)。
+  - CLB(Classic Load Balancer)：支持TCP、UDP、HTTP和HTTPS协议（包含基础的4、7层基础能力，仅支持基于域名或URL转发），更多信息，请参见[什么是传统型负载均衡CLB](https://help.aliyun.com/zh/slb/classic-load-balancer/product-overview/what-is-clb#concept-whs-lp4-tdb)。
+
+### 7.4 EIP
+
+- EIP(Elastic IP Address) 是可以独立购买和持有公网ip地址资源。目前，EIP支持绑定到专有网络类型的云服务器ESC实例、专有网络类型的私网传统型负载均衡CLB实例、私网类型的应用型负载均衡ALB、专有网络类型的辅助弹性网卡、NAT网关和高可用虚拟IP上。
+
+### 7.5 NAT网关
+
+- NAT网关（NAT Gateway）是一种网络地址转换服务，提供网络代理能力（包含SNAT和DNAT）。
+- 分类：
+
+- - 公网 NAT网关：提供公网的地址转换服务，具有100 Gbps的转发能力即跨可用区的容灾能力
+  - VPC NAT网关：提供私网地址转换服务
+
+##### 什么时候使用公网NAT网关
+
+- 如果只希望主动访问公网上的业务，而不希望云上的业务直接暴露在公网上从而被攻击的风险，可以选择公网NAT网关
+
+### 7.6 VPC
+
+- VPC(Virtual Private Cloud)是基于阿里云创建的自定义私有网络，可以在自己创建的专有网络内创建和管理云产品实例，比如ESC、SLB、RDS等。在创建前，需要根据具体的业务，规划VPC和交换机的数量及网段。
+- 每一个VPC至少有一个私网网段、一个路由器、一个交换机。
+
+- - 私网网段：192.168.0.0/16，表示有16个1，即可以表示**2的（32-16）-1** 个私有网络65535个私网ip
+  - 路由器(vRouter)：是专有网络的枢纽。作为专有网络中重要的功能组建，它可以连接专有网络内的各个交换机，同时也是链接专有网络和其他网络的网关设备。每个专有网络创建成功后，系统会自动创建一个路由器。每个路由器关联一张路由表。
+  - 交换机：是组成专有网络的基础网络设备，用来链接不通的云资源。创建专有网络后，你可以通过创建交换机为专有网络划分一个或多个子网。同一专有网络内的不通交换机之间内网互通。可以将应用部署在不通可用区的交换机内，提高应用的可用性。
+
+- 举例：![img](https://intranetproxy.alipay.com/skylark/lark/0/2023/png/30356712/1701658715950-8155b1ca-64f4-46ef-9d10-36e419aef276.png)
+
+- - 上图中创建了一个VPC，网段为：192.168.0.0/16，同时内部包含两个交换机，包含192.168.1.0/24和192.168.2.0/24两个子网网段。**这两个交换机的子网网段必须为vpc的一个子集**。同时，包含一个路由器用来链接这两个子网网段，且这两个子网网段部署在不同的可用区中，提高可用性。
 
 ## 八、大咖们发的文章涉及到的知识点
 
@@ -5579,7 +5622,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                                         
+  >                                                                            
   >    -- 第二步：执行SQL
   >    SELECT
   >        COUNT(p.pay_id)
@@ -5587,17 +5630,17 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        (SELECT pay_id FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c') tmp
   >    INNER JOIN pay p ON tmp.pay_id = p.pay_id
   >    WHERE state IN (0, 1);
-  >                                                                         
+  >                                                                            
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                                         
+  >                                                                            
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
   >      "rows": 996970,
   >      "cost": 203657
   >    },
-  >                                                                         
+  >                                                                            
   >    -- 走index_accountId_createTime索引的分析，评分为1.21
   >    "analyzing_range_alternatives": {
   >      "range_scan_alternatives": [
@@ -5620,7 +5663,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        "cause": "too_few_roworder_scans"
   >      }
   >    },
-  >                                                                         
+  >                                                                            
   >    -- 最终选择走index_accountId_createTime索引，因为评分最低，只有1.21
   >    "chosen_range_access_summary": {
   >      "range_access_plan": {
@@ -5635,9 +5678,9 @@ systemctl start rc-local.service  => 开启rc-local服务
   >      "cost_for_plan": 1.21,
   >      "chosen": true
   >    }
-  >                                                                         
+  >                                                                            
   >    综上所述，针对于INNER JOIN，在MySQL处理后，它最终选择走index_accountId_createTime索引，而且评分为1.21
-  >                                                                         
+  >                                                                            
   >    ```
   >
   >    * 执行另外一条SQL
@@ -5645,13 +5688,13 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                                         
+  >                                                                            
   >    -- 第二步：执行SQL
   >    SELECT COUNT(pay_id) FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c' AND state IN (0, 1);
-  >                                                                         
+  >                                                                            
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                                         
+  >                                                                            
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
