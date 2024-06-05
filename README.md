@@ -5823,7 +5823,13 @@ systemctl start rc-local.service  => 开启rc-local服务
   * 第一步：首先确定用户的ip运营商是什么，以及服务器部署的区域。然后再根据要访问的目的地域名，比如为`www.taobao.com`，对此域名进行[拔测]([阿里云网站运维检测平台 (aliyun.com)](https://boce.aliyun.com/detect/http))测试，根据拔测结果和用户ip所属区域作对比，看是否出现某个区域的网络问题。
   * 第二步：在做连通性测试，比如ping一个域名，或curl一下具体的服务。以`www.taobao.com`为例，就是执行如下两个命令：`curl www.taobao.com`和`ping www.taobao.com`，并查看结果。如果有时候通有时候不通，此时可以修改本地hosts文件，将www.taobao.com域名显示指定到`192.168.4.1(这个ip是有随意写的，具体还是要改成能实际访问www.taobao.com域名的ip地址)`，以此来判断是否是dns解析环节有问题。
   * 第三步：再让用户执行`dig www.taobao.com 和 dig @8.8.8.8 www.taobao.com 和 dig @114.114.144.144 www.taobao.com`三个命令，分别查看使用不同的dns服务器，解析出来的ip是否都是www.taobao.com域名对应的ip
-  * 第四步：如果域名没有问题，而是部分ip有问题，则使用`traceroute @8.8.8.8 www.taobao.com`命令，并对出现的每一个ip地址做`ping`命令操作，可以确定是中间哪个ip出了问题
+  * 第四步：如果域名没有问题，而是部分ip有问题，则使用`traceroute @8.8.8.8 www.taobao.com`命令，**并对出现的每一个ip地址做`ping`命令操作，可以确定是中间哪个ip出了问题（目的是确定哪个ip环节出现问题）**
+* 核心思路：如果有多个用户反馈，那就内部排查问题。如果只有一个用户反馈：
+  * 可以让用户换域名测试（不同的域名走不同的链路，可以大致定位出运营商劫持问题），如果为运营商劫持问题，这可以用mtr或traceroute对每个节点做ping操作。
+  * 可以让用户绑定host，绕过dns解析（可以排查是不是dns问题）
+  * 可以让用户绑定host，并用不同的ip（不同的ip走不同的链路，可以大致定位出是否存在运营商劫持问题），如果为运营商劫持问题，这可以用mtr或traceroute对每个节点做ping操作
+  * 可以让用户查看带宽，看是否带宽被打满了（流量过大，或者对方域名的证书过大导致占用过多带宽流量）
+  
 
 ### 10.4 为什么要使用阿里云sls的sdk往sls写日志，而不用tair采集日志的方式？
 
