@@ -1783,7 +1783,7 @@ System.out.println(B.class.isAssignableFrom(A.class));
   * Agent-Class：如果你的agent是被设计为可以在应用程序启动后的任意时间点动态加载，那么需要指定此属性，并执行一个拥有agentmain方法的全限定名。在启动时，需要使用jvm的attach api来触发agent-class
   * Can-Redefine-Classes：这个属性是可选的，用于告诉jvm此agent是否支持在运行时重新定义类。如果设置成true，那agent则可以重新定义类
 
-#### 2.1.35 log4j漏洞总结
+#### 2.1.36 log4j漏洞总结
 
 * 在log4j 2.14版本中，有一个漏洞；假设有这么一个程序：接收用户传入的参数，然后用log4j打印日志（打印代码`logger.info("userName:{} 正在登录", userName)`）。那次是黑客就可以传入一个脚本，利用log4j的漏洞执行此脚本，最终达到攻击的目的（比如启动一个linux命令， 疯狂消耗cpu资源）。
 
@@ -1800,6 +1800,232 @@ System.out.println(B.class.isAssignableFrom(A.class));
   这样，攻击者就能远程执行任意代码，这可能包括盗取敏感信息、安装恶意软件、破坏数据，或者使被攻击的系统成为进一步攻击其他系统的跳板。
 
   修复这个漏洞的方法之一是更新 Log4j 到一个安全的版本，比如 2.15.0 或更高。在这些版本中，Log4j 不再自动解析这种 JNDI 字符串，所以攻击者即使输入恶意字符串，应用程序也不会处理它，从而避免了远程代码执行的风险。
+
+
+
+#### 2.1.37 利用java agent + servlet3.0 注册filter
+
+* 业务背景：需要对三方应用添加自适应限流功能，但不想让三方应用的对接成本加大，因此使用了java agent的方式来注册servlet3.0的filter。这样不管三方应用用的是spring boot还是spring mvc都可以支持。
+
+* 实现步骤：
+
+  * agent入口：
+
+    ```java
+    package com.eugene.sumarry.filteragent;
+    
+    import net.bytebuddy.agent.builder.AgentBuilder;
+    import net.bytebuddy.asm.Advice;
+    import net.bytebuddy.matcher.ElementMatchers;
+    
+    import javax.servlet.ServletContainerInitializer;
+    import java.lang.instrument.Instrumentation;
+    
+    import static net.bytebuddy.matcher.ElementMatchers.isDeclaredBy;
+    import static net.bytebuddy.matcher.ElementMatchers.named;
+    
+    /**
+     * @author muyang
+     * @create 2024/7/1 19:46
+     */
+    public class SidecarFilterAgent {
+    
+        public static void premain(String agentArgs, Instrumentation inst) {
+            System.out.println("Java Agent is running!");
+    
+            new AgentBuilder.Default()
+                    // 针对ServletContainerInitializer的子类做增强
+                    .type(ElementMatchers.isSubTypeOf(javax.servlet.ServletContainerInitializer.class))
+                    .transform(
+                            (builder, typeDescription, classLoader, javaModule) -> {
+                                System.out.println("加载的类：" + typeDescription.getName());
+                                /**
+                                 * 只对ServletContainerInitializer子类的onStartup方法做拦截。
+                                 * 具体拦截操作参考：{@link OnStartupInterceptor}
+                                 */
+    
+                                return builder.method(named("onStartup").and(isDeclaredBy(typeDescription)))
+                                        .intercept(Advice.to(OnStartupInterceptor.class));
+                            }
+    
+                    ).installOn(inst);
+        }
+    
+    }
+    
+    ```
+
+  * 拦截ServletContainerInitializer的onStartup逻辑
+
+    ```java
+    package com.eugene.sumarry.filteragent;
+    
+    import net.bytebuddy.asm.Advice;
+    
+    import javax.servlet.ServletContext;
+    import javax.servlet.ServletException;
+    import java.util.HashSet;
+    import java.util.Set;
+    
+    /**
+     * @author muyang
+     * @create 2024/7/1 19:48
+     */
+    public class OnStartupInterceptor {
+    
+        /**
+         * 在方法入口处，做增强，增强逻辑为：添加指定servlet的filter
+         * @param ctx
+         * @throws ServletException
+         */
+        @Advice.OnMethodEnter
+        public static void enter(@Advice.Argument(1) ServletContext ctx) throws ServletException {
+            System.out.println("Enhancing ServletContainerInitializer's onStartup method...");
+            // 注册自定义过滤器
+            ctx.addFilter("sidecarFilter", SidecarFilter.class)
+                    .addMappingForUrlPatterns(null, false, "/*");
+        }
+    
+    }
+    
+    ```
+
+  * 自定义的filter
+
+    ```java
+    package com.eugene.sumarry.filteragent;
+    
+    import com.eugene.sumarry.filteragent.spring.SpringContextHolder;
+    
+    import javax.servlet.*;
+    import java.io.PrintWriter;
+    import java.util.Objects;
+    
+    /**
+     * @author muyang
+     * @create 2024/7/1 16:49
+     */
+    public class SidecarFilter implements Filter {
+    
+        @Override
+        public void init(FilterConfig filterConfig) throws ServletException {
+            System.out.println("sidecar filter init ");
+        }
+    
+        @Override
+        public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws java.io.IOException, ServletException {
+            System.out.println("sidecar filter doFilter");
+    
+            if (Objects.equals(request.getParameter("limit"), "Y")) {
+                // 可以添加自定义的逻辑，比如：基于pid算法的自适应限流
+                response.setContentType("application/json");
+                PrintWriter writer = response.getWriter();
+                writer.print("limit request");
+                writer.flush();
+                writer.close();
+                return;
+            }
+    
+            chain.doFilter(request, response);
+        }
+    
+        @Override
+        public void destroy() {
+        }
+    }
+    
+    ```
+
+  * pom文件：
+
+    ```xml
+    <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+        <modelVersion>4.0.0</modelVersion>
+        <parent>
+            <groupId>com.eugene.sumarry</groupId>
+            <artifactId>top-study-muyang</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </parent>
+    
+        <artifactId>sidecar-agent</artifactId>
+        <packaging>jar</packaging>
+    
+        <name>sidecar-agent</name>
+        <url>http://maven.apache.org</url>
+    
+        <properties>
+            <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+            <maven.assembly.plugin.version>3.0.0</maven.assembly.plugin.version>
+        </properties>
+    
+        <dependencies>
+            <!-- 依赖servlet -->
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>javax.servlet-api</artifactId>
+                <version>3.0.1</version>
+                <scope>provided</scope>
+            </dependency>
+    
+            <dependency>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy</artifactId>
+                <version>1.12.10</version>
+            </dependency>
+            <dependency>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy-agent</artifactId>
+                <version>1.12.10</version>
+            </dependency>
+    
+        </dependencies>
+    
+        <!-- java agent的打包配置。包含依赖的三方包 -->
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>3.2.4</version> <!-- 确保使用最新的插件版本 -->
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>shade</goal>
+                            </goals>
+                            <configuration>
+                                <createDependencyReducedPom>false</createDependencyReducedPom>
+                                <transformers>
+                                    <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                        <manifestEntries>
+    <!--                                        <Premain-Class>com.eugene.sumarry.filteragent.SidecarServletContainerInitializerAgent</Premain-Class>-->
+                                            <Premain-Class>com.eugene.sumarry.filteragent.SidecarFilterAgent</Premain-Class>
+                                            <Can-Redefine-Classes>true</Can-Redefine-Classes>
+                                            <Can-Retransform-Classes>true</Can-Retransform-Classes>
+                                        </manifestEntries>
+                                    </transformer>
+                                </transformers>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <source>8</source>
+                        <target>8</target>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </build>
+    
+    </project>
+    
+    ```
+
+    
 
 ### 2.2 Spring Cloud
 
@@ -4201,18 +4427,16 @@ CMS Final Remark：触发Full GC的原因，这里是CMS收集器的最终标记
 
 * 以保护应用A为例解释
 
-| 基础名词 | 概念解释                                                     | 备注                                                     |
-| -------- | ------------------------------------------------------------ | -------------------------------------------------------- |
-| 限流保护 | 上游（http、rpc服务）调用应用A，调用太频繁，被拒绝调用       | 限制上游服务调用。</br>如何定义过于频繁？</br>1、qps过高 |
-| 熔断保护 | 应用A调用下游服务（http、rpc服务），下游服务rt太高或频繁抛异常。为了保护应用A不被下游服务拖垮，可以对下游服务做熔断操作 | 熔断操作可以是快速失败或者快速响应mock数据               |
-| 降级保护 | 主动放弃一些**非核心**功能，以保证核心业务的持续运行         |                                                          |
-| 热点保护 | 限流保护的一种补充。可以针对某种频繁调用的case（比如参数A的值为"test"的情况），做针对性的限流 | 针对参数级别的限流                                       |
-| 系统保护 | 针对应用A的系统指标（load、全局RT、总线程数、总QPS）综合计算，如何系统指标超过阈值，则拒绝入口流量。 | 针对系统指标做限流                                       |
-| 簇点     | 簇点在sentinel中像是一个检查站或者收费站。每次车辆请求通过时，它都会被检查。在程序中，我们通过sentinel api创建一个簇点来代表请求进入资源的入口。这个簇点可以用来统计请求的数量、频率以及执行相关的流量控制策略。 |                                                          |
-| 资源名   | 在sentinel中，资源名就像是一条特定的道路或者街道。每次车辆(请求)通过时，我们可以监控和控制它以避免拥堵。在编程的情况下，资源可以是一个方法、一段代码块或者是一类特殊的操作（数据库的查询或者rpc调用） |                                                          |
-| 簇点链路 | 簇点链路可以被视为整个交通系统。在这个系统中，有很多道路（资源），每条道路都有自己的检查站（簇点）。在sentinel中，簇点链路是指一系列资源的调用链。一个请求可能会影响多个资源，例如：一个网页请求可能需要查询数据库、调用远程服务等。这些资源的集合就构成了一个链路。sentinel允许对整个链路进行监控和控制，以便在系统整体上应用流量控制策略。 |                                                          |
-
-
+| 基础名词     | 概念解释                                                     | 备注                                                     |
+| ------------ | ------------------------------------------------------------ | -------------------------------------------------------- |
+| **限流保护** | 上游（http、rpc服务）调用应用A，调用太频繁，被拒绝调用       | 限制上游服务调用。</br>如何定义过于频繁？</br>1、qps过高 |
+| **熔断保护** | 应用A调用下游服务（http、rpc服务），下游服务rt太高或频繁抛异常。为了保护应用A不被下游服务拖垮，可以对下游服务做熔断操作 | 熔断操作可以是快速失败或者快速响应mock数据               |
+| **降级保护** | 主动放弃一些**非核心**功能，以保证核心业务的持续运行         |                                                          |
+| 热点保护     | 限流保护的一种补充。可以针对某种频繁调用的case（比如参数A的值为"test"的情况），做针对性的限流 | 针对参数级别的限流                                       |
+| 系统保护     | 针对应用A的系统指标（load、全局RT、总线程数、总QPS）综合计算，如何系统指标超过阈值，则拒绝入口流量。 | 针对系统指标做限流                                       |
+| 簇点         | 簇点在sentinel中像是一个检查站或者收费站。每次车辆请求通过时，它都会被检查。在程序中，我们通过sentinel api创建一个簇点来代表请求进入资源的入口。这个簇点可以用来统计请求的数量、频率以及执行相关的流量控制策略。 |                                                          |
+| 资源名       | 在sentinel中，资源名就像是一条特定的道路或者街道。每次车辆(请求)通过时，我们可以监控和控制它以避免拥堵。在编程的情况下，资源可以是一个方法、一段代码块或者是一类特殊的操作（数据库的查询或者rpc调用） |                                                          |
+| 簇点链路     | 簇点链路可以被视为整个交通系统。在这个系统中，有很多道路（资源），每条道路都有自己的检查站（簇点）。在sentinel中，簇点链路是指一系列资源的调用链。一个请求可能会影响多个资源，例如：一个网页请求可能需要查询数据库、调用远程服务等。这些资源的集合就构成了一个链路。sentinel允许对整个链路进行监控和控制，以便在系统整体上应用流量控制策略。 |                                                          |
 
 * 整体来说，sentinel的资源名、簇点和簇点链路是流量控制的抽象概念，它们允许你定义哪些代码应该被监控和控制，以及如何控制。**资源名**就是**你想要监控的实际代码**部分，**簇点**是你创建的**用于监控和执行流量控制**的**逻辑入口点**，而**簇点链路**是指**跨多个资源**的整体**调用路径**，使你能在更广泛的范围内进行流量控制。
 
@@ -4777,8 +5001,6 @@ proxy_max_temp_file_size指令设置在 location 上下文中，其限制了 Ngi
 
 #### 3.5.1 如何启动arthas
 
-
-
 #### 3.5.2 使用watch命令查看方法返回值
 
 * 格式： `watch [类名] [方法名] "{params, target, returnObj}" [条件表达式] [动作] [选项]`
@@ -4790,6 +5012,10 @@ proxy_max_temp_file_size指令设置在 location 上下文中，其限制了 Ngi
   * `[选项]` 是可选的，可以指定命令的其他选项，例如 `-x 2` 用于控制展示对象的展开层数
 * `watch 你的包名.你的类名 getList "{returnObj}" -x 2 `  ==》 此命令表示对getList方法的返回值做展示，其中展示两层的结构，如果嵌套的map比较深的话，可以把2改成更大的值，这样就能方便查看数据了
 * 当你的系统有缓存等各种杂役问题时，使用此方法可以快速确定返回值是否符合期望结果。
+#### 3.5.3 使用vmtool调用指定方法
+
+* 格式：`vmtool --action getInstances --className 类的全限定名 --express 'instances[0].方法名称(入参)'`
+
 ### 3.5 kubernetes
 
 #### 3.5.1 架构图
@@ -5626,7 +5852,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                                            
+  >                                                                                  
   >    -- 第二步：执行SQL
   >    SELECT
   >        COUNT(p.pay_id)
@@ -5634,17 +5860,17 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        (SELECT pay_id FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c') tmp
   >    INNER JOIN pay p ON tmp.pay_id = p.pay_id
   >    WHERE state IN (0, 1);
-  >                                                                            
+  >                                                                                  
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                                            
+  >                                                                                  
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
   >      "rows": 996970,
   >      "cost": 203657
   >    },
-  >                                                                            
+  >                                                                                  
   >    -- 走index_accountId_createTime索引的分析，评分为1.21
   >    "analyzing_range_alternatives": {
   >      "range_scan_alternatives": [
@@ -5667,7 +5893,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        "cause": "too_few_roworder_scans"
   >      }
   >    },
-  >                                                                            
+  >                                                                                  
   >    -- 最终选择走index_accountId_createTime索引，因为评分最低，只有1.21
   >    "chosen_range_access_summary": {
   >      "range_access_plan": {
@@ -5682,9 +5908,9 @@ systemctl start rc-local.service  => 开启rc-local服务
   >      "cost_for_plan": 1.21,
   >      "chosen": true
   >    }
-  >                                                                            
+  >                                                                                  
   >    综上所述，针对于INNER JOIN，在MySQL处理后，它最终选择走index_accountId_createTime索引，而且评分为1.21
-  >                                                                            
+  >                                                                                  
   >    ```
   >
   >    * 执行另外一条SQL
@@ -5692,13 +5918,13 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                                            
+  >                                                                                  
   >    -- 第二步：执行SQL
   >    SELECT COUNT(pay_id) FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c' AND state IN (0, 1);
-  >                                                                            
+  >                                                                                  
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                                            
+  >                                                                                  
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
