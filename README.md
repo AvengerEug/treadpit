@@ -3204,6 +3204,19 @@ ps: --default-character-set=xxx  编码格式具体根据导出的db时选择的
 * 在可重复提交事务的事务隔离级别中，若需要更新同一条的数据时，第一个事务隔离级别拿到锁后，迟迟没有提交，第二个事务则会等到第一个事务提交后才能继续往下执行。
 * 在公司的一种业务中：分布式锁和mysql的事务锁互斥了，等到分布式锁到了释放锁的时间才提交事务，导致一些dubbo调用直接超时。具体的案例后续再细说。
 
+#### 2.5.15 left join 退化成inner join
+
+```sql
+select a.*, b.*
+from a
+left join b on a.id = b.a_id
+where a.x = 1
+and b.x2 = 4;
+```
+
+* 如上sql会退化成inner join。
+* 原因：**在where子句中对有表进行了限制。如果左表中有任何行在右表中没有匹配项**，则会将这些行从结果集中删除。此时会退化成inner join
+
 ### 2.6 Elasticsearch
 #### 2.6.1 linux构建es的坑
 ```shell
@@ -5852,7 +5865,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                                                  
+  >                                                                                     
   >    -- 第二步：执行SQL
   >    SELECT
   >        COUNT(p.pay_id)
@@ -5860,17 +5873,17 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        (SELECT pay_id FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c') tmp
   >    INNER JOIN pay p ON tmp.pay_id = p.pay_id
   >    WHERE state IN (0, 1);
-  >                                                                                  
+  >                                                                                     
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                                                  
+  >                                                                                     
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
   >      "rows": 996970,
   >      "cost": 203657
   >    },
-  >                                                                                  
+  >                                                                                     
   >    -- 走index_accountId_createTime索引的分析，评分为1.21
   >    "analyzing_range_alternatives": {
   >      "range_scan_alternatives": [
@@ -5893,7 +5906,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        "cause": "too_few_roworder_scans"
   >      }
   >    },
-  >                                                                                  
+  >                                                                                     
   >    -- 最终选择走index_accountId_createTime索引，因为评分最低，只有1.21
   >    "chosen_range_access_summary": {
   >      "range_access_plan": {
@@ -5908,9 +5921,9 @@ systemctl start rc-local.service  => 开启rc-local服务
   >      "cost_for_plan": 1.21,
   >      "chosen": true
   >    }
-  >                                                                                  
+  >                                                                                     
   >    综上所述，针对于INNER JOIN，在MySQL处理后，它最终选择走index_accountId_createTime索引，而且评分为1.21
-  >                                                                                  
+  >                                                                                     
   >    ```
   >
   >    * 执行另外一条SQL
@@ -5918,13 +5931,13 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                                                  
+  >                                                                                     
   >    -- 第二步：执行SQL
   >    SELECT COUNT(pay_id) FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c' AND state IN (0, 1);
-  >                                                                                  
+  >                                                                                     
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                                                  
+  >                                                                                     
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
