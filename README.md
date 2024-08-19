@@ -2025,7 +2025,84 @@ System.out.println(B.class.isAssignableFrom(A.class));
     
     ```
 
-    
+
+#### 2.1.38 map的putIfAbsent方法
+
+* 通常，我们操作map时，都是先get，如果不为空，直接返回。如果为空，则构建对象并放到map中。在这个流程中，get链路肯定是线程不安全的，我们如何保证在多线程环境下，put操作是线程安全的，并且正常的获取第一次put进去的对象呢？
+
+* 方案1：使用concurrentHashMap的get和putIfAbsent方式
+
+  ```java
+  Object obj = concurrentHashMap.get(key);
+  if (obj == null) {
+    obj = new Object();
+    // 这个方法保证了put方法的线程安全。如果key对应的value存在，则不会put成功，同时返回的是原始的value
+    Object oldObj = concurrentHashMap.putIfAbsent(key, obj);
+    if (oldObj != null) {
+      obj = oldObj
+    }
+  }
+  
+  return obj;
+  ```
+
+* 方案2：get & put 操作为同步操作，并且在锁内再获取一次
+
+  ```java
+  private final Lock lock = new ReentrantLock();
+  
+  try {
+    // 先get，直接获取旧值
+    Object obj = concurrentHashMap.get(key);
+    if (obj != null) {
+      return obj;
+    }
+  
+    // 无值，则加锁，进入同步块
+    if (lock.tryLock(5000)) {
+      // 在同步块继续get一次，防止多个请求都在lock.tryLock(5000)中卡着。
+    	Object obj = concurrentHashMap.get(key);
+      if (obj == null) {
+        obj = new Object();
+        concurrentHashMap.put(key, obj);
+      }
+  
+      return obj;
+    }
+  
+    return null;
+  } finally {
+    lock.unLock();
+  }
+  ```
+
+* 方案3：读写锁，保证map不并发修改，并且get到的都是最新值
+
+  ```java
+  // 先get
+  try {
+    readWriteLock.readLock().lock();
+    if (concurrentHashMap != null) {
+      return concurrentHashMap.get(appkey);
+    }
+    return null;
+  } finally {
+    readWriteLock.readLock().unlock();
+  }
+  
+  // 构建concurrentHashMap时，保证concurrentHashMap的get逻辑，获取到的是最新的
+  try {
+    readWriteLock.writeLock().lock();
+    if (concurrentHashMap != null) {
+      concurrentHashMap = newConcurrentHashMap;
+    }
+  } finally {
+    readWriteLock.writeLock().unlock();
+  }
+  
+  ```
+
+  
 
 ### 2.2 Spring Cloud
 
@@ -5023,11 +5100,17 @@ proxy_max_temp_file_size指令设置在 location 上下文中，其限制了 Ngi
   * `[条件表达式]` 是可选的，可以根据条件判断是否进行拦截。
   * `[动作]` 是可选的，指定满足条件时所执行的操作。
   * `[选项]` 是可选的，可以指定命令的其他选项，例如 `-x 2` 用于控制展示对象的展开层数
-* `watch 你的包名.你的类名 getList "{returnObj}" -x 2 `  ==》 此命令表示对getList方法的返回值做展示，其中展示两层的结构，如果嵌套的map比较深的话，可以把2改成更大的值，这样就能方便查看数据了
-* 当你的系统有缓存等各种杂役问题时，使用此方法可以快速确定返回值是否符合期望结果。
+* 举例：`watch 你的包名.你的类名 getList "{returnObj}" -x 2 `  ==》 此命令表示对getList方法的返回值做展示，其中展示两层的结构，如果嵌套的map比较深的话，可以把2改成更大的值，这样就能方便查看数据了
+* 当你的系统有缓存等各种杂症问题时，使用此方法可以快速确定返回值是否符合期望结果。
 #### 3.5.3 使用vmtool调用指定方法
 
 * 格式：`vmtool --action getInstances --className 类的全限定名 --express 'instances[0].方法名称(入参)'`
+
+#### 3.5.4 使用sc命令查看jvm已加载的类信息
+
+* 当我们在开发java agent功能时，为了保证不跟主应用有冲突，我们可以会选择自定义类加载器的方式来加载agent需要依赖的jar包，同时也会写自定义逻辑打破双亲委派机制。在整个过程中，可能会遇到很多『类找不到』的异常，此时我们就可以用sc命令来看，指定类是由哪个类加载器加载的，进而解决类找不到问题
+* 举例：**sc com.eugene.*** 查找com.eugene前缀的类，并暂时相关的信息（包含类加载器）
+* 
 
 ### 3.5 kubernetes
 
