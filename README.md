@@ -5533,6 +5533,15 @@ systemctl start rc-local.service  => 开启rc-local服务
 
 * 更多curl相关文档参考：[http://www.ruanyifeng.com/blog/2019/09/curl-reference.html](http://www.ruanyifeng.com/blog/2019/09/curl-reference.html)
 
+### 4.8 日志文件被删除导致的句柄未释放问题
+
+* 什么时候会出现这个问题？当我们删除正在写入的日志文件时，虽然文件被删除了，但是其实磁盘利用率没有下来。原因是：句柄未被释放？
+  * 如何解决呢？只能重启机器
+* 我使用`du -sh ./log/* | grep G`命令，也没有找到很大的日志文件，为什么磁盘利用率还是下不来？原因也是句柄未释放
+  * 如何解决？同上
+  * 如何定位当天正在写入的日志被删除了？执行命令：`sudo lsof | grep deleted` 。
+* 那如何清理正在写入的日志文件内容呢？使用命令：`echo "" > application.log` 重置日志文件内的内容
+
 ## 五. TCP & HTTP
 
 ### 5.1 ContentType
