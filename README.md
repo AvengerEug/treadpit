@@ -5844,6 +5844,21 @@ systemctl start rc-local.service  => 开启rc-local服务
 
 - - 上图中创建了一个VPC，网段为：192.168.0.0/16，同时内部包含两个交换机，包含192.168.1.0/24和192.168.2.0/24两个子网网段。**这两个交换机的子网网段必须为vpc的一个子集**。同时，包含一个路由器用来链接这两个子网网段，且这两个子网网段部署在不同的可用区中，提高可用性。
 
+### 7.7 SLS
+
+#### 7.7.1 日志格式问题-允许部分字段配置
+
+* ![image-20240829144554413](./sls-允许部分字段.png)
+* 日志格式用『|』分割。在末尾新增了一个元素，导致日志没有采集到sls中。原因是：没有勾选『允许部分字段』。此配置说明：如果只有部分字段匹配，也写入到sls中（比如期望有9个|，一共10个字段，如果最终只有2个|，解析出来3个字段，也会存入到sls中）。
+
+#### 7.7.2 弹内sls机器组的ip同步功能
+
+* 当机器组ip发生变化时，我们需要点击手动同步按钮。![image-20240829145313144](./sls-机器组同步.png)
+
+  发现报错了，原因是：机器组的Topic是中文导致。随便写一个英文就好。
+
+* 备注：此同步机制，只能使用Armory方法，即面对弹内的用户。弹外不支持此功能
+
 ## 八、大咖们发的文章涉及到的知识点
 
 ### 8.1  INSERT INTO SELECT语句造成的锁表事件
@@ -5957,7 +5972,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                                                     
+  >                                                                                        
   >    -- 第二步：执行SQL
   >    SELECT
   >        COUNT(p.pay_id)
@@ -5965,17 +5980,17 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        (SELECT pay_id FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c') tmp
   >    INNER JOIN pay p ON tmp.pay_id = p.pay_id
   >    WHERE state IN (0, 1);
-  >                                                                                     
+  >                                                                                        
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                                                     
+  >                                                                                        
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
   >      "rows": 996970,
   >      "cost": 203657
   >    },
-  >                                                                                     
+  >                                                                                        
   >    -- 走index_accountId_createTime索引的分析，评分为1.21
   >    "analyzing_range_alternatives": {
   >      "range_scan_alternatives": [
@@ -5998,7 +6013,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        "cause": "too_few_roworder_scans"
   >      }
   >    },
-  >                                                                                     
+  >                                                                                        
   >    -- 最终选择走index_accountId_createTime索引，因为评分最低，只有1.21
   >    "chosen_range_access_summary": {
   >      "range_access_plan": {
@@ -6013,9 +6028,9 @@ systemctl start rc-local.service  => 开启rc-local服务
   >      "cost_for_plan": 1.21,
   >      "chosen": true
   >    }
-  >                                                                                     
+  >                                                                                        
   >    综上所述，针对于INNER JOIN，在MySQL处理后，它最终选择走index_accountId_createTime索引，而且评分为1.21
-  >                                                                                     
+  >                                                                                        
   >    ```
   >
   >    * 执行另外一条SQL
@@ -6023,13 +6038,13 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                                                     
+  >                                                                                        
   >    -- 第二步：执行SQL
   >    SELECT COUNT(pay_id) FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c' AND state IN (0, 1);
-  >                                                                                     
+  >                                                                                        
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                                                     
+  >                                                                                        
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
