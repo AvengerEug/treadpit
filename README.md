@@ -3292,7 +3292,7 @@ and b.x2 = 4;
 ```
 
 * 如上sql会退化成inner join。
-* 原因：**在where子句中对有表进行了限制。如果左表中有任何行在右表中没有匹配项**，则会将这些行从结果集中删除。此时会退化成inner join
+* 原因：**在where子句中对右表进行了限制。如果左表中有任何行在右表中没有匹配项**，则会将这些行从结果集中删除。此时会退化成inner join
 
 ### 2.6 Elasticsearch
 #### 2.6.1 linux构建es的坑
@@ -4034,7 +4034,7 @@ git log --graph --pretty=oneline --abbrev-commit
 ```text
 2018-04-29T10:15:39.810-0200: [GC (Allocation Failure) [ParNew: 65536K->10752K(76288K), 0.0057800 secs] 65536K->21184K(251392K), 0.0058300 secs] [Times: user=0.02 sys=0.00, real=0.01 secs]
 
-GC：表示这是一次年轻代的垃圾挥手
+GC：表示这是一次年轻代的垃圾回收
 Allocation Failure：触发GC的原因，通常是因为年轻代没有足够空间分配新对象
 [ParNew: 65536K->10752K(76288K), 0.0057800 secs]：回收前对象占用65536K，回收后占用10752K，总大小76288K，本次清理耗时0.0057800秒
 65536K->21184K(251392K)：回收前整个堆为65536K大小，回收后21184K大小，总共堆的大小为：251392K
@@ -4075,7 +4075,7 @@ CMS Final Remark：触发Full GC的原因，这里是CMS收集器的最终标记
 | -Xloggc:/Users/avengereug/java-backend/gc.log                | 将垃圾回收日志输出到指定文件中。                             |
 | -XX:+PrintGCDetails                                          | 打印更详细的垃圾回收信息。                                   |
 | -XX:+PrintGCDateStamps                                       | 在垃圾回收日志中打印日期。                                   |
-| -XX:+HeapDumpBeforeFullGC                                    | 在fullgc前打印堆栈信息                                       |
+| -XX:+HeapDumpBeforeFullGC                                    | 在fullgc前dump信息                                           |
 | -XX:+HeapDumpOnOutOfMemoryError                              | 当发生内存溢出错误时，生成堆转储文件。                       |
 | -XX:HeapDumpPath=/Users/avengereug/java-backend/heapdump-%t.hprof | 当发生内存溢出错误时，堆文件存储的路径。也适用于-XX:+HeapDumpBeforeFullGC |
 | -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000 -XX:+PrintTenuringDistribution | 设置远程调试端口为8000，调试服务器等待客户端连接并立即开始运行程序。 |
@@ -4194,6 +4194,10 @@ CMS Final Remark：触发Full GC的原因，这里是CMS收集器的最终标记
 | 软应用 | 触发老年代gc时才会被回收（内存不够时才会被回收）。yougc不会被回收。老年代的gc会回收。 |
 | 弱引用 | 触发gc时，无论内存是否充足，都会被回收。young gc和老年代gc都会回收 |
 | 虚引用 | 触发gc时，无论内存是否充足，都会被回收，最先被清除的对象     |
+
+#### 2.11.16 快速dump堆内存
+
+*  `jmap -dump:format=b,file=<filename> <pid>`
 
 ### 2.12 消息中间件
 
@@ -5972,7 +5976,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                                                        
+  >                                                                                           
   >    -- 第二步：执行SQL
   >    SELECT
   >        COUNT(p.pay_id)
@@ -5980,17 +5984,17 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        (SELECT pay_id FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c') tmp
   >    INNER JOIN pay p ON tmp.pay_id = p.pay_id
   >    WHERE state IN (0, 1);
-  >                                                                                        
+  >                                                                                           
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                                                        
+  >                                                                                           
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
   >      "rows": 996970,
   >      "cost": 203657
   >    },
-  >                                                                                        
+  >                                                                                           
   >    -- 走index_accountId_createTime索引的分析，评分为1.21
   >    "analyzing_range_alternatives": {
   >      "range_scan_alternatives": [
@@ -6013,7 +6017,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        "cause": "too_few_roworder_scans"
   >      }
   >    },
-  >                                                                                        
+  >                                                                                           
   >    -- 最终选择走index_accountId_createTime索引，因为评分最低，只有1.21
   >    "chosen_range_access_summary": {
   >      "range_access_plan": {
@@ -6028,9 +6032,9 @@ systemctl start rc-local.service  => 开启rc-local服务
   >      "cost_for_plan": 1.21,
   >      "chosen": true
   >    }
-  >                                                                                        
+  >                                                                                           
   >    综上所述，针对于INNER JOIN，在MySQL处理后，它最终选择走index_accountId_createTime索引，而且评分为1.21
-  >                                                                                        
+  >                                                                                           
   >    ```
   >
   >    * 执行另外一条SQL
@@ -6038,13 +6042,13 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                                                        
+  >                                                                                           
   >    -- 第二步：执行SQL
   >    SELECT COUNT(pay_id) FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c' AND state IN (0, 1);
-  >                                                                                        
+  >                                                                                           
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                                                        
+  >                                                                                           
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
