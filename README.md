@@ -2037,6 +2037,7 @@ System.out.println(B.class.isAssignableFrom(A.class));
   if (obj == null) {
     obj = new Object();
     // 这个方法保证了put方法的线程安全。如果key对应的value存在，则不会put成功，同时返回的是原始的value
+    // 大白话：如果map中有key对应的value，则返回原始value，如果没有value，则put value并返回当前put的value
     Object oldObj = concurrentHashMap.putIfAbsent(key, obj);
     if (oldObj != null) {
       obj = oldObj
@@ -2228,6 +2229,7 @@ System.out.println(B.class.isAssignableFrom(A.class));
 #### 2.3.3 @RequestBody注解接收Post请求ContentType为application/x-www-form-urlencoded格式的数据
 * 在通常的前后端分离项目中, 一般在前端框架使用的异步请求框架都会全局设置ContentType为application/json.
   导致在接触第三方jar包回调时遇到不同的ContentType不知如何处理
+  
   ```
   在SpringBoot中的@RequestBody底层只有FormHttpMessageConverter支持解析application/x-www-form-urlencoded这种格式,
   但它只能将请求体中的内容转成MultiValueMap对象。
@@ -4126,6 +4128,7 @@ CMS Final Remark：触发Full GC的原因，这里是CMS收集器的最终标记
 * 第二步：使用`jinfo -flag +HeapDumpBeforeFullGC 进程ID` 为jvm进程添加HeapDumpBeforeFullGC参数，表示在fullgc之前把堆栈信息打印出来
 * 第三步：使用`jinfo -flags 进程ID`， 查看java的启动命令中是否包含了刚刚添加的jvm参数
 * 适用场景：大流量的项目，通常不会频繁在fullgc前打印fullgc前的堆栈信息（占用磁盘空间，打印快照也会影响性能），如果频繁系统突然某天频繁出现fullgc的话，则需要使用此方式为某些机器添加此参数，让这几台灰度的机器在fullgc前打印堆栈信息，方便分析问题。
+* dump文件生成的路径：默认在启动jvm的工作目录下
 
 #### 2.11.11 配置了fullgc前打印dump文件并且配置了内存溢出时打印dump文件的案例
 
@@ -4525,7 +4528,7 @@ CMS Final Remark：触发Full GC的原因，这里是CMS收集器的最终标记
 | ------------ | ------------------------------------------------------------ | -------------------------------------------------------- |
 | **限流保护** | 上游（http、rpc服务）调用应用A，调用太频繁，被拒绝调用       | 限制上游服务调用。</br>如何定义过于频繁？</br>1、qps过高 |
 | **熔断保护** | 应用A调用下游服务（http、rpc服务），下游服务rt太高或频繁抛异常。为了保护应用A不被下游服务拖垮，可以对下游服务做熔断操作 | 熔断操作可以是快速失败或者快速响应mock数据               |
-| **降级保护** | 主动放弃一些**非核心**功能，以保证核心业务的持续运行         |                                                          |
+| **降级保护** | 主动放弃一些**非核心**功能，以保证核心业务的持续运行         | 比如导购链路有A、B、C、D4个逻辑，大促时可以把C和D降级掉  |
 | 热点保护     | 限流保护的一种补充。可以针对某种频繁调用的case（比如参数A的值为"test"的情况），做针对性的限流 | 针对参数级别的限流                                       |
 | 系统保护     | 针对应用A的系统指标（load、全局RT、总线程数、总QPS）综合计算，如何系统指标超过阈值，则拒绝入口流量。 | 针对系统指标做限流                                       |
 | 簇点         | 簇点在sentinel中像是一个检查站或者收费站。每次车辆请求通过时，它都会被检查。在程序中，我们通过sentinel api创建一个簇点来代表请求进入资源的入口。这个簇点可以用来统计请求的数量、频率以及执行相关的流量控制策略。 |                                                          |
@@ -5976,7 +5979,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                                                           
+  >                                                                                                 
   >    -- 第二步：执行SQL
   >    SELECT
   >        COUNT(p.pay_id)
@@ -5984,17 +5987,17 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        (SELECT pay_id FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c') tmp
   >    INNER JOIN pay p ON tmp.pay_id = p.pay_id
   >    WHERE state IN (0, 1);
-  >                                                                                           
+  >                                                                                                 
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                                                           
+  >                                                                                                 
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
   >      "rows": 996970,
   >      "cost": 203657
   >    },
-  >                                                                                           
+  >                                                                                                 
   >    -- 走index_accountId_createTime索引的分析，评分为1.21
   >    "analyzing_range_alternatives": {
   >      "range_scan_alternatives": [
@@ -6017,7 +6020,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        "cause": "too_few_roworder_scans"
   >      }
   >    },
-  >                                                                                           
+  >                                                                                                 
   >    -- 最终选择走index_accountId_createTime索引，因为评分最低，只有1.21
   >    "chosen_range_access_summary": {
   >      "range_access_plan": {
@@ -6032,9 +6035,9 @@ systemctl start rc-local.service  => 开启rc-local服务
   >      "cost_for_plan": 1.21,
   >      "chosen": true
   >    }
-  >                                                                                           
+  >                                                                                                 
   >    综上所述，针对于INNER JOIN，在MySQL处理后，它最终选择走index_accountId_createTime索引，而且评分为1.21
-  >                                                                                           
+  >                                                                                                 
   >    ```
   >
   >    * 执行另外一条SQL
@@ -6042,13 +6045,13 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                                                           
+  >                                                                                                 
   >    -- 第二步：执行SQL
   >    SELECT COUNT(pay_id) FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c' AND state IN (0, 1);
-  >                                                                                           
+  >                                                                                                 
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                                                           
+  >                                                                                                 
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
