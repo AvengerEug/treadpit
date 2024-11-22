@@ -5109,15 +5109,29 @@ proxy_max_temp_file_size指令设置在 location 上下文中，其限制了 Ngi
   * `[选项]` 是可选的，可以指定命令的其他选项，例如 `-x 2` 用于控制展示对象的展开层数
 * 举例：`watch 你的包名.你的类名 getList "{returnObj}" -x 2 `  ==》 此命令表示对getList方法的返回值做展示，其中展示两层的结构，如果嵌套的map比较深的话，可以把2改成更大的值，这样就能方便查看数据了
 * 当你的系统有缓存等各种杂症问题时，使用此方法可以快速确定返回值是否符合期望结果。
+* 推荐在idea使用arthas插件生成！非常方便，此命令可以知道入参是什么耗时花了多久，简直是神器！
+* 什么时候要用他？比如监控显示某个http接口rt高，则可以用这个命令去采集对应的入参和耗时，进而分析问题
 #### 3.5.3 使用vmtool调用指定方法
 
 * 格式：`vmtool --action getInstances --className 类的全限定名 --express 'instances[0].方法名称(入参)'`
+* 推荐在idea使用arthas插件生成！
+* 什么时候要用他？你不知道运行时的数据是怎样的，就用这个方法执行一次对应的方法，进而获取到对应的运行时元数据
 
 #### 3.5.4 使用sc命令查看jvm已加载的类信息
 
 * 当我们在开发java agent功能时，为了保证不跟主应用有冲突，我们可以会选择自定义类加载器的方式来加载agent需要依赖的jar包，同时也会写自定义逻辑打破双亲委派机制。在整个过程中，可能会遇到很多『类找不到』的异常，此时我们就可以用sc命令来看，指定类是由哪个类加载器加载的，进而解决类找不到问题
 * 举例：**sc com.eugene.*** 查找com.eugene前缀的类，并暂时相关的信息（包含类加载器）
-* 
+
+#### 3.5.5 使用stack命令
+
+* 可以知道线上的流量中，有哪些调用栈会调用到此方法。
+* 示例命令：**stack com.eugene.sumarry.util.BaseCheckUtil canAccess  -n 5** 
+* 不用管格式是怎样的，用arthas插件生成就完事了！
+
+#### 3.5.6 使用monitor命令监控一个方法10s内的成功率
+
+* 命令格式：**monitor com.eugene.sumarry.util.BaseCheckUtil canAccess  -n 10  --cycle 1**
+* 上述命令表示：监控10s内请求canAccess方法的调用情况，包含总条用次数、成功次数、失败次数、平均rt和失败率
 
 ### 3.5 kubernetes
 
@@ -5349,6 +5363,18 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
 * control + a: 光标移动到最前面
 * control + e: 光标移动到最后面
 
+#### 4.1.25 less常用命令
+
+* `shift + g`: 移到文件末尾
+* `g`: 移动文件开始
+* `空格`：向下翻页
+* `b`: 向前翻页
+* `/ + 关键字`: 往后查询关键字
+* `? + 关键字`: 往前查询关键字
+* `h`: 查看帮助
+
+
+
 ### 4.2 keepalived实现主备部署
 
 #### 4.2.1 两台centos7使用keepalived实现主备简单部署
@@ -5542,8 +5568,13 @@ systemctl start rc-local.service  => 开启rc-local服务
 
 ### 4.8 日志文件被删除导致的句柄未释放问题
 
-* 什么时候会出现这个问题？当我们删除正在写入的日志文件时，虽然文件被删除了，但是其实磁盘利用率没有下来。原因是：句柄未被释放？
-  * 如何解决呢？只能重启机器
+* 什么时候会出现这个问题？当我们删除正在写入的日志文件时，文件被rm -f了。虽然文件被删除了，但是其实磁盘利用率没有下来。原因是：句柄未被释放。
+  * 如何解决？只能重启机器
+  * 如何查看对应的句柄？
+    * 查看被删除的文件名： lsof | grep deleted  
+    * 查找对应java进程持有的句柄文件：ll /proc/4651/fd/* | grep "application.log"     其中，4651为application.log所属的java进程id。假设输出的内容为：lr-x------ 1 admin admin 64 Oct 30 16:55 /proc/4651/fd/996 -> /home/admin/application.log
+    * 继续查看句柄文件内容：**tail -f /proc/4651/fd/996**   你会发现应用输出的日志还在不停的打印，这也是为什么磁盘利用率下不来的原因。
+    * 此时可以选择执行 `echo "" >/proc/4651/fd/996 `来置空句柄内容，但为了稳妥，最好还是重启应用。因为有可能application.log文件不会被生成
 * 我使用`du -sh ./log/* | grep G`命令，也没有找到很大的日志文件，为什么磁盘利用率还是下不来？原因也是句柄未释放
   * 如何解决？同上
   * 如何定位当天正在写入的日志被删除了？执行命令：`sudo lsof | grep deleted` 。
@@ -5979,7 +6010,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                                                                 
+  >                                                                                                    
   >    -- 第二步：执行SQL
   >    SELECT
   >        COUNT(p.pay_id)
@@ -5987,17 +6018,17 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        (SELECT pay_id FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c') tmp
   >    INNER JOIN pay p ON tmp.pay_id = p.pay_id
   >    WHERE state IN (0, 1);
-  >                                                                                                 
+  >                                                                                                    
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                                                                 
+  >                                                                                                    
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
   >      "rows": 996970,
   >      "cost": 203657
   >    },
-  >                                                                                                 
+  >                                                                                                    
   >    -- 走index_accountId_createTime索引的分析，评分为1.21
   >    "analyzing_range_alternatives": {
   >      "range_scan_alternatives": [
@@ -6020,7 +6051,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        "cause": "too_few_roworder_scans"
   >      }
   >    },
-  >                                                                                                 
+  >                                                                                                    
   >    -- 最终选择走index_accountId_createTime索引，因为评分最低，只有1.21
   >    "chosen_range_access_summary": {
   >      "range_access_plan": {
@@ -6035,9 +6066,9 @@ systemctl start rc-local.service  => 开启rc-local服务
   >      "cost_for_plan": 1.21,
   >      "chosen": true
   >    }
-  >                                                                                                 
+  >                                                                                                    
   >    综上所述，针对于INNER JOIN，在MySQL处理后，它最终选择走index_accountId_createTime索引，而且评分为1.21
-  >                                                                                                 
+  >                                                                                                    
   >    ```
   >
   >    * 执行另外一条SQL
@@ -6045,13 +6076,13 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                                                                 
+  >                                                                                                    
   >    -- 第二步：执行SQL
   >    SELECT COUNT(pay_id) FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c' AND state IN (0, 1);
-  >                                                                                                 
+  >                                                                                                    
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                                                                 
+  >                                                                                                    
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
