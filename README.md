@@ -5173,8 +5173,8 @@ proxy_max_temp_file_size指令设置在 location 上下文中，其限制了 Ngi
 * zip -r target.zip ./
 #### 4.1.4 解压缩zip压缩包到当前目录
 * unzip target.zip -d ./  或  unzip target.zip
-#### 4.1.5 查看某个文件的大小
-* du -h 文件名
+#### 4.1.5 查看某个文件夹的大小超过1GB
+* du -h /home/admin/app/* | grep G
 #### 4.1.6 列出文件夹下面第一级每个文件的大小(包括文件夹和文件)
 * du -ah --max-depth=1 文件夹名
 #### 4.1.7 查找文件命令
@@ -5205,6 +5205,7 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
 ```
 #### 4.1.12 清除所有log文件(内存不够时)
 * find . -name "*.log | xargs rm"
+* 这种会有问题，因为有可能把jvm持有的日志文件给删了，但实际上句柄还正在持有，空间并没有被释放
 
 #### 4.1.13 压缩成tar.gz压缩包
 * 将当前目录压缩成test.tar.gz
@@ -5338,6 +5339,7 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
 
 * dig和nslookup命令是dns解析的命令，我们可以解析出域名最终解析出来的ip地址是什么。与ping命令不同的是，dig命令可以看到整个dns解析过程。
 * 在使用dig命令中，我们可以使用`@`语法指定要使用的dns服务器（有时候有些dns服务器有定制逻辑，所以需要切换dns服务器排除这方面的判断）。eg: `dig @8.8.8.8 www.taobao.com`. 这表示使用阿里云公网的dns进行解析，也可以使用谷歌的`114.114.114.114`dns服务器进行解析。
+* dns使用的服务器，在`/etc/resolv.conf`中配置
 
 #### 4.1.22 tail -n命令
 
@@ -5492,10 +5494,10 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
 
 ### 4.5 使用jstack定位导致cpu狂飙的问题代码
 1. 使用 `top -c`命令，查看占用cpu资源过高的线程， 可以按大写的p来进行排序，占用最高的进程会排在第一位，假设为4669
-2. 执行`top -Hp 4669` 查看进程中占用cpu最高的线程, 假设为**4686**
-3. 为进程生成快照 `jstack -l 4669 > 4669.log`
-4. 将**4686**转成十六进制: 0x124e
-5. 使用vim命令打开4669.log文件，并按 '/', 输入`0x124e`, 按回车。定位线程的栈信息
+2. 执行`top -Hp ${进程Id}` 查看进程中占用cpu最高的线程, 假设为**4686**
+3. 为进程生成快照 `jstack -F ${线程id} > 4669.log`
+4. 将**4686**转成十六进制: 0x124e。快速命令：`printf "%X\n" 4686`
+5. 使用less命令打开4669.log文件，并按 '/', 输入`0x124e`, 按回车。定位线程的栈信息
 6. 可以按上下方向建来看更多的日志，往下翻，看堆栈信息，基本上就能定位到某一行了
 
 ps: 可以写一个死循环来测试上述方案。
@@ -6010,7 +6012,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                                                                    
+  >                                                                                                          
   >    -- 第二步：执行SQL
   >    SELECT
   >        COUNT(p.pay_id)
@@ -6018,17 +6020,17 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        (SELECT pay_id FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c') tmp
   >    INNER JOIN pay p ON tmp.pay_id = p.pay_id
   >    WHERE state IN (0, 1);
-  >                                                                                                    
+  >                                                                                                          
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                                                                    
+  >                                                                                                          
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
   >      "rows": 996970,
   >      "cost": 203657
   >    },
-  >                                                                                                    
+  >                                                                                                          
   >    -- 走index_accountId_createTime索引的分析，评分为1.21
   >    "analyzing_range_alternatives": {
   >      "range_scan_alternatives": [
@@ -6051,7 +6053,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        "cause": "too_few_roworder_scans"
   >      }
   >    },
-  >                                                                                                    
+  >                                                                                                          
   >    -- 最终选择走index_accountId_createTime索引，因为评分最低，只有1.21
   >    "chosen_range_access_summary": {
   >      "range_access_plan": {
@@ -6066,9 +6068,9 @@ systemctl start rc-local.service  => 开启rc-local服务
   >      "cost_for_plan": 1.21,
   >      "chosen": true
   >    }
-  >                                                                                                    
+  >                                                                                                          
   >    综上所述，针对于INNER JOIN，在MySQL处理后，它最终选择走index_accountId_createTime索引，而且评分为1.21
-  >                                                                                                    
+  >                                                                                                          
   >    ```
   >
   >    * 执行另外一条SQL
@@ -6076,13 +6078,13 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                                                                    
+  >                                                                                                          
   >    -- 第二步：执行SQL
   >    SELECT COUNT(pay_id) FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c' AND state IN (0, 1);
-  >                                                                                                    
+  >                                                                                                          
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                                                                    
+  >                                                                                                          
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
@@ -6260,7 +6262,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   * URL的标准编码后，变成：**Hello%2BWorld**
   * URL的表单编码后，变成：**Hello World**
 * 如果我们要做验签操作：
-  * 场景1：参数都放在query中，则不会有问题。因为**Hello%2BWorld**会解码成**Hello+World**。
+  * 场景1：参数都放在query中，则不会有问题。
   * 场景2：以表单方式提交，则会导致验签失败，因为**Hello+World**会变成**Hello World**（表单提交时+号代表的是空格），加签时用的是**Hello+World**，验签时用的是**Hello World**。
 
 ### 10.11 基于百分比的灰度工具方法
@@ -6379,6 +6381,144 @@ public static boolean isTargetInGray(String ratio, long target) {
     * 当然，后端频繁构建vo对象这个case比较特别，一般都是去查询数据库。但是如果数据库的数据量很大的话，完全也有可能造成一个耗时很高的sql。因此，这个也是有问题的
   * 结论：日期格式校验，后端也一定要校验。如果只依赖前端校验的话，攻击者完全可以绕过前端来发起非法参数的攻击。
 
-  
+  ### 10.14 常见的扫表模板
 
+  * 适用于MySQL自增id的扫表：
+  
+    ```java
+    /**
+     * 扫表模板
+     *
+     * 执行顺序:
+     * 1、根据游标查出指定数量（如果为空，则直接停止）
+     * 2、取出指定数量的最大值，并赋值给游标
+     * 3、根据游标取下一批数据
+     *
+     * @param <P> 从表中召回数据类型
+     */
+    @Slf4j
+    public abstract class AbstractScanTableWithProcessTemplate<P> {
+    
+        private Long cursor = 0L;
+    
+        public AbstractScanTableWithProcessTemplate(Long cursor) {
+            this.cursor = cursor;
+        }
+    
+        /**
+         * 添加set方法，可以修改游标
+         * @param cursor
+         */
+        public void setCursor(Long cursor) {
+            this.cursor = cursor;
+        }
+    
+        /**
+         * 获取游标
+         * @return
+         */
+        public Long getCursor() {
+            return cursor;
+        }
+    
+        /**
+         * 根据游标获取数据
+         * 第一次执行: 取传入的cursor
+         * 后面的每次执行：取上批数据最大的id
+         *
+         * @return
+         */
+        public abstract List<P> fetchDataWithCursor();
+    
+        public abstract Long generateNewCursor(List<P> data);
+    
+        public abstract void processDataWithCursor(List<P> data);
+    
+        public void exec() {
+            StopWatch stopWatch = new StopWatch("AbstractScanTableWithProcessTemplate.exec");
+            for (;;) {
+                // 拿当前游标数据
+                stopWatch.start("根据cursor" + this.cursor + "获取数据");
+                List<P> data = fetchDataWithCursor();
+                stopWatch.stop();
+                // 判断数据是否为空，如果为空，直接跳出循环，如果不为空，则继续走游标
+                if (CollectionUtils.isEmpty(data)) {
+                    log.info("无处理的数据，退出循环。cursor: {}", cursor);
+                    break;
+                }
+    
+                // 处理第一批数据
+                log.info("当前游标: {}", cursor);
+                stopWatch.start("处理游标数据");
+                processDataWithCursor(data);
+                stopWatch.stop();
+    
+                // 取最大值
+                this.cursor = generateNewCursor(data);
+    
+                try {
+                    // 休眠，避免对数据库造成太大压力
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    log.error("睡眠异常。", e);
+                }
+                log.info("cursor: {} ，stopWatch: {}", stopWatch.toString());
+            }
+        }
+    }
+    
+    //==================== 示例 ====================
+    int result = 0;
+    // 主题详情表数据下架扫表限制数量
+    int limit = 1000;
+    // 游标
+    final Long cursor = 0L;
+    // 结果
+    final Holder<Integer> holder = new Holder<>();
+    holder.set(result);
+    
+    new AbstractScanTableWithProcessTemplate<Long>(cursor) {
+      @Override
+      public List<Long> fetchDataWithCursor() {
+        TestDTO params = new TestDTO();
+        params.setBusiId(busiId);
+        params.setLimit(limit);
+        // 只需要处理未被删除的数据
+        params.setIsDeleted(0);
+        params.setCursor(this.getCursor());
+    
+        List<Long> detailIdList = mapper.listIdByBusiIdWithCursor(params);
+        return detailIdList;
+      }
+    
+      @Override
+      public void processDataWithCursor(List<Long> data) {
+        Integer result = holder.get();
+        // 批量，50一批
+    
+        // 分批处理
+        List<List<Long>> partitionList = Lists.partition(data, BATCH_LIMIT);
+        // 处理每批
+        for (int i = 0; i < partitionList.size(); i++) {
+          // 获取每批的itemId
+          List<Long> toProcessIdListBatch = partitionList.get(i);
+          result += toProcessIdListBatch.size();
+          log.info("处理批次：{}/{} ", (i + 1), partitionList.size());
+          batchDeleted(toProcessIdListBatch);
+        }
+    
+        holder.set(result);
+      }
+    
+      @Override
+      public Long generateNewCursor(List<Long> data) {
+        // 因为在fetchDataWithCursor中排序完了，直接取最后一个作为下一批的cursor
+        return data.get(data.size() - 1);
+      }
+    }.exec();
+    result = holder.get();
+    ```
+  
+    
+  
   
