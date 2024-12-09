@@ -5308,7 +5308,7 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
   # 意思就是将服务器中的/root/aaa.txt文件下载到本地
   ```
 
-#### 4.1.19 查看大文件
+#### 4.1.19 磁盘利用率上涨，如何查看大文件
 
 * 使用场景：在线上服务器进行磁盘利用率报警时，此时需要定位出大文件的位置，再分析如何处理这些大文件。
   * 方式：
@@ -5322,6 +5322,14 @@ ps: 它并不是将/root/test文件夹中的内容copy到/root/info/test中, 若
   
   ```shell
   du -h ~ | sort -rn | head -n 5
+  ```
+  
+* 备注：du 和 df的区别？
+  
+  ```
+  df 全称 disk free，主要是查看磁盘整体的情况
+  
+  du 全称 disk usage，主要是查看磁盘的利用率
   ```
   
   
@@ -6012,7 +6020,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                                                                          
+  >                                                                                                             
   >    -- 第二步：执行SQL
   >    SELECT
   >        COUNT(p.pay_id)
@@ -6020,17 +6028,17 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        (SELECT pay_id FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c') tmp
   >    INNER JOIN pay p ON tmp.pay_id = p.pay_id
   >    WHERE state IN (0, 1);
-  >                                                                                                          
+  >                                                                                                             
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                                                                          
+  >                                                                                                             
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
   >      "rows": 996970,
   >      "cost": 203657
   >    },
-  >                                                                                                          
+  >                                                                                                             
   >    -- 走index_accountId_createTime索引的分析，评分为1.21
   >    "analyzing_range_alternatives": {
   >      "range_scan_alternatives": [
@@ -6053,7 +6061,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        "cause": "too_few_roworder_scans"
   >      }
   >    },
-  >                                                                                                          
+  >                                                                                                             
   >    -- 最终选择走index_accountId_createTime索引，因为评分最低，只有1.21
   >    "chosen_range_access_summary": {
   >      "range_access_plan": {
@@ -6068,9 +6076,9 @@ systemctl start rc-local.service  => 开启rc-local服务
   >      "cost_for_plan": 1.21,
   >      "chosen": true
   >    }
-  >                                                                                                          
+  >                                                                                                             
   >    综上所述，针对于INNER JOIN，在MySQL处理后，它最终选择走index_accountId_createTime索引，而且评分为1.21
-  >                                                                                                          
+  >                                                                                                             
   >    ```
   >
   >    * 执行另外一条SQL
@@ -6078,13 +6086,13 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                                                                          
+  >                                                                                                             
   >    -- 第二步：执行SQL
   >    SELECT COUNT(pay_id) FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c' AND state IN (0, 1);
-  >                                                                                                          
+  >                                                                                                             
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                                                                          
+  >                                                                                                             
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
