@@ -5111,11 +5111,19 @@ proxy_max_temp_file_size指令设置在 location 上下文中，其限制了 Ngi
 * 当你的系统有缓存等各种杂症问题时，使用此方法可以快速确定返回值是否符合期望结果。
 * 推荐在idea使用arthas插件生成！非常方便，此命令可以知道入参是什么耗时花了多久，简直是神器！
 * 什么时候要用他？比如监控显示某个http接口rt高，则可以用这个命令去采集对应的入参和耗时，进而分析问题
-#### 3.5.3 使用vmtool调用指定方法
+#### 3.5.3 使用vmtool调用指定方法、查看参数名
 
-* 格式：`vmtool --action getInstances --className 类的全限定名 --express 'instances[0].方法名称(入参)'`
-* 推荐在idea使用arthas插件生成！
-* 什么时候要用他？你不知道运行时的数据是怎样的，就用这个方法执行一次对应的方法，进而获取到对应的运行时元数据
+* 调用方法格式：`vmtool --action getInstances --className 类的全限定名 --express 'instances[0].方法名称(入参)'`
+  * 推荐在idea使用arthas插件生成！
+  * 什么时候要用他？你不知道运行时的数据是怎样的，就用这个方法执行一次对应的方法，进而获取到对应的运行时元数据
+
+* 查看某个类的属性：`vmtool -x 3 --action getInstances --className 类的全限定名  --express 'instances[0].属性名' `
+  * 有一个坑：有可能某个类有多个对象。比如：有多个redis的client bean。此时用这个方法不太好，因为只能根据下标获取实例，我们也不知道到底是传递instances[0]还是instances[1]。解决方案：可以用spring的上下文容器，根据bean名称获取bean，进而获取到对应的属性。
+    * 命令：`ognl -c 1e4a7dd4 -x 5 '@com.taobao.top.core.TopApplicationContextHolder@getBean("test")' | grep -c 5 "@InitConfig"` 
+    * 表示利用classLoad 1e4a7dd4去执行com.eugene.com.utils.TopApplicationContextHolder的getBean方法，并传入test参数获取对应的bean对象，并对响应内容做**@InitConfig**字段的过滤，就能看到具体的信息了。
+      * -x 5 表示针对响应的对象字段时，做5层的内容解析。如果有嵌套json就用这个
+      * classLoad的hash值获取方式：**sc -d com.taobao.top.core.TopApplicationContextHolder**
+
 
 #### 3.5.4 使用sc命令查看jvm已加载的类信息
 
@@ -6020,7 +6028,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                                                                             
+  >                                                                                                                
   >    -- 第二步：执行SQL
   >    SELECT
   >        COUNT(p.pay_id)
@@ -6028,17 +6036,17 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        (SELECT pay_id FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c') tmp
   >    INNER JOIN pay p ON tmp.pay_id = p.pay_id
   >    WHERE state IN (0, 1);
-  >                                                                                                             
+  >                                                                                                                
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                                                                             
+  >                                                                                                                
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
   >      "rows": 996970,
   >      "cost": 203657
   >    },
-  >                                                                                                             
+  >                                                                                                                
   >    -- 走index_accountId_createTime索引的分析，评分为1.21
   >    "analyzing_range_alternatives": {
   >      "range_scan_alternatives": [
@@ -6061,7 +6069,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        "cause": "too_few_roworder_scans"
   >      }
   >    },
-  >                                                                                                             
+  >                                                                                                                
   >    -- 最终选择走index_accountId_createTime索引，因为评分最低，只有1.21
   >    "chosen_range_access_summary": {
   >      "range_access_plan": {
@@ -6076,9 +6084,9 @@ systemctl start rc-local.service  => 开启rc-local服务
   >      "cost_for_plan": 1.21,
   >      "chosen": true
   >    }
-  >                                                                                                             
+  >                                                                                                                
   >    综上所述，针对于INNER JOIN，在MySQL处理后，它最终选择走index_accountId_createTime索引，而且评分为1.21
-  >                                                                                                             
+  >                                                                                                                
   >    ```
   >
   >    * 执行另外一条SQL
@@ -6086,13 +6094,13 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                                                                             
+  >                                                                                                                
   >    -- 第二步：执行SQL
   >    SELECT COUNT(pay_id) FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c' AND state IN (0, 1);
-  >                                                                                                             
+  >                                                                                                                
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                                                                             
+  >                                                                                                                
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
