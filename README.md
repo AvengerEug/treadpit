@@ -1496,8 +1496,8 @@ System.out.println(B.class.isAssignableFrom(A.class));
 
   |                       存储证书的方式                        |                             优点                             |                             缺点                             |
   | :---------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
-  | 将证书放在项目中的classpath下，到时候直接使用文件流读取即可 |                          简单，方便                          | 1、不安全，证书直接放在了项目中了</br>2、每次读取需要有io消耗，耗时，性能低 |
-  |                将证书转成base64存在数据库中                 | 1、相对安全，将证书存在持久层了</br>2、每次读取直接从数据库中查，相对而言耗时少，性能高 | 1、每次要进行base64解码，这段过程可能会消耗一点性能，但与io消耗相比，可以忽略不计 |
+  | 将证书放在项目中的classpath下，到时候直接使用文件流读取即可 |                          简单，方便                          | 1、不安全，证书直接放在了项目中了<br>2、每次读取需要有io消耗，耗时，性能低 |
+  |                将证书转成base64存在数据库中                 | 1、相对安全，将证书存在持久层了<br>2、每次读取直接从数据库中查，相对而言耗时少，性能高 | 1、每次要进行base64解码，这段过程可能会消耗一点性能，但与io消耗相比，可以忽略不计 |
 
 #### 2.1.26 使用BooleanUtils判断true或false不是“画蛇添足，多此一举”
 
@@ -5676,6 +5676,7 @@ systemctl start rc-local.service  => 开启rc-local服务
 ### 5.3 tcp链接
 
 * tcp协议属于4层协议，而http属于5层协议。一个http的连接底层使用tcp来支持的，那一个tcp链接长什么样子呢？它一共有四要素：分别为客户端的ip和端口 以及 服务端的ip 和端口 来唯一组成一个tcp链接。
+* 使用如下命令查看：netstat -na|grep ESTABLISHED
 * todo：图片
 
 ### 5.4 在线连接数监控
@@ -6070,7 +6071,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                                                                                   
+  >                                                                                                                         
   >    -- 第二步：执行SQL
   >    SELECT
   >        COUNT(p.pay_id)
@@ -6078,17 +6079,17 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        (SELECT pay_id FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c') tmp
   >    INNER JOIN pay p ON tmp.pay_id = p.pay_id
   >    WHERE state IN (0, 1);
-  >                                                                                                                   
+  >                                                                                                                         
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                                                                                   
+  >                                                                                                                         
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
   >      "rows": 996970,
   >      "cost": 203657
   >    },
-  >                                                                                                                   
+  >                                                                                                                         
   >    -- 走index_accountId_createTime索引的分析，评分为1.21
   >    "analyzing_range_alternatives": {
   >      "range_scan_alternatives": [
@@ -6111,7 +6112,7 @@ systemctl start rc-local.service  => 开启rc-local服务
   >        "cause": "too_few_roworder_scans"
   >      }
   >    },
-  >                                                                                                                   
+  >                                                                                                                         
   >    -- 最终选择走index_accountId_createTime索引，因为评分最低，只有1.21
   >    "chosen_range_access_summary": {
   >      "range_access_plan": {
@@ -6126,9 +6127,9 @@ systemctl start rc-local.service  => 开启rc-local服务
   >      "cost_for_plan": 1.21,
   >      "chosen": true
   >    }
-  >                                                                                                                   
+  >                                                                                                                         
   >    综上所述，针对于INNER JOIN，在MySQL处理后，它最终选择走index_accountId_createTime索引，而且评分为1.21
-  >                                                                                                                   
+  >                                                                                                                         
   >    ```
   >
   >    * 执行另外一条SQL
@@ -6136,13 +6137,13 @@ systemctl start rc-local.service  => 开启rc-local服务
   >    ```sql
   >    -- 第一步：打开查询优化器的日志追踪功能
   >    SET optimizer_trace="enabled=on";
-  >                                                                                                                   
+  >                                                                                                                         
   >    -- 第二步：执行SQL
   >    SELECT COUNT(pay_id) FROM pay WHERE create_time < '2020-09-05' AND account_id = 'fe3bce61-8604-4ee0-9ee8-0509ffb1735c' AND state IN (0, 1);
-  >                                                                                                                   
+  >                                                                                                                         
   >    -- 第三步: 获取上述SQL的查询优化结果
   >    SELECT trace FROM information_schema.OPTIMIZER_TRACE;
-  >                                                                                                                   
+  >                                                                                                                         
   >    -- 第四步: 分析查询优化结果
   >    -- 全表扫描的分析，rows为表中的行数，cost为全表扫描的评分
   >    "table_scan": {
